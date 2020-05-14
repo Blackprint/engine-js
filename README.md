@@ -66,6 +66,8 @@ instance.createNode('math/multiply', {});
 ```
 
 ### Example
+![9lM3o2Trur](https://user-images.githubusercontent.com/11073373/81947175-72616600-962a-11ea-8e83-cfb4ba0c85c2.png)
+
 This repository provide an example with the JSON too, and you can try it with Node.js or Deno:<br>
 
 ```sh
