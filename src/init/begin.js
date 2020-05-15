@@ -5,6 +5,11 @@
 }(typeof window !== "undefined" ? window : this, (function(window){
 
 if(window.Blackprint === void 0)
-	window.Blackprint = {};
+	window.Blackprint = {
+		settings:function(which, val){
+			Blackprint.settings[which] = val;
+		}
+	};
 
 var Blackprint = window.Blackprint;
+

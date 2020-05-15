@@ -26,7 +26,7 @@ Blackprint.Interpreter.Port = class Port{
 					if(target === void 0)
 						continue;
 
-					if(Blackprint.settings && Blackprint.settings.visualizeFlow)
+					if(Blackprint.settings.visualizeFlow)
 						cables[i].visualizeFlow();
 
 					target.node.handle.inputs[target.name](port, cables[i]);
@@ -52,7 +52,7 @@ Blackprint.Interpreter.Port = class Port{
 
 						// Request the data first
 						if(target.node.handle.request){
-							if(target.node.handle.request(target, port.node) !== false && Blackprint.settings && Blackprint.settings.visualizeFlow)
+							if(target.node.handle.request(target, port.node) !== false && Blackprint.settings.visualizeFlow)
 								port.cables[0].visualizeFlow();
 						}
 
@@ -70,7 +70,7 @@ Blackprint.Interpreter.Port = class Port{
 
 						// Request the data first
 						if(target.node.handle.request){
-							if(target.node.handle.request(target, port.node) !== false && Blackprint.settings && Blackprint.settings.visualizeFlow)
+							if(target.node.handle.request(target, port.node) !== false && Blackprint.settings.visualizeFlow)
 								cables[i].visualizeFlow();
 						}
 
@@ -120,14 +120,14 @@ Blackprint.Interpreter.Port = class Port{
 					if(target.feature === Blackprint.PortListener){
 						target._call(cables[i].owner === port ? cables[i].owner : cables[i].target, val);
 
-						if(Blackprint.settings && Blackprint.settings.visualizeFlow)
+						if(Blackprint.settings.visualizeFlow)
 							cables[i].visualizeFlow();
 					}
 
 					if(target.node._requesting === void 0 && target.node.handle.update){
 						target.node.handle.update(cables[i]);
 
-						if(Blackprint.settings && Blackprint.settings.visualizeFlow)
+						if(Blackprint.settings.visualizeFlow)
 							cables[i].visualizeFlow();
 					}
 				}
