@@ -24,8 +24,13 @@ Blackprint.Interpreter = class Interpreter{
 			var nodes = json[namespace];
 
 			// Every nodes that using this namespace name
-			for (var a = 0; a < nodes.length; a++)
-				inserted[nodes[a].id] = this.createNode(namespace, nodes[a].options, handlers);
+			for (var a = 0; a < nodes.length; a++){
+				var nodeOpt = {};
+				if(nodes[a].options !== void 0)
+					nodeOpt.options = nodes[a].options;
+
+				inserted[nodes[a].id] = this.createNode(namespace, nodeOpt, handlers);
+			}
 		}
 
 		// Create cable only from outputs and properties
@@ -117,6 +122,7 @@ Blackprint.Interpreter = class Interpreter{
 		var handle = {}, node = {type:'default', title:'No Title', description:''};
 		node.handle = handle;
 		node.namespace = namespace;
+		node.importing = true;
 
 		Object.setPrototypeOf(node, Blackprint.Interpreter.Node.prototype);
 
@@ -129,14 +135,18 @@ Blackprint.Interpreter = class Interpreter{
 		// Initialize for interface
 		Blackprint.Interpreter.Node.interface(this.interface[node.type], node);
 
+		// Assign the saved options if exist
+		// Must be called here to avoid port trigger
+		if(node.options !== void 0 && options.options !== void 0)
+			Object.assign(node.options, options.options);
+
 		// Create the linker between the handler and the node
 		Blackprint.Interpreter.Node.prepare(handle, node);
 
-		// Assign the options if exist
-		if(options !== void 0)
-			Object.assign(node, options);
-
 		this.nodes.push(node);
+
+		node.importing = false;
+		handle.imported && handle.imported();
 
 		if(handlers !== void 0)
 			handlers.push(handle);

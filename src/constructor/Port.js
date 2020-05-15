@@ -18,7 +18,10 @@ Blackprint.Interpreter.Port = class Port{
 		var port = this;
 
 		// Only for outputs
-		if(this.type === Function)
+		if(this.type === Function){
+			// Disable sync
+			port.sync = false;
+
 			return function(){
 				var cables = port.cables;
 				for (var i = 0; i < cables.length; i++) {
@@ -32,6 +35,7 @@ Blackprint.Interpreter.Port = class Port{
 					target.node.handle.inputs[target.name](port, cables[i]);
 				}
 			};
+		}
 
 		var prepare = {
 			enumerable:true,
@@ -109,31 +113,37 @@ Blackprint.Interpreter.Port = class Port{
 				}
 
 				port.value = val;
-
-				// Check all connected cables, if any node need to synchronize
-				var cables = port.cables;
-				for (var i = 0; i < cables.length; i++) {
-					var target = cables[i].owner === port ? cables[i].target : cables[i].owner;
-					if(target === void 0)
-						continue;
-
-					if(target.feature === Blackprint.PortListener){
-						target._call(cables[i].owner === port ? cables[i].owner : cables[i].target, val);
-
-						if(Blackprint.settings.visualizeFlow)
-							cables[i].visualizeFlow();
-					}
-
-					if(target.node._requesting === void 0 && target.node.handle.update){
-						target.node.handle.update(cables[i]);
-
-						if(Blackprint.settings.visualizeFlow)
-							cables[i].visualizeFlow();
-					}
-				}
+				port.sync();
 			}
 		}
 
+		// Disable sync
+		else port.sync = false;
+
 		return prepare;
+	}
+
+	sync(){
+		// Check all connected cables, if any node need to synchronize
+		var cables = this.cables;
+		for (var i = 0; i < cables.length; i++) {
+			var target = cables[i].owner === this ? cables[i].target : cables[i].owner;
+			if(target === void 0)
+				continue;
+
+			if(target.feature === Blackprint.PortListener){
+				target._call(cables[i].owner === this ? cables[i].owner : cables[i].target, this.value);
+
+				if(Blackprint.settings.visualizeFlow)
+					cables[i].visualizeFlow();
+			}
+
+			if(target.node._requesting === void 0 && target.node.handle.update){
+				target.node.handle.update(cables[i]);
+
+				if(Blackprint.settings.visualizeFlow)
+					cables[i].visualizeFlow();
+			}
+		}
 	}
 }

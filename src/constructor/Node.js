@@ -1,5 +1,5 @@
 Blackprint.Interpreter.Node = class Node extends Blackprint.Interpreter.CustomEvent{
-	static prepare(handle, node, extendPort){
+	static prepare(handle, node){
 		// Type extract for port data type
 		// Create reactiveness of handle and node's ports
 		['inputs', 'outputs', 'properties'].forEach(function(which){
