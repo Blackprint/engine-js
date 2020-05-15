@@ -3,6 +3,7 @@
 
 // For Node
 var Blackprint = require('blackprint-interpreter');
+// var Blackprint = require('../dist/interpreter.js');
 
 var instance = new Blackprint.Interpreter();
 // These comment can be collapsed depend on your IDE
@@ -16,24 +17,24 @@ var instance = new Blackprint.Interpreter();
 	});
 
 	instance.registerInterface('input', function(self, bind){
-		var save = '...';
+		var theValue = '';
 		bind({
-			set value(val){
-				save = val;
-				self.textChanged(val);
-			},
-			get value(){
-				return save;
+			options:{
+				set value(val){
+					theValue = val;
+
+					if(self.handle.changed !== void 0)
+						self.handle.changed(val);
+				},
+				get value(){
+					return theValue;
+				}
 			}
 		});
-
-		self.textChanged = function(text){
-			self.handle.changed(text);
-		}
 	});
 
 	instance.registerInterface('logger', function(self, bind){
-		var log = '';
+		var log = '...';
 		bind({
 			get log(){
 				return log;
@@ -191,9 +192,21 @@ var instance = new Blackprint.Interpreter();
 			Value:'', // Default to empty string
 		};
 
+		// Bring value from imported node to handle output
+		handle.imported = function(){
+			if(node.options.value)
+				console.log("Saved options as outputs:", node.options.value);
+
+			handle.outputs.Value = node.options.value;
+		}
+
 		// Proxy string value from: node.changed -> handle.changed -> outputs.Value
 		// And also call outputs.Changed() if connected to other node
 		handle.changed = function(text, ev){
+			// This node still being imported
+			if(node.importing !== false)
+				return;
+
 			console.log('The input box have new value:', text);
 			handle.outputs.Value = text;
 
@@ -203,7 +216,8 @@ var instance = new Blackprint.Interpreter();
 	});
 
 // === Import JSON after all nodes was registered ===
-instance.importJSON('{"math/random":[{"id":0,"x":298,"y":73,"outputs":{"Out":[{"id":2,"name":"A"}]}},{"id":1,"x":298,"y":239,"outputs":{"Out":[{"id":2,"name":"B"}]}}],"math/multiply":[{"id":2,"x":525,"y":155,"outputs":{"Result":[{"id":3,"name":"Any"}]}}],"display/logger":[{"id":3,"x":754,"y":163}],"button/simple":[{"id":4,"x":27,"y":41,"outputs":{"Clicked":[{"id":2,"name":"Exec"}]}}],"input/simple":[{"id":5,"x":36,"y":331,"outputs":{"Changed":[{"id":1,"name":"Re-seed"}],"Value":[{"id":3,"name":"Any"}]}}]}');
+// You can import this to Blackprint Sketch if you want to view the nodes visually
+instance.importJSON('{"math/random":[{"id":0,"x":298,"y":73,"outputs":{"Out":[{"id":2,"name":"A"}]}},{"id":1,"x":298,"y":239,"outputs":{"Out":[{"id":2,"name":"B"}]}}],"math/multiply":[{"id":2,"x":525,"y":155,"outputs":{"Result":[{"id":3,"name":"Any"}]}}],"display/logger":[{"id":3,"x":763,"y":169}],"button/simple":[{"id":4,"x":41,"y":59,"outputs":{"Clicked":[{"id":2,"name":"Exec"}]}}],"input/simple":[{"id":5,"x":38,"y":281,"options":{"value":"saved input"},"outputs":{"Changed":[{"id":1,"name":"Re-seed"}],"Value":[{"id":3,"name":"Any"}]}}]}');
 
 
 // Time to run something :)
@@ -217,7 +231,7 @@ log("\n>> I got the output value:", logger.log);
 
 log("\n>> I'm writing something to the input box");
 var input = instance.getNodes('input/simple')[0];
-input.value = 'hello wrold';
+input.options.value = 'hello wrold';
 
 var logger = instance.getNodes('display/logger')[0];
 log("\n>> I got the output value:", logger.log);
