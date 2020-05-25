@@ -1,8 +1,26 @@
 Blackprint.Interpreter = class Interpreter{
+	static handler = {};
+	static interface = {default: NoOperation};
+
+	// Register node handler
+	// Callback function will get handle and node
+	// - handle = Blackprint binding
+	// - node = ScarletsFrame binding <~> element
+	static registerNode(namespace, func){
+		deepProperty(Interpreter.handler, namespace.split('/'), func);
+	}
+
+	static registerInterface(nodeType, options, func){
+		if(func === void 0)
+			func = options;
+		else if(options.extend !== void 0)
+			func.extend = options.extend;
+
+		Interpreter.interface[nodeType] = func;
+	}
+
 	constructor(){
-		this.handler = {};
 		this.settings = {};
-		this.interface = {default: NoOperation};
 
 		// ToDo: Improve
 		this.nodes = [];
@@ -68,7 +86,7 @@ Blackprint.Interpreter = class Interpreter{
 								continue;
 							}
 
-							var cable = new Blackprint.Interpreter.Cable(linkPortA, linkPortB);
+							var cable = new Interpreter.Cable(linkPortA, linkPortB);
 							linkPortA.cables.push(cable);
 							linkPortB.cables.push(cable);
 						}
@@ -98,42 +116,28 @@ Blackprint.Interpreter = class Interpreter{
 		this.settings[which] = val;
 	}
 
-	// Register node handler
-	// Callback function will get handle and node
-	// - handle = Blackprint binding
-	// - node = ScarletsFrame binding <~> element
-	registerNode(namespace, func){
-		deepProperty(this.handler, namespace.split('/'), func);
-	}
-
-	registerInterface(nodeType, options, func){
-		if(func === void 0)
-			func = options;
-
-		this.interface[nodeType] = func;
-	}
-
 	createNode(namespace, options, handlers){
-		var func = deepProperty(this.handler, namespace.split('/'));
+		var func = deepProperty(Interpreter.handler, namespace.split('/'));
 		if(func === void 0)
 			return console.error('Node handler for', namespace, "was not found, maybe .registerNode() haven't being called?") && void 0;
 
 		// Processing scope is different with node scope
 		var handle = {}, node = {type:'default', title:'No Title', description:''};
+
 		node.handle = handle;
 		node.namespace = namespace;
 		node.importing = true;
 
-		Object.setPrototypeOf(node, Blackprint.Interpreter.Node.prototype);
+		Object.setPrototypeOf(node, Interpreter.Node.prototype);
 
 		// Call the registered func (from this.registerNode)
 		func(handle, node);
 
-		if(this.interface[node.type] === void 0)
+		if(Interpreter.interface[node.type] === void 0)
 			return console.error('Node type for', node.type, "was not found, maybe .registerInterface() haven't being called?") && void 0;
 
 		// Initialize for interface
-		Blackprint.Interpreter.Node.interface(this.interface[node.type], node);
+		Interpreter.Node.interface(Interpreter.interface[node.type], node);
 
 		// Assign the saved options if exist
 		// Must be called here to avoid port trigger
@@ -141,7 +145,7 @@ Blackprint.Interpreter = class Interpreter{
 			Object.assign(node.options, options.options);
 
 		// Create the linker between the handler and the node
-		Blackprint.Interpreter.Node.prepare(handle, node);
+		Interpreter.Node.prepare(handle, node);
 
 		this.nodes.push(node);
 
@@ -156,3 +160,5 @@ Blackprint.Interpreter = class Interpreter{
 		return node;
 	}
 }
+
+var Interpreter = Blackprint.Interpreter;
