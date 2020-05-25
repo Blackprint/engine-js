@@ -26,6 +26,10 @@ Blackprint.Interpreter = class Interpreter{
 		this.nodes = [];
 	}
 
+	clearNodes(){
+		this.nodes.splice(0);
+	}
+
 	importJSON(json){
 		if(json.constructor !== Object)
 			json = JSON.parse(json);
