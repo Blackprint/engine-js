@@ -12,17 +12,15 @@ This repository is designed to be used together with [Blackprint](https://github
 
 ## Documentation
 > Warning: This project haven't reach it stable version (semantic versioning at v1.0.0)<br>
-
-```js
-// Create Blackprint Interpreter instance, `instance` in this documentation will refer to this
-var instance = new Blackprint.Interpreter();
-```
+> The available API is similar with Blackprint.Sketch
+> The documentation here only write the different API
 
 ### Register new node interface type
 An interface is designed for communicate the node handler with the JavaScript's runtime API. Because there're no HTML to be controlled, this would be little different with the browser version.
 
 ```js
-interTest.registerInterface('logger', function(self, bind){
+// -> (node identifier, callback)
+Blackprint.Interpreter.registerInterface('logger', function(self, bind){
 	// `bind` is used for bind `self` property with a function
 	// And polyfill for ScarletsFrame element binding system
 
@@ -51,8 +49,9 @@ If you already have the browser version, you can just copy it without changes.<b
 It should be compatible if it's not accessing any Browser API.<br>
 
 ```js
-sketch.registerNode('myspace/button', function(handle, node){
-    // Use node handler from sketch.registerInterface('button')
+// -> (namespace, callback)
+Blackprint.Interpreter.registerNode('myspace/button', function(handle, node){
+    // Use node handler from instance.registerInterface('button')
     node.type = 'button';
     node.title = "My simple button";
 
@@ -61,8 +60,21 @@ sketch.registerNode('myspace/button', function(handle, node){
         console.log("Henlo", ev);
     }
 });
+```
 
-instance.createNode('math/multiply', {});
+## Node handler registration
+```js
+// Create Blackprint Interpreter instance, `instance` in this documentation will refer to this
+var instance = new Blackprint.Interpreter();
+
+// Example: Create new node (after registration)
+var node = instance.createNode('math/multiply', {/* node options */});
+
+// Clear all nodes on this instance
+instance.clearNodes();
+
+// Example: Import nodes from JSON (after registration)
+instance.importJSON(/* JSON || Object */);
 ```
 
 ### Example

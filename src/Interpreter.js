@@ -145,8 +145,7 @@ Blackprint.Interpreter = class Interpreter{
 
 		// Assign the saved options if exist
 		// Must be called here to avoid port trigger
-		if(node.options !== void 0 && options.options !== void 0)
-			Object.assign(node.options, options.options);
+		node.imported && node.imported(options.options);
 
 		// Create the linker between the handler and the node
 		Interpreter.Node.prepare(handle, node);
@@ -154,7 +153,7 @@ Blackprint.Interpreter = class Interpreter{
 		this.nodes.push(node);
 
 		node.importing = false;
-		handle.imported && handle.imported();
+		handle.imported && handle.imported(options.options);
 
 		if(handlers !== void 0)
 			handlers.push(handle);
