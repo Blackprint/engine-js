@@ -38,6 +38,7 @@ Blackprint.Interpreter.Port = class Port{
 		}
 
 		var prepare = {
+			configurable:true,
 			enumerable:true,
 			get:function(){
 				// This port must use values from connected outputs
