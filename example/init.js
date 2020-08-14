@@ -1,22 +1,23 @@
 // For Deno
-// import 'https://cdn.jsdelivr.net/gh/blackprint/interpreter-js/dist/interpreter.min.js';
+import 'https://cdn.jsdelivr.net/npm/blackprint-interpreter@0.0.3';
+const Interpreter = Blackprint.Interpreter;
 
 // For Node
-var Blackprint = require('blackprint-interpreter');
+// var Blackprint = require('blackprint-interpreter');
 // var Blackprint = require('../dist/interpreter.js');
 
-var instance = new Blackprint.Interpreter();
+var instance = new Interpreter();
 // These comment can be collapsed depend on your IDE
 
 // === Register Node Interface ===
-	instance.registerInterface('button', function(self){
+	Interpreter.registerInterface('button', function(self){
 		self.clicked = function(ev){
 			console.log("Interpreter: 'Trigger' button clicked, going to run the handler");
 			self.handle.clicked && self.handle.clicked(ev);
 		}
 	});
 
-	instance.registerInterface('input', function(self, bind){
+	Interpreter.registerInterface('input', function(self, bind){
 		var theValue = '';
 		bind({
 			options:{
@@ -33,7 +34,7 @@ var instance = new Blackprint.Interpreter();
 		});
 	});
 
-	instance.registerInterface('logger', function(self, bind){
+	Interpreter.registerInterface('logger', function(self, bind){
 		var log = '...';
 		bind({
 			get log(){
@@ -55,7 +56,7 @@ var instance = new Blackprint.Interpreter();
 // === Register Node Handler ===
 // Exact copy of register-handler.js from the browser version
 // https://github.com/Blackprint/blackprint.github.io/blob/master/src/js/register-handler.js
-	instance.registerNode('math/multiply', function(handle, node){
+	Interpreter.registerNode('math/multiply', function(handle, node){
 		node.title = "Multiply";
 		var inputs = handle.inputs = {
 			Exec: function(){
@@ -96,7 +97,7 @@ var instance = new Blackprint.Interpreter();
 		}
 	});
 
-	instance.registerNode('math/random', function(handle, node){
+	Interpreter.registerNode('math/random', function(handle, node){
 		node.title = "Random";
 		node.description = "Number (0-100)";
 
@@ -126,7 +127,7 @@ var instance = new Blackprint.Interpreter();
 		}
 	});
 
-	instance.registerNode('display/logger', function(handle, node){
+	Interpreter.registerNode('display/logger', function(handle, node){
 		node.title = "Logger";
 		node.type = 'logger';
 		node.description = 'Print anything into text';
@@ -164,7 +165,7 @@ var instance = new Blackprint.Interpreter();
 		}
 	});
 
-	instance.registerNode('button/simple', function(handle, node){
+	Interpreter.registerNode('button/simple', function(handle, node){
 		// node = under ScarletsFrame element control
 		node.title = "Button";
 		node.type = 'button';
@@ -181,7 +182,7 @@ var instance = new Blackprint.Interpreter();
 		}
 	});
 
-	instance.registerNode('input/simple', function(handle, node){
+	Interpreter.registerNode('input/simple', function(handle, node){
 		// node = under ScarletsFrame element control
 		node.title = "Input";
 		node.type = 'input';
