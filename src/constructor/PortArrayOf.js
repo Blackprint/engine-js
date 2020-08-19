@@ -8,24 +8,13 @@ Blackprint.PortArrayOf = function(type){
 	};
 }
 
-Blackprint.PortArrayOf.validate = function(type, data, deep){
-	if(data === null || data === void 0)
-		throw new Error("One of the cable's value was not an "+type.name);
+Blackprint.PortArrayOf.validate = function(type, target){
+	if(type === target)
+		return true;
 
-	if(type === data.constructor && !deep)
-		return;
+	if(type.constructor === Array)
+		if(type.includes(target))
+			return true;
 
-	if(data.constructor === Array){
-		for (var i = 0; i < data.length; i++) {
-			if(type.constructor === Array && !type.includes(data[i].constructor))
-				throw new Error("One of the cable's value was not an "+type);
-
-			if(data[i].constructor !== type)
-				throw new Error("One of the cable's value was not an "+type.name);
-		}
-
-		return;
-	}
-
-	throw new Error("One of the cable's value was not an "+type.name);
+	console.log("One of the cable's value was not an "+type.name);
 }

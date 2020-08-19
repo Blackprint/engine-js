@@ -67,10 +67,8 @@ Blackprint.Interpreter.Port = class Port{
 						}
 
 						port.node._requesting = void 0;
-						if(port.feature === Blackprint.PortArrayOf){
-							Blackprint.PortArrayOf.validate(port.type, target.value);
+						if(port.feature === Blackprint.PortArrayOf)
 							return [target.value];
-						}
 
 						return target.value || target.default;
 					}
@@ -93,8 +91,6 @@ Blackprint.Interpreter.Port = class Port{
 					}
 
 					port.node._requesting = void 0;
-
-					Blackprint.PortArrayOf.validate(port.type, data, tre);
 					return data;
 				}
 
