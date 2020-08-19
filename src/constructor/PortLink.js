@@ -36,7 +36,7 @@ class PortLink{
 				def = [];
 			else if(type === Object)
 				def = {};
-			else if(type.constructor === Function){
+			else if(type.constructor === Function && !type.prototype[Symbol.toStringTag]){
 				if(type.portFeature !== void 0){
 					haveFeature = type.portFeature;
 					type = type.portType || Object;
@@ -45,7 +45,7 @@ class PortLink{
 
 				def = void 0;
 			}
-			else return console.error(type, "was unrecognized as an port data type");
+			else def = null;
 		}
 		else if(val === null){
 			type = {name:'Any'};
