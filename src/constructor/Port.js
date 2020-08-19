@@ -111,6 +111,8 @@ Blackprint.Interpreter.Port = class Port{
 						}
 						else throw new Error(JSON.stringify(val) + " can't be converted as a " + port.type.name);
 					}
+					else if(!(val instanceof port.type))
+						throw new Error(JSON.stringify(val) + " is not instance of "+port.type.name);
 				}
 
 				port.value = val;
