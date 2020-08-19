@@ -52,8 +52,15 @@ class PortLink{
 			def = null;
 		}
 		else{
-			type = val.constructor;
-			def = val;
+			if(val.portFeature === Blackprint.PortArrayOf){
+				haveFeature = val.portFeature;
+				type = val.portType;
+				def = [];
+			}
+			else{
+				type = val.constructor;
+				def = val;
+			}
 		}
 
 		var linkedPort = this._node.newPort(portName, type, def, this._which, this._node);
@@ -65,6 +72,8 @@ class PortLink{
 
 		if(haveFeature){
 			linkedPort.feature = haveFeature;
+			if(haveFeature === Blackprint.PortArrayOf)
+				linkedPort.classAdd = ' Array';
 			linkedPort._call = val;
 		}
 

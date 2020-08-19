@@ -52,13 +52,15 @@ Blackprint.Interpreter.CustomEvent = class CustomEvent{
 			delete this._event[eventName];
 	}
 
-	_trigger(eventName, data){
+	_trigger(eventName){
 		if(this._event === void 0 || this._event[eventName] === void 0)
 			return;
 
+		var args = Array.from(arguments).slice(1);
+
 		var events = this._event[eventName];
 		for (var i = 0; i < events.length; i++){
-			events[i](data);
+			events[i].apply(null, args);
 
 			if(events[i].once){
 				delete events[i].once;

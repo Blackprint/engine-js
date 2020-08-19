@@ -5,11 +5,12 @@ Blackprint.Interpreter.Port = class Port{
 		this.cables = [];
 		this.source = source;
 		this.node = node;
+		this.classAdd ='';
 
 		// this.value;
 		this.default = def;
 
-		// this.feature == PortListener | PortValidator
+		// this.feature == PortListener | PortArrayOf
 	}
 
 	// Set for the linked port (Handle for ScarletsFrame)
@@ -52,8 +53,12 @@ Blackprint.Interpreter.Port = class Port{
 					// Return single data
 					if(port.cables.length === 1){
 						var target = port.cables[0].owner === port ? port.cables[0].target : port.cables[0].owner;
-						if(target === void 0)
+
+						if(target === void 0){
+							if(port.feature === Blackprint.PortArrayOf)
+								return [];
 							return;
+						}
 
 						// Request the data first
 						if(target.node.handle.request){
@@ -62,6 +67,11 @@ Blackprint.Interpreter.Port = class Port{
 						}
 
 						port.node._requesting = void 0;
+						if(port.feature === Blackprint.PortArrayOf){
+							Blackprint.PortArrayOf.validate(port.type, target.value);
+							return [target.value];
+						}
+
 						return target.value || target.default;
 					}
 
@@ -83,6 +93,8 @@ Blackprint.Interpreter.Port = class Port{
 					}
 
 					port.node._requesting = void 0;
+
+					Blackprint.PortArrayOf.validate(port.type, data, tre);
 					return data;
 				}
 
