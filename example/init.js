@@ -10,14 +10,14 @@ var instance = new Interpreter();
 // These comment can be collapsed depend on your IDE
 
 // === Register Node Interface ===
-	Interpreter.registerInterface('button', function(self){
+	Interpreter.registerInterface('nodes/button', function(self){
 		self.clicked = function(ev){
 			console.log("Interpreter: 'Trigger' button clicked, going to run the handler");
 			self.handle.clicked && self.handle.clicked(ev);
 		}
 	});
 
-	Interpreter.registerInterface('input', function(self, bind){
+	Interpreter.registerInterface('nodes/input', function(self, bind){
 		var theValue = '';
 		bind({
 			options:{
@@ -34,7 +34,7 @@ var instance = new Interpreter();
 		});
 	});
 
-	Interpreter.registerInterface('logger', function(self, bind){
+	Interpreter.registerInterface('nodes/logger', function(self, bind){
 		var log = '...';
 		bind({
 			get log(){
@@ -129,7 +129,7 @@ var instance = new Interpreter();
 
 	Interpreter.registerNode('display/logger', function(handle, node){
 		node.title = "Logger";
-		node.type = 'logger';
+		node.interface = 'nodes/logger';
 		node.description = 'Print anything into text';
 		node.trigger = false;
 
@@ -168,7 +168,7 @@ var instance = new Interpreter();
 	Interpreter.registerNode('button/simple', function(handle, node){
 		// node = under ScarletsFrame element control
 		node.title = "Button";
-		node.type = 'button';
+		node.interface = 'nodes/button';
 
 		// handle = under Blackprint node flow control
 		handle.outputs = {
@@ -185,7 +185,7 @@ var instance = new Interpreter();
 	Interpreter.registerNode('input/simple', function(handle, node){
 		// node = under ScarletsFrame element control
 		node.title = "Input";
-		node.type = 'input';
+		node.interface = 'nodes/input';
 
 		// handle = under Blackprint node flow control
 		handle.outputs = {
