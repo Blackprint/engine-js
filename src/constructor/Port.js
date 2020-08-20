@@ -10,7 +10,7 @@ Blackprint.Interpreter.Port = class Port{
 		// this.value;
 		this.default = def;
 
-		// this.feature == PortListener | PortArrayOf
+		// this.feature == PortListener | PortArrayOf | PortAwait
 	}
 
 	// Set for the linked port (Handle for ScarletsFrame)
@@ -52,18 +52,19 @@ Blackprint.Interpreter.Port = class Port{
 
 					// Return single data
 					if(port.cables.length === 1){
-						var target = port.cables[0].owner === port ? port.cables[0].target : port.cables[0].owner;
+						var cable = port.cables[0];
+						var target = cable.owner === port ? cable.target : cable.owner;
 
-						if(target === void 0){
+						if(target === void 0 || cable.connected === false){
 							if(port.feature === Blackprint.PortArrayOf)
 								return [];
-							return;
+							return target.default;
 						}
 
 						// Request the data first
 						if(target.node.handle.request){
 							if(target.node.handle.request(target, port.node) !== false && Blackprint.settings.visualizeFlow)
-								port.cables[0].visualizeFlow();
+								cable.visualizeFlow();
 						}
 
 						port.node._requesting = void 0;
@@ -77,14 +78,16 @@ Blackprint.Interpreter.Port = class Port{
 					var cables = port.cables;
 					var data = [];
 					for (var i = 0; i < cables.length; i++) {
-						var target = cables[i].owner === port ? cables[i].target : cables[i].owner;
-						if(target === void 0)
+						var cable = cables[i];
+						var target = cable.owner === port ? cable.target : cable.owner;
+
+						if(target === void 0 || cable.connected === false)
 							continue;
 
 						// Request the data first
 						if(target.node.handle.request){
 							if(target.node.handle.request(target, port.node) !== false && Blackprint.settings.visualizeFlow)
-								cables[i].visualizeFlow();
+								cable.visualizeFlow();
 						}
 
 						data.push(target.value || target.default);
@@ -113,14 +116,14 @@ Blackprint.Interpreter.Port = class Port{
 							val = String(val);
 						else if(val.constructor === String){
 							if(isNaN(val) === true)
-								throw new Error(val + " is not a Number");
+								throw new Error(port.node.title+"> "+val + " is not a Number");
 
 							val = Number(val);
 						}
-						else throw new Error(JSON.stringify(val) + " can't be converted as a " + port.type.name);
+						else throw new Error(port.node.title+"> "+getDataType(val) + " can't be converted as a " + port.type.name);
 					}
 					else if(!(val instanceof port.type))
-						throw new Error(JSON.stringify(val) + " is not instance of "+port.type.name);
+						throw new Error(port.node.title+"> "+getDataType(val) + " is not instance of "+port.type.name);
 				}
 
 				port.value = val;
@@ -157,4 +160,8 @@ Blackprint.Interpreter.Port = class Port{
 			}
 		}
 	}
+}
+
+function getDataType(which){
+	return which.constructor.name;
 }

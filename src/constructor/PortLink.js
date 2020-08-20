@@ -57,6 +57,11 @@ class PortLink{
 				type = val.portType;
 				def = [];
 			}
+			else if(val.portFeature === Blackprint.PortAwait){
+				haveFeature = val.portFeature;
+				type = val.portType;
+				def = val.call;
+			}
 			else{
 				type = val.constructor;
 				def = val;

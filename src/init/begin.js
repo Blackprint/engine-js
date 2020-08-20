@@ -12,3 +12,4 @@ if(window.Blackprint === void 0)
 	};
 
 var Blackprint = window.Blackprint;
+Blackprint.Addons = {};

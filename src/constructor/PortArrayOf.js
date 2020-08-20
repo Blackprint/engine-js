@@ -16,5 +16,5 @@ Blackprint.PortArrayOf.validate = function(type, target){
 		if(type.includes(target))
 			return true;
 
-	console.log("One of the cable's value was not an "+type.name);
+	return false;
 }
