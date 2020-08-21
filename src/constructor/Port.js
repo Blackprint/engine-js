@@ -1,5 +1,7 @@
-Blackprint.Interpreter.Port = class Port{
+Blackprint.Interpreter.Port = class Port extends Blackprint.Interpreter.CustomEvent{
 	constructor(name, type, def, source, node){
+		super();
+
 		this.name = name;
 		this.type = type;
 		this.cables = [];
@@ -169,18 +171,6 @@ Blackprint.Interpreter.Port = class Port{
 					cables[i].visualizeFlow();
 			}
 		}
-	}
-
-	listen(func){
-		this._call = func;
-
-		if(this.feature !== Blackprint.PortArrayOf)
-			this.feature = Blackprint.PortListener;
-	}
-
-	async(func){
-		this._call = func;
-		this.feature = Blackprint.PortAsync;
 	}
 }
 
