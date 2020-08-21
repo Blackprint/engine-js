@@ -29,11 +29,11 @@ class Cable{
 
 	connecting(){
 		if(this.owner.source === 'inputs'){
-			if(this.owner.feature === Blackprint.PortAwait)
+			if(this.owner.feature === Blackprint.PortAsync)
 				return this.awaiting(this.owner.default);
 		}
 		else if(this.target.source === 'inputs'){
-			if(this.target.feature === Blackprint.PortAwait)
+			if(this.target.feature === Blackprint.PortAsync)
 				return this.awaiting(this.target.default);
 		}
 
@@ -43,8 +43,8 @@ class Cable{
 	triggerConnected(){
 		this.connected = true;
 
-		this.target.node._trigger('cable.connect', this.target, this.owner, this);
-		this.owner.node._trigger('cable.connect', this.owner, this.target, this);
+		this.target.iface._trigger('cable.connect', this.target, this.owner, this);
+		this.owner.iface._trigger('cable.connect', this.owner, this.target, this);
 
 		var out, inp;
 		if(this.target.source === 'inputs'){
@@ -56,8 +56,8 @@ class Cable{
 			inp = this.owner;
 		}
 
-		if(inp.node.handle.update)
-			inp.node.handle.update(inp, out, this);
+		if(inp.iface.node.update)
+			inp.iface.node.update(inp, out, this);
 	}
 
 	destroy(){
@@ -68,8 +68,8 @@ class Cable{
 				this.owner.cables.splice(i, 1);
 
 			if(this.connected)
-				this.owner.node._trigger('cable.disconnect', this.owner, this.target);
-			else this.owner.node._trigger('cable.cancel', this.owner, this);
+				this.owner.iface._trigger('cable.disconnect', this.owner, this.target);
+			else this.owner.iface._trigger('cable.cancel', this.owner, this);
 		}
 
 		// Remove from connected target
@@ -78,7 +78,7 @@ class Cable{
 			if(i !== -1)
 				this.target.cables.splice(i, 1);
 
-			this.target.node._trigger('cable.disconnect', this.target, this.owner);
+			this.target.iface._trigger('cable.disconnect', this.target, this.owner);
 		}
 	}
 }

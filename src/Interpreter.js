@@ -125,42 +125,42 @@ Blackprint.Interpreter = class Interpreter{
 		if(func === void 0)
 			return console.error('Node handler for', namespace, "was not found, maybe .registerNode() haven't being called?") && void 0;
 
-		// Processing scope is different with node scope
-		var handle = {}, node = {type:'default', title:'No Title', description:''};
+		// Processing scope is different with iface scope
+		var node = {}, iface = {type:'default', title:'No Title', description:''};
 
-		node.handle = handle;
-		node.namespace = namespace;
-		node.importing = true;
+		iface.node = node;
+		iface.namespace = namespace;
+		iface.importing = true;
 
-		Object.setPrototypeOf(node, Interpreter.Node.prototype);
+		Object.setPrototypeOf(iface, Interpreter.Node.prototype);
 
 		// Call the registered func (from this.registerNode)
-		func(handle, node);
+		func(node, iface);
 
-		if(Interpreter.interface[node.type] === void 0)
-			return console.error('Node type for', node.type, "was not found, maybe .registerInterface() haven't being called?") && void 0;
+		if(Interpreter.interface[iface.type] === void 0)
+			return console.error('Node type for', iface.type, "was not found, maybe .registerInterface() haven't being called?") && void 0;
 
 		// Initialize for interface
-		Interpreter.Node.interface(Interpreter.interface[node.type], node);
+		Interpreter.Node.interface(Interpreter.interface[iface.type], iface);
 
 		// Assign the saved options if exist
 		// Must be called here to avoid port trigger
+		iface.imported && iface.imported(options.options);
+
+		// Create the linker between the node and the iface
+		Interpreter.Node.prepare(node, iface);
+
+		this.nodes.push(iface);
+
+		iface.importing = false;
 		node.imported && node.imported(options.options);
 
-		// Create the linker between the handler and the node
-		Interpreter.Node.prepare(handle, node);
-
-		this.nodes.push(node);
-
-		node.importing = false;
-		handle.imported && handle.imported(options.options);
-
 		if(handlers !== void 0)
-			handlers.push(handle);
-		else if(handle.init !== void 0)
-			handle.init();
+			handlers.push(node);
+		else if(node.init !== void 0)
+			node.init();
 
-		return node;
+		return iface;
 	}
 }
 

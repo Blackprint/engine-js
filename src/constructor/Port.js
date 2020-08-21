@@ -4,13 +4,13 @@ Blackprint.Interpreter.Port = class Port{
 		this.type = type;
 		this.cables = [];
 		this.source = source;
-		this.node = node;
+		this.iface = node;
 		this.classAdd ='';
 
 		// this.value;
 		this.default = def;
 
-		// this.feature == PortListener | PortArrayOf | PortAwait
+		// this.feature == PortListener | PortArrayOf | PortAsync
 	}
 
 	// Set for the linked port (Handle for ScarletsFrame)
@@ -33,7 +33,7 @@ Blackprint.Interpreter.Port = class Port{
 					if(Blackprint.settings.visualizeFlow)
 						cables[i].visualizeFlow();
 
-					target.node.handle.inputs[target.name](port, cables[i]);
+					target.iface.node.inputs[target.name](port, cables[i]);
 				}
 			};
 		}
@@ -48,7 +48,7 @@ Blackprint.Interpreter.Port = class Port{
 						return port.default;
 
 					// Flag current node is requesting value to other node
-					port.node._requesting = true;
+					port.iface._requesting = true;
 
 					// Return single data
 					if(port.cables.length === 1){
@@ -56,18 +56,19 @@ Blackprint.Interpreter.Port = class Port{
 						var target = cable.owner === port ? cable.target : cable.owner;
 
 						if(target === void 0 || cable.connected === false){
+							port.iface._requesting = void 0;
 							if(port.feature === Blackprint.PortArrayOf)
 								return [];
 							return target.default;
 						}
 
 						// Request the data first
-						if(target.node.handle.request){
-							if(target.node.handle.request(target, port.node) !== false && Blackprint.settings.visualizeFlow)
+						if(target.iface.node.request){
+							if(target.iface.node.request(target, port.iface) !== false && Blackprint.settings.visualizeFlow)
 								cable.visualizeFlow();
 						}
 
-						port.node._requesting = void 0;
+						port.iface._requesting = void 0;
 						if(port.feature === Blackprint.PortArrayOf)
 							return [target.value];
 
@@ -85,15 +86,15 @@ Blackprint.Interpreter.Port = class Port{
 							continue;
 
 						// Request the data first
-						if(target.node.handle.request){
-							if(target.node.handle.request(target, port.node) !== false && Blackprint.settings.visualizeFlow)
+						if(target.iface.node.request){
+							if(target.iface.node.request(target, port.iface) !== false && Blackprint.settings.visualizeFlow)
 								cable.visualizeFlow();
 						}
 
 						data.push(target.value || target.default);
 					}
 
-					port.node._requesting = void 0;
+					port.iface._requesting = void 0;
 					return data;
 				}
 
@@ -116,14 +117,14 @@ Blackprint.Interpreter.Port = class Port{
 							val = String(val);
 						else if(val.constructor === String){
 							if(isNaN(val) === true)
-								throw new Error(port.node.title+"> "+val + " is not a Number");
+								throw new Error(port.iface.title+"> "+val + " is not a Number");
 
 							val = Number(val);
 						}
-						else throw new Error(port.node.title+"> "+getDataType(val) + " can't be converted as a " + port.type.name);
+						else throw new Error(port.iface.title+"> "+getDataType(val) + " can't be converted as a " + port.type.name);
 					}
 					else if(!(val instanceof port.type))
-						throw new Error(port.node.title+"> "+getDataType(val) + " is not instance of "+port.type.name);
+						throw new Error(port.iface.title+"> "+getDataType(val) + " is not instance of "+port.type.name);
 				}
 
 				port.value = val;
@@ -141,24 +142,45 @@ Blackprint.Interpreter.Port = class Port{
 		// Check all connected cables, if any node need to synchronize
 		var cables = this.cables;
 		for (var i = 0; i < cables.length; i++) {
-			var target = cables[i].owner === this ? cables[i].target : cables[i].owner;
-			if(target === void 0)
-				continue;
+			var target, owner;
+			if(cables[i].owner === this){
+				owner = this;
+				target = cables[i].target;
+
+				if(target === void 0)
+					continue;
+			}
+			else{
+				target = this;
+				owner = cables[i].target;
+			}
 
 			if(target.feature === Blackprint.PortListener){
-				target._call(cables[i].owner === this ? cables[i].owner : cables[i].target, this.value);
+				target._call(this.value, cables[i].owner === this ? cables[i].owner : cables[i].target);
 
 				if(Blackprint.settings.visualizeFlow)
 					cables[i].visualizeFlow();
 			}
 
-			if(target.node._requesting === void 0 && target.node.handle.update){
-				target.node.handle.update(cables[i]);
+			if(target.iface._requesting === void 0 && target.iface.node.update){
+				target.iface.node.update(target, owner, cables[i]);
 
 				if(Blackprint.settings.visualizeFlow)
 					cables[i].visualizeFlow();
 			}
 		}
+	}
+
+	listen(func){
+		this._call = func;
+
+		if(this.feature !== Blackprint.PortArrayOf)
+			this.feature = Blackprint.PortListener;
+	}
+
+	async(func){
+		this._call = func;
+		this.feature = Blackprint.PortAsync;
 	}
 }
 

@@ -1,12 +1,12 @@
 class PortLink{
-	static construct(portLink, which, node){
+	static construct(portLink, which, iface){
 		Object.defineProperties(portLink, {
 			_which:{value:which},
-			_node:{value:node},
+			_iface:{value:iface},
 			_extracted:{writable:true, value:false},
 		});
 
-		node[which] = {}; // Handled by ScarletsFrame
+		iface[which] = {}; // Handled by ScarletsFrame
 
 		// Create linker for all port
 		for(var portName in portLink)
@@ -18,7 +18,7 @@ class PortLink{
 	}
 
 	add(portName, val){
-		var nodeEls = this._node[this._which];
+		var nodeEls = this._iface[this._which];
 
 		// Determine type and add default value for each type
 		var type, def, haveFeature;
@@ -68,7 +68,7 @@ class PortLink{
 			}
 		}
 
-		var linkedPort = this._node.newPort(portName, type, def, this._which, this._node);
+		var linkedPort = this._iface.newPort(portName, type, def, this._which, this._iface);
 
 		if(this._extracted === true)
 			sf.set(nodeEls, portName, linkedPort);
@@ -91,7 +91,7 @@ class PortLink{
 	}
 
 	delete(portName){
-		var ref = this._node[this._which];
+		var ref = this._iface[this._which];
 
 		// Destroy cable first
 		var cables = ref[portName].cables;
