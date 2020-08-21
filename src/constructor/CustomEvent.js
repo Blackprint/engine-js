@@ -56,7 +56,9 @@ Blackprint.Interpreter.CustomEvent = class CustomEvent{
 		if(this._event === void 0 || this._event[eventName] === void 0)
 			return;
 
-		var args = Array.from(arguments).slice(1);
+		var args = new Array(arguments.length);
+		for(var i=1; i < arguments.length; i++)
+			args[i-1] = arguments[i];
 
 		var events = this._event[eventName];
 		for (var i = 0; i < events.length; i++){
