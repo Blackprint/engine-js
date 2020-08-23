@@ -57,11 +57,6 @@ class PortLink{
 				type = val.portType;
 				def = [];
 			}
-			else if(val.portFeature === Blackprint.PortAsync){
-				haveFeature = val.portFeature;
-				type = val.portType;
-				def = val.call;
-			}
 			else{
 				type = val.constructor;
 				def = val;
@@ -88,6 +83,8 @@ class PortLink{
 				Object.defineProperty(this, portName, {enumerable:true, writable:false, value:linkedPort.createLinker()});
 		}
 		else Object.defineProperty(this, portName, linkedPort.createLinker());
+
+		return linkedPort;
 	}
 
 	delete(portName){
