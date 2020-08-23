@@ -2,7 +2,7 @@ class Cable{
 	visualizeFlow(){}
 
 	// If false then we assume it's haven't been connected
-	await = false;
+	await = 0;
 	connected = false;
 
 	constructor(owner, target){
@@ -11,31 +11,37 @@ class Cable{
 		this.target = target;
 	}
 
-	awaiting(func, otherCallback){
-		this.await = true;
-		var that = this;
-		func(function(success){
-			otherCallback && otherCallback(success);
+	activation(enable){
+		if(enable === void 0){ // Async mode
+			this.await++;
+			return;
+		}
 
-			if(success === false){
-				that.target = void 0;
-				return that.destroy();
-			}
+		if(enable === true){
+			if(--this.await !== 0)
+				return;
 
-			that.await = false;
-			that.triggerConnected();
-		});
+			this.triggerConnected();
+			return;
+		}
+
+		if(enable === false){
+			this.destroy();
+			return;
+		}
 	}
 
 	connecting(){
-		if(this.owner.source === 'inputs'){
-			if(this.owner.feature === Blackprint.PortAsync)
-				return this.awaiting(this.owner.default);
+		var that = this;
+		function activation(arg){
+			that.activation(arg);
 		}
-		else if(this.target.source === 'inputs'){
-			if(this.target.feature === Blackprint.PortAsync)
-				return this.awaiting(this.target.default);
-		}
+
+		this.owner._trigger('connecting', this.target, activation);
+		this.target._trigger('connecting', this.owner, activation);
+
+		if(this.await !== 0)
+			return;
 
 		this.triggerConnected();
 	}
@@ -45,6 +51,9 @@ class Cable{
 
 		this.target.iface._trigger('cable.connect', this.target, this.owner, this);
 		this.owner.iface._trigger('cable.connect', this.owner, this.target, this);
+
+		this.target._trigger('connect', this.owner, this);
+		this.owner._trigger('connect', this.target, this);
 
 		var out, inp;
 		if(this.target.source === 'inputs'){
@@ -58,6 +67,9 @@ class Cable{
 
 		if(inp.iface.node.update)
 			inp.iface.node.update(inp, out, this);
+
+		if(out.value !== void 0 && inp._trigger('value', out))
+			this.visualizeFlow();
 	}
 
 	destroy(){
@@ -67,8 +79,10 @@ class Cable{
 			if(i !== -1)
 				this.owner.cables.splice(i, 1);
 
-			if(this.connected)
+			if(this.connected){
 				this.owner.iface._trigger('cable.disconnect', this.owner, this.target);
+				this.owner._trigger('disconnect', this.target);
+			}
 			else this.owner.iface._trigger('cable.cancel', this.owner, this);
 		}
 
@@ -79,6 +93,7 @@ class Cable{
 				this.target.cables.splice(i, 1);
 
 			this.target.iface._trigger('cable.disconnect', this.target, this.owner);
+			this.target._trigger('disconnect', this.owner);
 		}
 	}
 }
