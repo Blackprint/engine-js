@@ -130,6 +130,7 @@ Blackprint.Interpreter.Port = class Port extends Blackprint.Interpreter.CustomEv
 				}
 
 				port.value = val;
+				port._trigger('value', port);
 				port.sync();
 			}
 		}
@@ -145,31 +146,25 @@ Blackprint.Interpreter.Port = class Port extends Blackprint.Interpreter.CustomEv
 		var cables = this.cables;
 		for (var i = 0; i < cables.length; i++) {
 			var target, owner;
-			if(cables[i].owner === this){
+			var cable = cables[i];
+
+			if(cable.owner === this){
 				owner = this;
-				target = cables[i].target;
+				target = cable.target;
 
 				if(target === void 0)
 					continue;
 			}
 			else{
 				target = this;
-				owner = cables[i].target;
+				owner = cable.target;
 			}
 
-			if(target.feature === Blackprint.PortListener){
-				target._call(this.value, cables[i].owner === this ? cables[i].owner : cables[i].target);
+			if(target.iface._requesting === void 0 && target.iface.node.update)
+				target.iface.node.update(target, owner, cable);
 
-				if(Blackprint.settings.visualizeFlow)
-					cables[i].visualizeFlow();
-			}
-
-			if(target.iface._requesting === void 0 && target.iface.node.update){
-				target.iface.node.update(target, owner, cables[i]);
-
-				if(Blackprint.settings.visualizeFlow)
-					cables[i].visualizeFlow();
-			}
+			if(target._trigger('value', this))
+				cable.visualizeFlow();
 		}
 	}
 }
