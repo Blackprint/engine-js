@@ -55,22 +55,25 @@ Blackprint.Interpreter.CustomEvent = class CustomEvent{
 		return this;
 	}
 
-	_trigger(eventName){
-		if(this._event === void 0 || this._event[eventName] === void 0)
-			return;
-
-		var args = new Array(arguments.length);
-		for(var i=1; i < arguments.length; i++)
-			args[i-1] = arguments[i];
+	// Max args = 5
+	_trigger(eventName, a,b,c,d,e){
+		if(this._event === void 0)
+			return false;
 
 		var events = this._event[eventName];
-		for (var i = 0; i < events.length; i++){
-			events[i].apply(this, args);
+		if(events === void 0 || events.length === 0)
+			return false;
 
-			if(events[i].once){
-				delete events[i].once;
+		for (var i = 0; i < events.length; i++){
+			var ev = events[i];
+			ev.call(this, a,b,c,d,e);
+
+			if(ev.once){
+				delete ev.once;
 				events.splice(i--, 1);
 			}
 		}
+
+		return true;
 	}
 }
