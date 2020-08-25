@@ -36,15 +36,6 @@ class PortLink{
 				def = [];
 			else if(type === Object)
 				def = {};
-			else if(type.constructor === Function && !type.prototype[Symbol.toStringTag]){
-				if(type.portFeature !== void 0){
-					haveFeature = type.portFeature;
-					type = type.portType || Object;
-				}
-				else type = Function;
-
-				def = void 0;
-			}
 			else def = null;
 		}
 		else if(val === null){
@@ -57,9 +48,25 @@ class PortLink{
 				type = val.portType;
 				def = [];
 			}
+			else if(val.portFeature === Blackprint.PortTrigger){
+				type = Function;
+				def = val.default;
+			}
+			else if(val.portFeature === Blackprint.PortDefault){
+				type = val.portType;
+				def = val.default;
+			}
 			else{
-				type = val.constructor;
-				def = val;
+				if(val.constructor === Array){
+					haveFeature = Blackprint.PortUnion;
+					val.name = 'Union';
+					type = val;
+					def = [];
+				}
+				else{
+					type = val.constructor;
+					def = val;
+				}
 			}
 		}
 

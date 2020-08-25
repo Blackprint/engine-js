@@ -35,7 +35,7 @@ Blackprint.Interpreter.Port = class Port extends Blackprint.Interpreter.CustomEv
 					if(Blackprint.settings.visualizeFlow)
 						cables[i].visualizeFlow();
 
-					target.iface.node.inputs[target.name](port, cables[i]);
+					target.iface.inputs[target.name].default(port, cables[i]);
 				}
 			};
 		}
@@ -61,6 +61,8 @@ Blackprint.Interpreter.Port = class Port extends Blackprint.Interpreter.CustomEv
 							port.iface._requesting = void 0;
 							if(port.feature === Blackprint.PortArrayOf)
 								return [];
+
+							console.log(34, cable);
 							return target.default;
 						}
 
