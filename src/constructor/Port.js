@@ -109,7 +109,7 @@ Blackprint.Interpreter.Port = class Port extends Blackprint.Interpreter.CustomEv
 		// Can only obtain data when accessing input port
 		if(port.source !== 'inputs'){
 			prepare.set = function(val){
-				if(val === void 0){
+				if(val === void 0 || val === null){
 					port.value = port.default;
 					return;
 				}

@@ -1,24 +1,35 @@
 Blackprint.Interpreter.Node = class Node extends Blackprint.Interpreter.CustomEvent{
-	static prepare(handle, node){
+	static prepare(node, iface){
 		// Type extract for port data type
-		// Create reactiveness of handle and node's ports
+		// Create reactiveness of node and iface's ports
 
-		if(handle.outputs !== void 0){
-			Object.setPrototypeOf(handle.outputs, Interpreter.PortLink.prototype);
-			Interpreter.PortLink.construct(handle.outputs, 'outputs', node);
+		iface.const = {};
+
+		if(node.outputs !== void 0){
+			Object.setPrototypeOf(node.outputs, Interpreter.PortLink.prototype);
+			Interpreter.PortLink.construct(node.outputs, 'outputs', iface);
+
+			iface.const.IOutput = iface.outputs;
+			iface.const.Output = node.outputs;
 		}
 
-		if(handle.inputs !== void 0){
-			Object.setPrototypeOf(handle.inputs, Interpreter.PortLink.prototype);
-			Interpreter.PortLink.construct(handle.inputs, 'inputs', node);
+		if(node.inputs !== void 0){
+			Object.setPrototypeOf(node.inputs, Interpreter.PortLink.prototype);
+			Interpreter.PortLink.construct(node.inputs, 'inputs', iface);
+
+			iface.const.IInput = iface.inputs;
+			iface.const.Input = node.inputs;
 		}
 
-		if(handle.properties !== void 0){
-			Object.setPrototypeOf(handle.properties, Interpreter.PortLink.prototype);
-			Interpreter.PortLink.construct(handle.properties, 'properties', node);
+		if(node.properties !== void 0){
+			Object.setPrototypeOf(node.properties, Interpreter.PortLink.prototype);
+			Interpreter.PortLink.construct(node.properties, 'properties', iface);
+
+			iface.const.IProperty= iface.properties;
+			iface.const.Property= node.properties;
 		}
 
-		Object.defineProperty(node, '_requsting', {writable:true, value:false});
+		Object.defineProperty(iface, '_requesting', {writable:true, value:false});
 	}
 
 	static interface(interFunc, node){
