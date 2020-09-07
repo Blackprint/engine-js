@@ -15,6 +15,12 @@ Blackprint.Interpreter.Port = class Port extends Blackprint.Interpreter.CustomEv
 		// this.feature == PortListener | PortArrayOf | PortAsync
 	}
 
+	disconnectAll(){
+		var cables = this.cables;
+		for (var i = cables.length - 1; i >= 0; i--)
+			cables[i].destroy();
+	}
+
 	// Set for the linked port (Handle for ScarletsFrame)
 	// ex: linkedPort = node.outputs.portName
 	createLinker(){
