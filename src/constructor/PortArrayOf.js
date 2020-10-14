@@ -1,5 +1,5 @@
 Blackprint.PortArrayOf = function(type){
-	if(type.constructor === Array)
+	if(type !== null && type.constructor === Array)
 		type.name = 'Array '+type[0].constructor.name;
 
 	return {
@@ -9,7 +9,7 @@ Blackprint.PortArrayOf = function(type){
 }
 
 Blackprint.PortArrayOf.validate = function(type, target){
-	if(type === target)
+	if(type.any || type === target)
 		return true;
 
 	if(type.constructor === Array)

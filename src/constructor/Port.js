@@ -27,7 +27,7 @@ Blackprint.Interpreter.Port = class Port extends Blackprint.Interpreter.CustomEv
 		var port = this;
 
 		// Only for outputs
-		if(this.type === Function){
+		if(this.source === 'outputs' && this.type === Function){
 			// Disable sync
 			port.sync = false;
 
@@ -49,7 +49,7 @@ Blackprint.Interpreter.Port = class Port extends Blackprint.Interpreter.CustomEv
 		var prepare = {
 			configurable:true,
 			enumerable:true,
-			get:function(){
+			get(){
 				// This port must use values from connected outputs
 				if(port.source === 'inputs'){
 					if(port.cables.length === 0)
@@ -68,7 +68,7 @@ Blackprint.Interpreter.Port = class Port extends Blackprint.Interpreter.CustomEv
 							if(port.feature === Blackprint.PortArrayOf)
 								return [];
 
-							console.log(34, cable);
+							// console.log(34, cable);
 							return target.default;
 						}
 

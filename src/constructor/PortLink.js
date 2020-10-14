@@ -46,7 +46,12 @@ class PortLink{
 			if(val.portFeature === Blackprint.PortArrayOf){
 				haveFeature = val.portFeature;
 				type = val.portType;
-				def = [];
+
+				if(type === null){
+					type = {name:'Any', any:true};
+					def = null;
+				}
+				else def = [];
 			}
 			else if(val.portFeature === Blackprint.PortTrigger){
 				type = Function;
@@ -84,12 +89,15 @@ class PortLink{
 			linkedPort._call = val;
 		}
 
+		var linkValue = linkedPort.createLinker();
+
 		// Set on the this scope
 		if(type === Function){
 			if(this._which === 'outputs')
-				Object.defineProperty(this, portName, {enumerable:true, writable:false, value:linkedPort.createLinker()});
+				Object.defineProperty(this, portName, {enumerable:true, writable:false, value:linkValue});
+			else this[portName] = def;
 		}
-		else Object.defineProperty(this, portName, linkedPort.createLinker());
+		else Object.defineProperty(this, portName, linkValue);
 
 		return linkedPort;
 	}
