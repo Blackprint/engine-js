@@ -65,7 +65,7 @@ class Cable{
 			inp = this.owner;
 		}
 
-		if(inp.iface.node.update)
+		if(inp.iface.node.update && inp.type.constructor !== Function)
 			inp.iface.node.update(inp, out, this);
 
 		if(out.value !== void 0 && inp._trigger('value', out) && Blackprint.settings.visualizeFlow)
