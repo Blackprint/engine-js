@@ -25,8 +25,8 @@ Blackprint.Interpreter.Node = class Node extends Blackprint.Interpreter.CustomEv
 			Object.setPrototypeOf(node.properties, Interpreter.PortLink.prototype);
 			Interpreter.PortLink.construct(node.properties, 'properties', iface);
 
-			iface.const.IProperty= iface.properties;
-			iface.const.Property= node.properties;
+			iface.const.IProperty = iface.properties;
+			iface.const.Property = node.properties;
 		}
 
 		Object.defineProperty(iface, '_requesting', {writable:true, value:false});
@@ -41,8 +41,21 @@ Blackprint.Interpreter.Node = class Node extends Blackprint.Interpreter.CustomEv
 
 		// function argument = 2
 		if(interFunc.length === 2)
-			return interFunc(node, function(bind){
-				Object.defineProperties(node, Object.getOwnPropertyDescriptors(bind));
+			return interFunc(node, function bindingFunction(bind, target = node){
+				var temp = Object.getOwnPropertyDescriptors(bind);
+				Object.defineProperties(target, temp);
+
+				for(let key in temp){
+					var val = temp[key].value;
+					if(!val || val.constructor !== Object)
+						continue;
+
+					bindingFunction(val, val);
+					Object.defineProperty(target, key, {
+						get:()=>val,
+						set:(v)=>Object.assign(val, v)
+					});
+				}
 			});
 
 		interFunc(node);

@@ -93,6 +93,8 @@ Blackprint.Interpreter = class Interpreter{
 							var cable = new Interpreter.Cable(linkPortA, linkPortB);
 							linkPortA.cables.push(cable);
 							linkPortB.cables.push(cable);
+
+							cable.connecting();
 						}
 					}
 				}
@@ -126,7 +128,7 @@ Blackprint.Interpreter = class Interpreter{
 			return console.error('Node handler for', namespace, "was not found, maybe .registerNode() haven't being called?") && void 0;
 
 		// Processing scope is different with iface scope
-		var node = {}, iface = {type:'default', title:'No Title', description:''};
+		var node = {}, iface = {interface:'default', title:'No Title', description:''};
 
 		iface.node = node;
 		iface.namespace = namespace;
@@ -137,11 +139,11 @@ Blackprint.Interpreter = class Interpreter{
 		// Call the registered func (from this.registerNode)
 		func(node, iface);
 
-		if(Interpreter.interface[iface.type] === void 0)
-			return console.error('Node type for', iface.type, "was not found, maybe .registerInterface() haven't being called?") && void 0;
+		if(Interpreter.interface[iface.interface] === void 0)
+			return console.error('Node interface for', iface.interface, "was not found, maybe .registerInterface() haven't being called?") && void 0;
 
 		// Initialize for interface
-		Interpreter.Node.interface(Interpreter.interface[iface.type], iface);
+		Interpreter.Node.interface(Interpreter.interface[iface.interface], iface);
 
 		// Assign the saved options if exist
 		// Must be called here to avoid port trigger
