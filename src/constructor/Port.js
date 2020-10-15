@@ -171,7 +171,8 @@ Blackprint.Interpreter.Port = class Port extends Blackprint.Interpreter.CustomEv
 			if(target.iface._requesting === void 0 && target.iface.node.update)
 				target.iface.node.update(target, owner, cable);
 
-			if(target._trigger('value', this) && Blackprint.settings.visualizeFlow)
+			target._trigger('value', this);
+			if(Blackprint.settings.visualizeFlow)
 				cable.visualizeFlow();
 		}
 	}
