@@ -4,7 +4,6 @@
 <p align="center">Run exported Blackprint on any JavaScript environment.</p>
 
 <p align="center">
-    <a href='https://patreon.com/stefansarya'><img src='https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.herokuapp.com%2Fstefansarya%2Fpledges&style=for-the-badge' height='20'></a>
     <a href='https://github.com/Blackprint/Blackprint/blob/master/LICENSE'><img src='https://img.shields.io/badge/License-MIT-brightgreen.svg' height='20'></a>
 </p>
 
@@ -20,8 +19,8 @@ An interface is designed for communicate the node handler with the JavaScript's 
 
 ```js
 // -> (node identifier, callback)
-Blackprint.Interpreter.registerInterface('logger', function(self, bind){
-	// `bind` is used for bind `self` property with a function
+Blackprint.Interpreter.registerInterface('logger', function(iface, bind){
+	// `bind` is used for bind `iface` property with a function
 	// And polyfill for ScarletsFrame element binding system
 
 	var myLog = '...';
@@ -35,11 +34,11 @@ Blackprint.Interpreter.registerInterface('logger', function(self, bind){
 		}
 	});
 
-	// After that, you can get/set from `self` like a normal property
-	// self.log === '...';
+	// After that, you can get/set from `iface` like a normal property
+	// iface.log === '...';
 
-	// In the self object, it simillar with: https://github.com/Blackprint/Blackprint
-	self.clickMe = function(){...}
+	// In the iface object, it simillar with: https://github.com/Blackprint/Blackprint
+	iface.clickMe = function(){...}
 });
 ```
 
@@ -50,13 +49,13 @@ It should be compatible if it's not accessing any Browser API.<br>
 
 ```js
 // -> (namespace, callback)
-Blackprint.Interpreter.registerNode('myspace/button', function(handle, node){
-    // Use node handler from instance.registerInterface('button')
-    node.type = 'button';
-    node.title = "My simple button";
+Blackprint.Interpreter.registerNode('myspace/button', function(node, iface){
+    // Use iface handler from instance.registerInterface('button')
+    iface.type = 'button';
+    iface.title = "My simple button";
 
     // Called after `.button` have been clicked
-    handle.onclicked = function(ev){
+    node.onclicked = function(ev){
         console.log("Henlo", ev);
     }
 });
