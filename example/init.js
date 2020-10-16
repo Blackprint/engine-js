@@ -1,11 +1,11 @@
 // For Deno
-// import 'https://cdn.jsdelivr.net/npm/blackprint-interpreter@0.1.0';
-// const Interpreter = Blackprint.Interpreter;
+import 'https://cdn.jsdelivr.net/npm/blackprint-interpreter@0.1.1';
+const Interpreter = Blackprint.Interpreter;
 
 // For Node
 // var Blackprint = require('blackprint-interpreter');
-var Blackprint = require('../dist/interpreter.js');
-var Interpreter = Blackprint.Interpreter;
+// var Blackprint = require('../dist/interpreter.js');
+// var Interpreter = Blackprint.Interpreter;
 
 var instance = new Interpreter();
 // These comment can be collapsed depend on your IDE

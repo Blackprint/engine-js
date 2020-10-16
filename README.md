@@ -87,3 +87,6 @@ $ git clone --depth 1 https://github.com/Blackprint/interpreter-js .
 $ npm i
 $ node ./example/init.js
 ```
+
+## Contributing
+To compile this interpreter you need to follow the instruction [from this link](https://github.com/Blackprint/Blackprint#contributing).

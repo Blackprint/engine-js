@@ -1,12 +1,12 @@
 Blackprint.Interpreter.Port = class Port extends Blackprint.Interpreter.CustomEvent{
-	constructor(name, type, def, source, node){
+	constructor(name, type, def, source, iface){
 		super();
 
 		this.name = name;
 		this.type = type;
 		this.cables = [];
 		this.source = source;
-		this.iface = node;
+		this.iface = iface;
 		this.classAdd ='';
 
 		// this.value;
