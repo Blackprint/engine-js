@@ -13,7 +13,7 @@ class PortLink{
 			portLink.add(portName, portLink[portName]);
 
 		// Check if a browser
-		if(typeof sf !== 'undefined' && sf.set !== void 0)
+		if(typeof sf !== 'undefined' && sf.Obj.set !== void 0)
 			portLink._extracted = true;
 	}
 
@@ -78,7 +78,7 @@ class PortLink{
 		var linkedPort = this._iface.newPort(portName, type, def, this._which, this._iface);
 
 		if(this._extracted === true)
-			sf.set(nodeEls, portName, linkedPort);
+			sf.Obj.set(nodeEls, portName, linkedPort);
 		else
 			nodeEls[portName] = linkedPort;
 
@@ -113,10 +113,10 @@ class PortLink{
 		delete this[portName];
 
 		// Check if a browser or not
-		if(typeof sf === 'undefined' && sf.delete)
-			delete ref[portName];
+		if(typeof sf !== 'undefined' && sf.Obj.delete !== void 0)
+			sf.Obj.delete(ref, portName);
 		else
-			sf.delete(ref, portName);
+			delete ref[portName];
 	}
 }
 
