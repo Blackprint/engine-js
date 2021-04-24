@@ -3,6 +3,6 @@
   "version": "0.1.1",
   "main": "dist/interpreter.js",
   "dependencies": {
-    "blackprint-interpreter": "^0.0.3"
+    "blackprint-interpreter": "^0.1.1"
   }
 }
