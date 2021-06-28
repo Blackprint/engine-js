@@ -1,13 +1,13 @@
-Blackprint.Interpreter = class Interpreter{
+Blackprint.Engine = class Engine{
 	static handler = {};
 	static interface = {default: NoOperation};
 
 	// Register node handler
-	// Callback function will get handle and node
-	// - handle = Blackprint binding
-	// - node = ScarletsFrame binding <~> element
+	// Callback function will get node and iface
+	// - node = Blackprint binding
+	// - iface = ScarletsFrame binding <~> element
 	static registerNode(namespace, func){
-		deepProperty(Interpreter.handler, namespace.split('/'), func);
+		deepProperty(Engine.handler, namespace.split('/'), func);
 	}
 
 	static registerInterface(nodeType, options, func){
@@ -16,7 +16,7 @@ Blackprint.Interpreter = class Interpreter{
 		else if(options.extend !== void 0)
 			func.extend = options.extend;
 
-		Interpreter.interface[nodeType] = func;
+		Engine.interface[nodeType] = func;
 	}
 
 	constructor(){
@@ -90,7 +90,7 @@ Blackprint.Interpreter = class Interpreter{
 								continue;
 							}
 
-							var cable = new Interpreter.Cable(linkPortA, linkPortB);
+							var cable = new Engine.Cable(linkPortA, linkPortB);
 							linkPortA.cables.push(cable);
 							linkPortB.cables.push(cable);
 
@@ -123,7 +123,7 @@ Blackprint.Interpreter = class Interpreter{
 	}
 
 	createNode(namespace, options, handlers){
-		var func = deepProperty(Interpreter.handler, namespace.split('/'));
+		var func = deepProperty(Engine.handler, namespace.split('/'));
 		if(func === void 0)
 			return console.error('Node handler for', namespace, "was not found, maybe .registerNode() haven't being called?") && void 0;
 
@@ -134,23 +134,23 @@ Blackprint.Interpreter = class Interpreter{
 		iface.namespace = namespace;
 		iface.importing = true;
 
-		Object.setPrototypeOf(iface, Interpreter.Node.prototype);
+		Object.setPrototypeOf(iface, Engine.Node.prototype);
 
 		// Call the registered func (from this.registerNode)
 		func(node, iface);
 
-		if(Interpreter.interface[iface.interface] === void 0)
+		if(Engine.interface[iface.interface] === void 0)
 			return console.error('Node interface for', iface.interface, "was not found, maybe .registerInterface() haven't being called?") && void 0;
 
 		// Initialize for interface
-		Interpreter.Node.interface(Interpreter.interface[iface.interface], iface);
+		Engine.Node.interface(Engine.interface[iface.interface], iface);
 
 		// Assign the saved options if exist
 		// Must be called here to avoid port trigger
 		iface.imported && iface.imported(options.options);
 
 		// Create the linker between the node and the iface
-		Interpreter.Node.prepare(node, iface);
+		Engine.Node.prepare(node, iface);
 
 		this.nodes.push(iface);
 
@@ -166,4 +166,4 @@ Blackprint.Interpreter = class Interpreter{
 	}
 }
 
-var Interpreter = Blackprint.Interpreter;
+var Engine = Blackprint.Engine;
