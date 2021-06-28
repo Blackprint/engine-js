@@ -1,24 +1,24 @@
 // For Deno
 import 'https://cdn.jsdelivr.net/npm/blackprint-interpreter@0.1.1';
-const Interpreter = Blackprint.Interpreter;
+const Engine = Blackprint.Engine;
 
 // For Node
 // var Blackprint = require('blackprint-interpreter');
 // var Blackprint = require('../dist/interpreter.js');
-// var Interpreter = Blackprint.Interpreter;
+// var Engine = Blackprint.Engine;
 
-var instance = new Interpreter();
+var instance = new Engine();
 // These comment can be collapsed depend on your IDE
 
 // === Register Node Interface ===
-	Interpreter.registerInterface('nodes/button', function(iface){
+	Engine.registerInterface('nodes/button', function(iface){
 		iface.clicked = function(ev){
-			console.log("Interpreter: 'Trigger' button clicked, going to run the handler");
+			console.log("Engine: 'Trigger' button clicked, going to run the handler");
 			iface.node.clicked && iface.node.clicked(ev);
 		}
 	});
 
-	Interpreter.registerInterface('nodes/input', function(iface, bind){
+	Engine.registerInterface('nodes/input', function(iface, bind){
 		var theValue = '';
 		bind({
 			options:{
@@ -35,7 +35,7 @@ var instance = new Interpreter();
 		});
 	});
 
-	Interpreter.registerInterface('nodes/logger', function(iface, bind){
+	Engine.registerInterface('nodes/logger', function(iface, bind){
 		var log = '...';
 		bind({
 			get log(){
@@ -56,9 +56,9 @@ var instance = new Interpreter();
 
 // === Register Node Handler ===
 // Exact copy of register-handler.js from the browser version
-// We just need to replace Blackprint.registerNode with Interpreter.registerNode
+// We just need to replace Blackprint.registerNode with Engine.registerNode
 // https://github.com/Blackprint/blackprint.github.io/blob/master/src/js/register-handler.js
-	Interpreter.registerNode('example/math/multiply', function(node, iface){
+	Engine.registerNode('example/math/multiply', function(node, iface){
 		iface.title = "Multiply";
 		// Let's use default node interface
 
@@ -103,7 +103,7 @@ var instance = new Interpreter();
 		}
 	});
 
-	Interpreter.registerNode('example/math/random', function(node, iface){
+	Engine.registerNode('example/math/random', function(node, iface){
 		iface.title = "Random";
 		iface.description = "Number (0-100)";
 
@@ -135,7 +135,7 @@ var instance = new Interpreter();
 		}
 	});
 
-	Interpreter.registerNode('example/display/logger', function(node, iface){
+	Engine.registerNode('example/display/logger', function(node, iface){
 		iface.title = "Logger";
 		iface.description = 'Print anything into text';
 
@@ -176,7 +176,7 @@ var instance = new Interpreter();
 		}
 	});
 
-	Interpreter.registerNode('example/button/simple', function(node, iface){
+	Engine.registerNode('example/button/simple', function(node, iface){
 		// node = under ScarletsFrame element control
 		iface.title = "Button";
 
@@ -195,7 +195,7 @@ var instance = new Interpreter();
 		}
 	});
 
-	Interpreter.registerNode('example/input/simple', function(node, iface){
+	Engine.registerNode('example/input/simple', function(node, iface){
 		// iface = under ScarletsFrame element control
 		iface.title = "Input";
 
@@ -239,7 +239,7 @@ var instance = new Interpreter();
 	});
 
 	// Does nothing :3
-	Interpreter.registerNode('example/dummy/test', function(node, iface){
+	Engine.registerNode('example/dummy/test', function(node, iface){
 		iface.title = "Do nothing";
 
 		// PortName must different any port

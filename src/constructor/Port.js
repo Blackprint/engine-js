@@ -1,4 +1,4 @@
-Blackprint.Interpreter.Port = class Port extends Blackprint.Interpreter.CustomEvent{
+Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 	constructor(name, type, def, source, iface){
 		super();
 

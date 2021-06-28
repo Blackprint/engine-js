@@ -98,4 +98,4 @@ class Cable{
 	}
 }
 
-Blackprint.Interpreter.Cable = Cable;
+Blackprint.Engine.Cable = Cable;

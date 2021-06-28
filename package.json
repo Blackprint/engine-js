@@ -1,8 +1,8 @@
 {
-  "name": "blackprint-interpreter",
-  "version": "0.1.1",
-  "main": "dist/interpreter.js",
+  "name": "blackprint-engine",
+  "version": "0.1.0",
+  "main": "dist/engine.js",
   "dependencies": {
-    "blackprint-interpreter": "^0.1.1"
+    "blackprint-engine": "^0.1.0"
   }
 }

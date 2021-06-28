@@ -1,6 +1,6 @@
 // This class must be initialized first before any extendable
 
-Blackprint.Interpreter.CustomEvent = class CustomEvent{
+Blackprint.Engine.CustomEvent = class CustomEvent{
 	on(eventName, func){
 		if(this._event === void 0)
 			Object.defineProperty(this, '_event', {value:{}});
