@@ -183,7 +183,7 @@ var instance = new Engine();
 		// Let's use ../nodes/button.js
 		iface.interface = 'nodes/button';
 
-		// handle = under Blackprint node flow control
+		// node = under Blackprint node flow control
 		node.outputs = {
 			Clicked:Function
 		};
@@ -202,7 +202,7 @@ var instance = new Engine();
 		// Let's use ../nodes/input.js
 		iface.interface = 'nodes/input';
 
-		// handle = under Blackprint node flow control
+		// node = under Blackprint node flow control
 		node.outputs = {
 			Changed:Function,
 			Value:String, // Default to empty string
