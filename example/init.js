@@ -1,13 +1,13 @@
 // For Deno
-import 'https://cdn.jsdelivr.net/npm/blackprint-interpreter@0.1.1';
-const Engine = Blackprint.Engine;
+import Blackprint from 'https://cdn.skypack.dev/@blackprint/engine@0.1.0';
+// import Blackprint from '../dist/engine.es6.js';
 
 // For Node
-// var Blackprint = require('blackprint-interpreter');
-// var Blackprint = require('../dist/interpreter.js');
-// var Engine = Blackprint.Engine;
+// var Blackprint = require('@blackprint/engine');
+// var Blackprint = require('../dist/engine.js');
 
-var instance = new Engine();
+let Engine = Blackprint.Engine;
+let instance = new Engine();
 // These comment can be collapsed depend on your IDE
 
 // === Register Node Interface ===
