@@ -1,8 +1,23 @@
 {
-  "name": "blackprint-engine",
+  "name": "@blackprint/engine",
+  "description": "Blackprint engine for JavaScript environment",
   "version": "0.1.0",
+  "author": "ScarletsFiction",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Blackprint/engine-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Blackprint/engine-js/issues"
+  },
+  "homepage": "http://stefansarya.gitbook.io/blackprint",
   "main": "dist/engine.js",
-  "dependencies": {
-    "blackprint-engine": "^0.1.0"
-  }
+  "module": "dist/engine.es6.js",
+  "keywords": [
+    "visual-programming",
+    "flow-based-programming",
+    "blackprint",
+    "engine"
+  ]
 }

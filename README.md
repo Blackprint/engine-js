@@ -12,17 +12,39 @@ This repository is designed to be used together with [Blackprint](https://github
 ## Documentation
 Please visit [Blackprint's Wiki](https://github.com/Blackprint/Blackprint/wiki/JavaScript-Standalone-Node-Engine) to see the documentation.
 
-### Example
-![9lM3o2Trur](https://user-images.githubusercontent.com/11073373/81947175-72616600-962a-11ea-8e83-cfb4ba0c85c2.png)
+### Importing
+Please specify the version when importing, breaking changes may happen on v0.\*.0 incremental.
 
-This repository provide an example with the JSON too, and you can try it with Node.js or Deno:<br>
-
-```sh
-# Change your working directory into empty folder first
-$ git clone --depth 1 https://github.com/Blackprint/engine-js .
-$ npm i
-$ node ./example/init.js
+Browser
+```html
+<script src="https://cdn.jsdelivr.net/npm/@blackprint/engine@0.1.0"></script>
+<script>
+	console.log(Blackprint.Engine);
+</script>
 ```
 
+Node.js
+```sh
+# Add the dependency first
+npm i @blackprint/engine@0.1.0
+```
+
+```js
+let Blackprint = require('@blackprint/engine');
+let { Engine } = Blackprint;
+```
+
+Deno
+```js
+import Blackprint from 'https://cdn.skypack.dev/@blackprint/engine@0.1.0';
+let { Engine } = Blackprint;
+```
+
+### Example
+Please visit the `/example` folder if you want to see the code.
+![9lM3o2Trur](https://user-images.githubusercontent.com/11073373/81947175-72616600-962a-11ea-8e83-cfb4ba0c85c2.png)
+
 ## Contributing
-To compile this engine you need to follow the instruction [from this link](https://github.com/Blackprint/Blackprint#contributing).
+Feel free to contribute any bug fix, improvement, report an issue or ask a feature for the Engine.
+
+When improving this Blackprint Engine, you will need to clone the main repository. For further instruction it will be written on the [documentation](http://stefansarya.gitbook.io/blackprint).
