@@ -4,6 +4,7 @@ Blackprint.Engine.Node = class Node extends Blackprint.Engine.CustomEvent{
 		// Create reactiveness of node and iface's ports
 
 		iface.const = {};
+		node.iface = iface;
 
 		if(node.outputs !== void 0){
 			Object.setPrototypeOf(node.outputs, Engine.PortLink.prototype);

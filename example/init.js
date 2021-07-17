@@ -248,17 +248,17 @@ instance.importJSON('{"Example/Math/Random":[{"i":0,"x":298,"y":73,"outputs":{"O
 
 
 // Time to run something :)
-var button = instance.getNodes('Example/Button/Simple')[0];
+var button = instance.getNodes('Example/Button/Simple')[0].iface;
 
 log("\n>> I'm clicking the button");
 button.clicked("'An event'");
 
-var logger = instance.getNodes('Example/Display/Logger')[0];
+var logger = instance.getNodes('Example/Display/Logger')[0].iface;
 log("\n>> I got the output value:", logger.log);
 
 log("\n>> I'm writing something to the input box");
-var input = instance.getNodes('Example/Input/Simple')[0];
+var input = instance.getNodes('Example/Input/Simple')[0].iface;
 input.data.value = 'hello wrold';
 
-var logger = instance.getNodes('Example/Display/Logger')[0];
+var logger = instance.getNodes('Example/Display/Logger')[0].iface;
 log("\n>> I got the output value:", logger.log);
