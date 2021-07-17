@@ -19,25 +19,26 @@ Blackprint.Engine = class Engine{
 		Engine.interface[nodeType] = func;
 	}
 
-	constructor(){
-		this.settings = {};
-
-		// ToDo: Improve
-		this.nodes = [];
-	}
+	iface = {};
+	ifaceList = []; // ToDo: Improve
+	settings = {};
 
 	clearNodes(){
-		this.nodes.splice(0);
+		this.iface = {};
+		this.ifaceList.splice(0);
 	}
 
-	importJSON(json){
+	async importJSON(json){
+		if(window.sf && window.sf.loader)
+			await window.sf.loader.task;
+
 		if(json.constructor !== Object)
 			json = JSON.parse(json);
 
 		var version = json.version;
 		delete json.version;
 
-		var inserted = this.nodes;
+		var inserted = this.ifaceList;
 		var handlers = [];
 
 		// Prepare all nodes depend on the namespace
@@ -47,11 +48,13 @@ Blackprint.Engine = class Engine{
 
 			// Every nodes that using this namespace name
 			for (var a = 0; a < nodes.length; a++){
-				var nodeOpt = {};
-				if(nodes[a].options !== void 0)
-					nodeOpt.options = nodes[a].options;
+				let temp = nodes[a];
+				var nodeOpt = {id: temp.id, _i: temp._i};
 
-				inserted[nodes[a].id] = this.createNode(namespace, nodeOpt, handlers);
+				if(temp.options !== void 0)
+					nodeOpt.options = temp.options;
+
+				inserted[temp._i] = this.createNode(namespace, nodeOpt, handlers);
 			}
 		}
 
@@ -62,7 +65,7 @@ Blackprint.Engine = class Engine{
 
 			// Every nodes that using this namespace name
 			for (var a = 0; a < nodes.length; a++){
-				var node = inserted[nodes[a].id];
+				var node = inserted[nodes[a]._i];
 
 				// If have outputs connection
 				if(nodes[a].outputs !== void 0){
@@ -81,7 +84,7 @@ Blackprint.Engine = class Engine{
 						// Current outputs's available targets
 						for (var k = 0; k < port.length; k++) {
 							var target = port[k];
-							var targetNode = inserted[target.id];
+							var targetNode = inserted[target._i];
 
 							// Outputs can only meet input port
 							var linkPortB = targetNode.inputs[target.name];
@@ -102,17 +105,30 @@ Blackprint.Engine = class Engine{
 		}
 
 		// Call handler init after creation processes was finished
-		for (var i = 0; i < handlers.length; i++)
-			handlers[i].init && handlers[i].init();
+		for (var i = 0; i < handlers.length; i++){
+			let temp = handlers[i];
+			temp.init && temp.init();
+		}
+	}
+
+	getNode(id){
+		if(id == null) throw "ID couldn't be null or undefined";
+
+		var ifaces = this.ifaceList;
+		for (var i = 0; i < ifaces.length; i++) {
+			let that = ifaces[i];
+			if(that._i === id || that.id === id)
+				return that.node;
+		}
 	}
 
 	// ToDo: Improve
 	getNodes(namespace){
-		var nodes = this.nodes;
+		var ifaces = this.ifaceList;
 		var got = [];
-		for (var i = 0; i < nodes.length; i++) {
-			if(nodes[i].namespace === namespace)
-				got.push(nodes[i]);
+		for (var i = 0; i < ifaces.length; i++) {
+			if(ifaces[i].namespace === namespace)
+				got.push(ifaces[i].node);
 		}
 
 		return got;
@@ -148,11 +164,12 @@ Blackprint.Engine = class Engine{
 		// Assign the saved options if exist
 		// Must be called here to avoid port trigger
 		iface.imported && iface.imported(options.options);
+		this.iface[temp.id || temp._i] = iface;
 
 		// Create the linker between the node and the iface
 		Engine.Node.prepare(node, iface);
 
-		this.nodes.push(iface);
+		this.ifaceList.push(iface);
 
 		iface.importing = false;
 		node.imported && node.imported(options.options);
