@@ -16,5 +16,7 @@ if(exports.Blackprint === void 0){
 }
 
 Blackprint.Addons = function(name){
-	return this.Addons[name] ??= {};
+	if(!(name in this.Addons))
+		return this.Addons[name] = {};
+	return this.Addons[name];
 };
