@@ -49,12 +49,11 @@ Blackprint.Engine = class Engine{
 			// Every nodes that using this namespace name
 			for (var a = 0; a < nodes.length; a++){
 				let temp = nodes[a];
-				var nodeOpt = {id: temp.id, _i: temp._i};
-
-				if(temp.options !== void 0)
-					nodeOpt.options = temp.options;
-
-				inserted[temp._i] = this.createNode(namespace, nodeOpt, handlers);
+				this.createNode(namespace, {
+					id: temp.id, // Named ID (if exist)
+					i: temp.i, // List Index
+					data: temp.data, // if exist
+				}, handlers);
 			}
 		}
 
@@ -65,7 +64,7 @@ Blackprint.Engine = class Engine{
 
 			// Every nodes that using this namespace name
 			for (var a = 0; a < nodes.length; a++){
-				var node = inserted[nodes[a]._i];
+				var node = inserted[nodes[a].i];
 
 				// If have outputs connection
 				if(nodes[a].outputs !== void 0){
@@ -84,7 +83,7 @@ Blackprint.Engine = class Engine{
 						// Current outputs's available targets
 						for (var k = 0; k < port.length; k++) {
 							var target = port[k];
-							var targetNode = inserted[target._i];
+							var targetNode = inserted[target.i];
 
 							// Outputs can only meet input port
 							var linkPortB = targetNode.inputs[target.name];
@@ -114,11 +113,13 @@ Blackprint.Engine = class Engine{
 	getNode(id){
 		if(id == null) throw "ID couldn't be null or undefined";
 
+		if(id.constructor === Number)
+			return this.ifaceList[id];
+
 		var ifaces = this.ifaceList;
 		for (var i = 0; i < ifaces.length; i++) {
-			let that = ifaces[i];
-			if(that._i === id || that.id === id)
-				return that.node;
+			if(ifaces[i].id === id)
+				return ifaces[i].node;
 		}
 	}
 
@@ -126,6 +127,7 @@ Blackprint.Engine = class Engine{
 	getNodes(namespace){
 		var ifaces = this.ifaceList;
 		var got = [];
+
 		for (var i = 0; i < ifaces.length; i++) {
 			if(ifaces[i].namespace === namespace)
 				got.push(ifaces[i].node);
@@ -161,18 +163,28 @@ Blackprint.Engine = class Engine{
 		// Initialize for interface
 		Engine.Node.interface(Engine.interface[iface.interface], iface);
 
+		var savedData = options.data;
+		delete options.data;
+
+		// Assign the iface options
+		Object.assign(iface, options);
+
 		// Assign the saved options if exist
 		// Must be called here to avoid port trigger
-		iface.imported && iface.imported(options.options);
-		this.iface[temp.id || temp._i] = iface;
+		iface.imported && iface.imported(savedData);
+
+		if(iface.id !== void 0)
+			this.iface[iface.id] = iface;
 
 		// Create the linker between the node and the iface
 		Engine.Node.prepare(node, iface);
 
-		this.ifaceList.push(iface);
+		if(iface.i !== void 0)
+			this.ifaceList[iface.i] = iface;
+		else this.ifaceList.push(iface);
 
 		iface.importing = false;
-		node.imported && node.imported(options.options);
+		node.imported && node.imported(savedData);
 
 		if(handlers !== void 0)
 			handlers.push(node);
