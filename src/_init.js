@@ -1,7 +1,7 @@
 let exports = module.exports; // This will be 'window' object on browser
 
 // Use the existing Blackprint Sketch, or create the polyfill
-var Blackprint = exports.Blackprint || {
+var Blackprint = window.Blackprint || {
 	settings(which, val){
 		Blackprint.settings[which] = val;
 	}
