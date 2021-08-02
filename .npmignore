@@ -1,0 +1,6 @@
+example
+pnpm-lock.yaml
+src
+node_modules
+.github
+.git
