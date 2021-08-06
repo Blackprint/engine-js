@@ -1,15 +1,25 @@
 // This class must be initialized first before any extendable
 
 Blackprint.Engine.CustomEvent = class CustomEvent{
-	on(eventName, func){
-		if(this._event === void 0)
-			Object.defineProperty(this, '_event', {value:{}});
+	on(eventName, func, options){
+		if(this._event === void 0){
+			Object.defineProperty(this, '_event', {
+				value:{
+					$_fallback: {}
+				}
+			});
+		}
 
 		if(eventName.includes(' ')){
 			eventName = eventName.split(' ');
 			for (var i = 0; i < eventName.length; i++)
-				this.on(eventName[i], func);
+				this.on(eventName[i], func, options);
 
+			return this;
+		}
+
+		if(options && options.asFallback){
+			this._event.$_fallback[eventName] = func;
 			return this;
 		}
 
@@ -26,12 +36,17 @@ Blackprint.Engine.CustomEvent = class CustomEvent{
 		return this;
 	}
 
-	off(eventName, func){
+	off(eventName, func, options){
 		if(eventName.includes(' ')){
 			eventName = eventName.split(' ');
 			for (var i = 0; i < eventName.length; i++)
 				this.off(eventName[i], func);
 
+			return this;
+		}
+
+		if(options && options.asFallback){
+			delete this._event.$_fallback[eventName];
 			return this;
 		}
 
@@ -61,8 +76,19 @@ Blackprint.Engine.CustomEvent = class CustomEvent{
 			return false;
 
 		var events = this._event[eventName];
-		if(events === void 0 || events.length === 0)
-			return false;
+		if(events === void 0 || events.length === 0){
+			events = this._event;
+
+			let hasFallback = events.$_fallback[eventName];
+			if(hasFallback){
+				hasFallback(a,b,c,d,e);
+
+				if(hasFallback.once)
+					delete events.$_fallback[eventName];
+			}
+
+			return hasFallback !== void 0;
+		}
 
 		for (var i = 0; i < events.length; i++){
 			var ev = events[i];
