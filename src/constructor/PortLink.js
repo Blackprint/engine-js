@@ -93,7 +93,7 @@ class PortLink{
 
 		// Set on the this scope
 		if(type === Function){
-			if(this._which === 'outputs')
+			if(this._which === 'output')
 				Object.defineProperty(this, portName, {enumerable:true, writable:false, value:linkValue});
 			else this[portName] = def;
 		}

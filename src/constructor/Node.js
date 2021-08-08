@@ -6,28 +6,28 @@ Blackprint.Engine.Node = class Node extends Blackprint.Engine.CustomEvent{
 		iface.const = {};
 		node.iface = iface;
 
-		if(node.outputs !== void 0){
-			Object.setPrototypeOf(node.outputs, Engine.PortLink.prototype);
-			Engine.PortLink.construct(node.outputs, 'outputs', iface);
+		if(node.output !== void 0){
+			Object.setPrototypeOf(node.output, Engine.PortLink.prototype);
+			Engine.PortLink.construct(node.output, 'output', iface);
 
-			iface.const.IOutput = iface.outputs;
-			iface.const.Output = node.outputs;
+			iface.const.IOutput = iface.output;
+			iface.const.Output = node.output;
 		}
 
-		if(node.inputs !== void 0){
-			Object.setPrototypeOf(node.inputs, Engine.PortLink.prototype);
-			Engine.PortLink.construct(node.inputs, 'inputs', iface);
+		if(node.input !== void 0){
+			Object.setPrototypeOf(node.input, Engine.PortLink.prototype);
+			Engine.PortLink.construct(node.input, 'input', iface);
 
-			iface.const.IInput = iface.inputs;
-			iface.const.Input = node.inputs;
+			iface.const.IInput = iface.input;
+			iface.const.Input = node.input;
 		}
 
-		if(node.properties !== void 0){
-			Object.setPrototypeOf(node.properties, Engine.PortLink.prototype);
-			Engine.PortLink.construct(node.properties, 'properties', iface);
+		if(node.property !== void 0){
+			Object.setPrototypeOf(node.property, Engine.PortLink.prototype);
+			Engine.PortLink.construct(node.property, 'property', iface);
 
-			iface.const.IProperty = iface.properties;
-			iface.const.Property = node.properties;
+			iface.const.IProperty = iface.property;
+			iface.const.Property = node.property;
 		}
 
 		Object.defineProperty(iface, '_requesting', {writable:true, value:false});

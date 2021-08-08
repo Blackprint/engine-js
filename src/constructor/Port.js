@@ -22,12 +22,12 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 	}
 
 	// Set for the linked port (Handle for ScarletsFrame)
-	// ex: linkedPort = node.outputs.portName
+	// ex: linkedPort = node.output.portName
 	createLinker(){
 		var port = this;
 
-		// Only for outputs
-		if(this.source === 'outputs' && this.type === Function){
+		// Only for output
+		if(this.source === 'output' && this.type === Function){
 			// Disable sync
 			port.sync = false;
 
@@ -41,7 +41,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 					if(Blackprint.settings.visualizeFlow)
 						cables[i].visualizeFlow();
 
-					target.iface.inputs[target.name].default(port, cables[i]);
+					target.iface.input[target.name].default(port, cables[i]);
 				}
 			};
 		}
@@ -50,8 +50,8 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			configurable:true,
 			enumerable:true,
 			get(){
-				// This port must use values from connected outputs
-				if(port.source === 'inputs'){
+				// This port must use values from connected output
+				if(port.source === 'input'){
 					if(port.cables.length === 0)
 						return port.default;
 
@@ -113,7 +113,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		};
 
 		// Can only obtain data when accessing input port
-		if(port.source !== 'inputs'){
+		if(port.source !== 'input'){
 			prepare.set = function(val){
 				if(val === void 0 || val === null){
 					port.value = port.default;

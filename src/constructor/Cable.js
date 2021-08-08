@@ -56,7 +56,7 @@ class Cable{
 		this.owner._trigger('connect', this.target, this);
 
 		var out, inp;
-		if(this.target.source === 'inputs'){
+		if(this.target.source === 'input'){
 			inp = this.target;
 			out = this.owner;
 		}

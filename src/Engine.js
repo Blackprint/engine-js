@@ -57,7 +57,7 @@ Blackprint.Engine = class Engine{
 			}
 		}
 
-		// Create cable only from outputs and properties
+		// Create cable only from output and property
 		// > Important to be separated from above, so the cable can reference to loaded nodes
 		for(var namespace in json){
 			var nodes = json[namespace];
@@ -66,13 +66,13 @@ Blackprint.Engine = class Engine{
 			for (var a = 0; a < nodes.length; a++){
 				var node = inserted[nodes[a].i];
 
-				// If have outputs connection
-				if(nodes[a].outputs !== void 0){
-					var out = nodes[a].outputs;
+				// If have output connection
+				if(nodes[a].output !== void 0){
+					var out = nodes[a].output;
 
-					// Every outputs port that have connection
+					// Every output port that have connection
 					for(var portName in out){
-						var linkPortA = node.outputs[portName];
+						var linkPortA = node.output[portName];
 						if(linkPortA === void 0){
 							console.error("Node port not found for", node, "with name:", portName);
 							continue;
@@ -80,13 +80,13 @@ Blackprint.Engine = class Engine{
 
 						var port = out[portName];
 
-						// Current outputs's available targets
+						// Current output's available targets
 						for (var k = 0; k < port.length; k++) {
 							var target = port[k];
 							var targetNode = inserted[target.i];
 
-							// Outputs can only meet input port
-							var linkPortB = targetNode.inputs[target.name];
+							// output can only meet input port
+							var linkPortB = targetNode.input[target.name];
 							if(linkPortB === void 0){
 								console.error("Node port not found for", targetNode, "with name:", target.name);
 								continue;
