@@ -146,12 +146,15 @@ Blackprint.Engine = class Engine{
 			return console.error('Node handler for', namespace, "was not found, maybe .registerNode() haven't being called?") && void 0;
 
 		// Processing scope is different with iface scope
-		var node = {}, iface = {interface:'default', title:'No Title', description:''};
+		var node = {}, iface = {
+			interface:'default',
+			title:'No Title',
+			namespace,
+			importing:true,
+			env: Blackprint.Environment.map
+		};
 
 		iface.node = node;
-		iface.namespace = namespace;
-		iface.importing = true;
-
 		Object.setPrototypeOf(iface, Engine.Node.prototype);
 
 		// Call the registered func (from this.registerNode)
