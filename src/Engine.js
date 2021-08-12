@@ -1,15 +1,4 @@
 Blackprint.Engine = class Engine{
-	static interface = {default: NoOperation};
-
-	static registerInterface(nodeType, options, func){
-		if(func === void 0)
-			func = options;
-		else if(options.extend !== void 0)
-			func.extend = options.extend;
-
-		Engine.interface[nodeType] = func;
-	}
-
 	iface = {};
 	ifaceList = []; // ToDo: Improve
 	settings = {};
@@ -151,11 +140,11 @@ Blackprint.Engine = class Engine{
 		// Call the registered func (from this.registerNode)
 		func(node, iface);
 
-		if(Engine.interface[iface.interface] === void 0)
+		if(Blackprint.interface[iface.interface] === void 0)
 			return console.error('Node interface for', iface.interface, "was not found, maybe .registerInterface() haven't being called?") && void 0;
 
 		// Initialize for interface
-		Engine.Node.interface(Engine.interface[iface.interface], iface);
+		Engine.Node.interface(Blackprint.interface[iface.interface], iface);
 
 		var savedData = options.data;
 		delete options.data;
@@ -198,8 +187,14 @@ Blackprint.registerNode = function(namespace, func){
 	deepProperty(Blackprint.nodes, namespace.split('/'), func);
 }
 
-Blackprint.registerInterface = function(){
-	throw new Error("For non-browser, please use 'Blackprint.Engine.registerInterface' instead");
+Blackprint.interface = {default: NoOperation};
+Blackprint.registerInterface = function(nodeType, options, func){
+	if(func === void 0)
+		func = options;
+	else if(options.extend !== void 0)
+		func.extend = options.extend;
+
+	Blackprint.interface[nodeType] = func;
 }
 
 var Engine = Blackprint.Engine;
