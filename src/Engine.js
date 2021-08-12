@@ -1,14 +1,5 @@
 Blackprint.Engine = class Engine{
-	static handler = {};
 	static interface = {default: NoOperation};
-
-	// Register node handler
-	// Callback function will get node and iface
-	// - node = Blackprint binding
-	// - iface = ScarletsFrame binding <~> element
-	static registerNode(namespace, func){
-		deepProperty(Engine.handler, namespace.split('/'), func);
-	}
 
 	static registerInterface(nodeType, options, func){
 		if(func === void 0)
@@ -141,7 +132,7 @@ Blackprint.Engine = class Engine{
 	}
 
 	createNode(namespace, options, handlers){
-		var func = deepProperty(Engine.handler, namespace.split('/'));
+		var func = deepProperty(Blackprint.nodes, namespace.split('/'));
 		if(func === void 0)
 			return console.error('Node handler for', namespace, "was not found, maybe .registerNode() haven't being called?") && void 0;
 
@@ -196,6 +187,19 @@ Blackprint.Engine = class Engine{
 
 		return iface;
 	}
+}
+
+// Register node handler
+// Callback function will get node and iface
+// - node = Blackprint binding
+// - iface = ScarletsFrame binding <~> element
+Blackprint.nodes = {};
+Blackprint.registerNode = function(namespace, func){
+	deepProperty(Blackprint.nodes, namespace.split('/'), func);
+}
+
+Blackprint.registerInterface = function(){
+	throw new Error("For non-browser, please use 'Blackprint.Engine.registerInterface' instead");
 }
 
 var Engine = Blackprint.Engine;

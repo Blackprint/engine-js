@@ -60,9 +60,8 @@ let instance = new Engine();
 
 // === Register Node Handler ===
 // Exact copy of register-handler.js from the browser version
-// We just need to replace Blackprint.registerNode with Engine.registerNode
 // https://github.com/Blackprint/blackprint.github.io/blob/master/src/js/register-handler.js
-	Engine.registerNode('Example/Math/Multiply', function(node, iface){
+	Blackprint.registerNode('Example/Math/Multiply', function(node, iface){
 		iface.title = "Multiply";
 		// iface.interface = undefined; // Let's use default node interface
 
@@ -107,7 +106,7 @@ let instance = new Engine();
 		}
 	});
 
-	Engine.registerNode('Example/Math/Random', function(node, iface){
+	Blackprint.registerNode('Example/Math/Random', function(node, iface){
 		iface.title = "Random";
 		iface.description = "Number (0-100)";
 
@@ -139,7 +138,7 @@ let instance = new Engine();
 		}
 	});
 
-	Engine.registerNode('Example/Display/Logger', function(node, iface){
+	Blackprint.registerNode('Example/Display/Logger', function(node, iface){
 		iface.title = "Logger";
 		iface.description = 'Print anything into text';
 
@@ -180,7 +179,7 @@ let instance = new Engine();
 		}
 	});
 
-	Engine.registerNode('Example/Button/Simple', function(node, iface){
+	Blackprint.registerNode('Example/Button/Simple', function(node, iface){
 		// node = under ScarletsFrame element control
 		iface.title = "Button";
 
@@ -199,7 +198,7 @@ let instance = new Engine();
 		}
 	});
 
-	Engine.registerNode('Example/Input/Simple', function(node, iface){
+	Blackprint.registerNode('Example/Input/Simple', function(node, iface){
 		// iface = under ScarletsFrame element control
 		iface.title = "Input";
 
