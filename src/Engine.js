@@ -178,13 +178,37 @@ Blackprint.Engine = class Engine{
 	}
 }
 
+if(isBrowser){
+	Blackprint.modulesURL = {};
+	Blackprint._modulesURL = [];
+}
+
 // Register node handler
 // Callback function will get node and iface
 // - node = Blackprint binding
 // - iface = ScarletsFrame binding <~> element
 Blackprint.nodes = {};
 Blackprint.registerNode = function(namespace, func){
-	deepProperty(Blackprint.nodes, namespace.split('/'), func);
+	if(isBrowser && sf.Obj){
+		let temp = Blackprint.modulesURL[Blackprint._loadingURL];
+
+		if(temp === void 0){
+			Blackprint.modulesURL[Blackprint._loadingURL] = {list:{}};
+			temp = Blackprint.modulesURL[Blackprint._loadingURL];
+			temp.url = Blackprint._loadingURL;
+			Blackprint._modulesURL.push(temp);
+		}
+
+		temp[namespace] = true;
+	}
+
+	namespace = namespace.split('/');
+
+	// Add with sf.Obj to trigger ScarletsFrame object binding update
+	if(isBrowser && sf.Obj && !(namespace[0] in Blackprint.nodes))
+		sf.Obj.set(Blackprint.nodes, namespace[0], {});
+
+	deepProperty(Blackprint.nodes, namespace, func);
 }
 
 Blackprint.interface = {default: NoOperation};
