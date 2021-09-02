@@ -189,7 +189,7 @@ if(isBrowser){
 // - iface = ScarletsFrame binding <~> element
 Blackprint.nodes = {};
 Blackprint.registerNode = function(namespace, func){
-	if(isBrowser && sf.Obj){
+	if(isBrowser && sf.Obj && Blackprint._loadingURL !== void 0){
 		let temp = Blackprint.modulesURL[Blackprint._loadingURL];
 
 		if(temp === void 0){
