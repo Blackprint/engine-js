@@ -189,13 +189,13 @@ if(isBrowser){
 // - iface = ScarletsFrame binding <~> element
 Blackprint.nodes = {};
 Blackprint.registerNode = function(namespace, func){
-	if(isBrowser && sf.Obj && Blackprint._loadingURL !== void 0){
-		let temp = Blackprint.modulesURL[Blackprint._loadingURL];
+	if(isBrowser && sf.Obj && this._scopeURL !== void 0){
+		let temp = Blackprint.modulesURL[this._scopeURL];
 
 		if(temp === void 0){
-			Blackprint.modulesURL[Blackprint._loadingURL] = {list:{}};
-			temp = Blackprint.modulesURL[Blackprint._loadingURL];
-			temp.url = Blackprint._loadingURL;
+			Blackprint.modulesURL[this._scopeURL] = {};
+			temp = Blackprint.modulesURL[this._scopeURL];
+			temp.url = this._scopeURL;
 			Blackprint._modulesURL.push(temp);
 		}
 
@@ -207,6 +207,19 @@ Blackprint.registerNode = function(namespace, func){
 	// Add with sf.Obj to trigger ScarletsFrame object binding update
 	if(isBrowser && sf.Obj && !(namespace[0] in Blackprint.nodes))
 		sf.Obj.set(Blackprint.nodes, namespace[0], {});
+
+	let isExist = deepProperty(Blackprint.nodes, namespace);
+	if(isExist){
+		if(this._scopeURL && isExist._scopeURL !== this._scopeURL){
+			throw `Conflicting nodes with similar name was found\nNamespace:${namespace.join('/')}\nFirst register from: ${isExist._scopeURL}\nTrying to register again from: ${this._scopeURL}`;
+		}
+
+		if(isExist._hidden)
+			func._hidden = true;
+
+		if(isExist._disabled)
+			func._disabled = true;
+	}
 
 	deepProperty(Blackprint.nodes, namespace, func);
 }
