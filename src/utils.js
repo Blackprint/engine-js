@@ -1,10 +1,12 @@
-function deepProperty(obj, path, value){
+function deepProperty(obj, path, value, onCreate){
 	var temp;
 	if(value !== void 0){
 		for(var i = 0, n = path.length-1; i < n; i++){
 			temp = path[i];
-			if(obj[temp] === void 0)
+			if(obj[temp] === void 0){
 				obj[temp] = {};
+				onCreate && onCreate(obj[temp]);
+			}
 
 			obj = obj[temp];
 		}
