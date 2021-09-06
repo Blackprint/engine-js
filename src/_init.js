@@ -43,11 +43,10 @@ Blackprint.LoadScope = function(options){
 
 		let url = temp._scopeURL.replace(/(|\.min|\.es6)\.(js|mjs|ts)$/m, '');
 
-		console.log(312, noStyle);
 		if(!noStyle)
 			sf.loader.css([url+'.sf.css']);
 
-		sf.loader.mjs([url+'.sf.mjs'], {noWait: true});
+		sf.loader.mjs([url+'.sf.mjs']);
 	}
 
 	return temp;
