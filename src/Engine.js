@@ -178,6 +178,7 @@ Blackprint.Engine = class Engine{
 	}
 }
 
+// ToDo: Migrate some code to Blackprint Sketch
 if(isBrowser){
 	Blackprint.modulesURL = {};
 	Blackprint._modulesURL = [];
@@ -189,13 +190,17 @@ if(isBrowser){
 // - iface = ScarletsFrame binding <~> element
 Blackprint.nodes = {};
 Blackprint.registerNode = function(namespace, func){
-	if(isBrowser && sf.Obj && this._scopeURL !== void 0){
+	let hasScarletsFrame = isBrowser && sf.Obj;
+
+	// ToDo: Migrate some code to Blackprint Sketch
+	if(hasScarletsFrame && this._scopeURL !== void 0){
 		let temp = Blackprint.modulesURL[this._scopeURL];
 
 		if(temp === void 0){
 			Blackprint.modulesURL[this._scopeURL] = {};
 			temp = Blackprint.modulesURL[this._scopeURL];
-			temp.url = this._scopeURL;
+			temp._nodeLength = 0;
+			temp._url = this._scopeURL;
 			Blackprint._modulesURL.push(temp);
 		}
 
@@ -205,13 +210,13 @@ Blackprint.registerNode = function(namespace, func){
 	namespace = namespace.split('/');
 
 	// Add with sf.Obj to trigger ScarletsFrame object binding update
-	if(isBrowser && sf.Obj && !(namespace[0] in Blackprint.nodes))
+	if(hasScarletsFrame && !(namespace[0] in Blackprint.nodes))
 		sf.Obj.set(Blackprint.nodes, namespace[0], {});
 
 	let isExist = deepProperty(Blackprint.nodes, namespace);
 	if(isExist){
 		if(this._scopeURL && isExist._scopeURL !== this._scopeURL){
-			throw `Conflicting nodes with similar name was found\nNamespace:${namespace.join('/')}\nFirst register from: ${isExist._scopeURL}\nTrying to register again from: ${this._scopeURL}`;
+			throw `Conflicting nodes with similar name was found\nNamespace: ${namespace.join('/')}\nFirst register from: ${isExist._scopeURL}\nTrying to register again from: ${this._scopeURL}`;
 		}
 
 		if(isExist._hidden)
@@ -220,8 +225,31 @@ Blackprint.registerNode = function(namespace, func){
 		if(isExist._disabled)
 			func._disabled = true;
 	}
+	else if(hasScarletsFrame && this._scopeURL !== void 0){
+		let ref = Blackprint.modulesURL[this._scopeURL];
+		if(ref._nodeLength === void 0)
+			ref._nodeLength = 0;
+		ref._nodeLength++;
 
-	deepProperty(Blackprint.nodes, namespace, func);
+		ref = Blackprint.nodes[namespace[0]];
+		if(ref._length === void 0){
+			Object.defineProperty(ref, '_length', {writable: true, value: 0});
+			Object.defineProperty(ref, '_visibleNode', {writable: true, value: 0});
+		}
+
+		ref._length++;
+		ref._visibleNode++;
+	}
+
+	func._scopeURL = this._scopeURL;
+	deepProperty(Blackprint.nodes, namespace, func, hasScarletsFrame && function(obj){
+		if(obj._length !== void 0)
+			obj._length++;
+		else{
+			Object.defineProperty(obj, '_length', {writable: true, value: 1});
+			Object.defineProperty(obj, '_visibleNode', {writable: true, value: 1});
+		}
+	});
 }
 
 Blackprint.interface = {default: NoOperation};
