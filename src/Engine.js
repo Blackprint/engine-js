@@ -15,8 +15,22 @@ Blackprint.Engine = class Engine{
 		if(json.constructor !== Object)
 			json = JSON.parse(json);
 
-		var version = json.version;
-		delete json.version;
+		var metaData = json._;
+		delete json._;
+
+		if(metaData !== void 0){
+			if(metaData.env !== void 0){
+				let temp = Blackprint.Environment;
+				Object.assign(temp.map, metaData.env);
+				temp.list = Object.entries(metaData.env).map(([k, v]) => ({key: k, val: v}));
+			}
+
+			if(metaData.moduleJS !== void 0){
+				Blackprint.loadModuleFromURL(metaData.moduleJS, {
+					loadBrowserInterface: false
+				});
+			}
+		}
 
 		var inserted = this.ifaceList;
 		var handlers = [];
