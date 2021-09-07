@@ -15,20 +15,27 @@ Blackprint.Engine = class Engine{
 		if(json.constructor !== Object)
 			json = JSON.parse(json);
 
-		var metaData = json._;
+		var metadata = json._;
 		delete json._;
 
-		if(metaData !== void 0){
-			if(metaData.env !== void 0){
+		if(metadata !== void 0){
+			if(metadata.env !== void 0){
 				let temp = Blackprint.Environment;
-				Object.assign(temp.map, metaData.env);
-				temp.list = Object.entries(metaData.env).map(([k, v]) => ({key: k, val: v}));
+				Object.assign(temp.map, metadata.env);
+				temp.list = Object.entries(temp.map).map(([k, v]) => ({key: k, value: v}));
 			}
 
-			if(metaData.moduleJS !== void 0){
-				Blackprint.loadModuleFromURL(metaData.moduleJS, {
+			if(metadata.moduleJS !== void 0){
+				// wait for .min.mjs
+				await Blackprint.loadModuleFromURL(metadata.moduleJS, {
 					loadBrowserInterface: false
 				});
+
+				// wait for .sf.mjs and .sf.css if being loaded from code above
+				if(window.sf && window.sf.loader){
+					await sf.loader.task;
+					await Promise.resolve();
+				}
 			}
 		}
 
