@@ -199,40 +199,17 @@ Blackprint.Engine = class Engine{
 	}
 }
 
-// ToDo: Migrate some code to Blackprint Sketch
-if(isBrowser){
-	Blackprint.modulesURL = {};
-	Blackprint._modulesURL = [];
-}
+// For storing registered nodes
+Blackprint.nodes = {};
 
+// This function will be replaced when using Blackprint Sketch
+//
 // Register node handler
 // Callback function will get node and iface
 // - node = Blackprint binding
 // - iface = ScarletsFrame binding <~> element
-Blackprint.nodes = {};
 Blackprint.registerNode = function(namespace, func){
-	let hasScarletsFrame = isBrowser && sf.Obj;
-
-	// ToDo: Migrate some code to Blackprint Sketch
-	if(hasScarletsFrame && this._scopeURL !== void 0){
-		let temp = Blackprint.modulesURL[this._scopeURL];
-
-		if(temp === void 0){
-			Blackprint.modulesURL[this._scopeURL] = {};
-			temp = Blackprint.modulesURL[this._scopeURL];
-			temp._nodeLength = 0;
-			temp._url = this._scopeURL;
-			Blackprint._modulesURL.push(temp);
-		}
-
-		temp[namespace] = true;
-	}
-
 	namespace = namespace.split('/');
-
-	// Add with sf.Obj to trigger ScarletsFrame object binding update
-	if(hasScarletsFrame && !(namespace[0] in Blackprint.nodes))
-		sf.Obj.set(Blackprint.nodes, namespace[0], {});
 
 	let isExist = deepProperty(Blackprint.nodes, namespace);
 	if(isExist){
@@ -246,31 +223,9 @@ Blackprint.registerNode = function(namespace, func){
 		if(isExist._disabled)
 			func._disabled = true;
 	}
-	else if(hasScarletsFrame && this._scopeURL !== void 0){
-		let ref = Blackprint.modulesURL[this._scopeURL];
-		if(ref._nodeLength === void 0)
-			ref._nodeLength = 0;
-		ref._nodeLength++;
-
-		ref = Blackprint.nodes[namespace[0]];
-		if(ref._length === void 0){
-			Object.defineProperty(ref, '_length', {writable: true, value: 0});
-			Object.defineProperty(ref, '_visibleNode', {writable: true, value: 0});
-		}
-
-		ref._length++;
-		ref._visibleNode++;
-	}
 
 	func._scopeURL = this._scopeURL;
-	deepProperty(Blackprint.nodes, namespace, func, hasScarletsFrame && function(obj){
-		if(obj._length !== void 0)
-			obj._length++;
-		else{
-			Object.defineProperty(obj, '_length', {writable: true, value: 1});
-			Object.defineProperty(obj, '_visibleNode', {writable: true, value: 1});
-		}
-	});
+	deepProperty(Blackprint.nodes, namespace, func);
 }
 
 Blackprint.interface = {default: NoOperation};
