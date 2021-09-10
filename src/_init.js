@@ -16,10 +16,10 @@ if(exports.Blackprint === void 0){
 	else exports.Blackprint = Blackprint;
 }
 
-Blackprint.Addons = function(name){
-	if(!(name in this.Addons))
-		return this.Addons[name] = {};
-	return this.Addons[name];
+Blackprint.ModuleContext = function(name){
+	if(!(name in this.ModuleContext))
+		return this.ModuleContext[name] = {};
+	return this.ModuleContext[name];
 };
 
 // This function will be replaced when using browser and have loaded Blackprint Sketch
