@@ -229,13 +229,16 @@ Blackprint.registerNode = function(namespace, func){
 }
 
 Blackprint.interface = {default: NoOperation};
-Blackprint.registerInterface = function(nodeType, options, func){
+Blackprint.registerInterface = function(templatePath, options, func){
+	if(templatePath.slice(0, 5) !== 'BPIC/')
+		throw new Error("The first parameter of 'registerInterface' must be started with BPIC to avoid name conflict. Please name the interface similar with 'templatePrefix' for your module that you have set on 'blackprint.config.js'.");
+
 	if(func === void 0)
 		func = options;
 	else if(options.extend !== void 0)
 		func.extend = options.extend;
 
-	Blackprint.interface[nodeType] = func;
+	Blackprint.interface[templatePath] = func;
 }
 
 var Engine = Blackprint.Engine;
