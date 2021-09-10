@@ -4,7 +4,7 @@
 
 // For Node
 // var Blackprint = require('@blackprint/engine');
-var Blackprint = require('../dist/engine.js');
+var Blackprint = require('../dist/engine.min.js');
 
 // These comment can be collapsed depend on your IDE
 

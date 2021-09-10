@@ -15,7 +15,7 @@
   "main": "dist/engine.js",
   "module": "dist/engine.es6.js",
   "exports": {
-    "default": "./dist/engine.js",
+    "default": "./dist/engine.min.js",
     "deno": "./dist/engine.es6.js"
   },
   "keywords": [
