@@ -6,8 +6,11 @@ Blackprint.Environment = {
 	map: {},
 
 	import(arr){
-		let temp = new Set();
 		var map = this.map;
+		if(arr.constructor !== Array)
+			return this.map = Object.assign(arr, map);
+
+		let temp = new Set();
 
 		// Reassign the value to the map
 		for (var i = 0; i < arr.length; i++) {
