@@ -46,15 +46,15 @@ Blackprint.Engine.Node = class Node extends Blackprint.Engine.CustomEvent{
 				var temp = Object.getOwnPropertyDescriptors(bind);
 				Object.defineProperties(target, temp);
 
-				for(let key in temp){
-					var val = temp[key].value;
+				for(var key in temp){
+					let val = temp[key].value; // don't have getter/setter property?
 					if(!val || val.constructor !== Object)
-						continue;
+						continue; // If also not an object
 
 					bindingFunction(val, val);
 					Object.defineProperty(target, key, {
-						get:()=>val,
-						set:(v)=>Object.assign(val, v)
+						get:()=> val,
+						set:v=> Object.assign(val, v)
 					});
 				}
 			});
