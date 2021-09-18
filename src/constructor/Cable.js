@@ -1,15 +1,15 @@
 class Cable{
-	visualizeFlow(){}
-
-	// If false then we assume it's haven't been connected
-	await = 0;
-	connected = false;
-
 	constructor(owner, target){
 		this.type = owner.type;
 		this.owner = owner;
 		this.target = target;
+
+		// If false then we assume it's haven't been connected
+		this.await = 0;
+		this.connected = false;
 	}
+
+	visualizeFlow(){}
 
 	activation(enable){
 		if(enable === void 0){ // Async mode

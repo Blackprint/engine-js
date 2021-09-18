@@ -1,7 +1,9 @@
 Blackprint.Engine = class Engine{
-	iface = {};
-	ifaceList = []; // ToDo: Improve
-	settings = {};
+	constructor(){
+		this.iface = {}; // { id => object }
+		this.ifaceList = []; // ToDo: Improve
+		this.settings = {};
+	}
 
 	clearNodes(){
 		this.iface = {};
