@@ -7,6 +7,9 @@ var Blackprint = window.Blackprint || {
 	}
 };
 
+if(Blackprint._utils === void 0)
+	Blackprint._utils = {};
+
 let isBrowser = window.HTMLVideoElement !== void 0;
 if(exports.Blackprint === void 0){
 	if(!isBrowser) // as Node.js/Deno module
