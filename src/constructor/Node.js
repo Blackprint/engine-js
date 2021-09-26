@@ -1,3 +1,4 @@
+let _reuseNode;
 Blackprint.Engine.Node = class Node extends Blackprint.Engine.CustomEvent{
 	static prepare(node, iface){
 		// Type extract for port data type
@@ -34,10 +35,17 @@ Blackprint.Engine.Node = class Node extends Blackprint.Engine.CustomEvent{
 	}
 
 	static interface(interFunc, node){
+		if(isClass(interFunc)){
+			_reuseNode = node;
+			new interFunc();
+			Object.setPrototypeOf(node, interFunc.prototype);
+			return;
+		}
+
 		// Check for options
 		if(interFunc.extend !== void 0){
 			Object.setPrototypeOf(node, interFunc.extend.prototype);
-			interFunc.extend.construct && interFunc.extend.construct.call(node);
+			interFunc.extend.$constructor && interFunc.extend.$constructor.call(node);
 		}
 
 		// function argument = 2
@@ -60,6 +68,16 @@ Blackprint.Engine.Node = class Node extends Blackprint.Engine.CustomEvent{
 			});
 
 		interFunc(node);
+	}
+
+	constructor(){
+		if(_reuseNode !== void 0){
+			let temp = _reuseNode;
+			_reuseNode = void 0;
+			return temp;
+		}
+
+		super();
 	}
 
 	newPort(portName, type, def, which, node){

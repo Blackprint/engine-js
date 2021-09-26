@@ -230,6 +230,7 @@ Blackprint.registerNode = function(namespace, func){
 	deepProperty(Blackprint.nodes, namespace, func);
 }
 
+let _classExtendError = ".registerInterface: Class must be instance of Blackprint.Engine.Node";
 Blackprint.interface = {default: NoOperation};
 Blackprint.registerInterface = function(templatePath, options, func){
 	if(templatePath.slice(0, 5) !== 'BPIC/')
@@ -237,8 +238,15 @@ Blackprint.registerInterface = function(templatePath, options, func){
 
 	if(func === void 0)
 		func = options;
-	else if(options.extend !== void 0)
+	else if(options.extend !== void 0){
+		if(!(func.extend.prototype instanceof Blackprint.Engine.Node))
+			throw new Error(_classExtendError);
+
 		func.extend = options.extend;
+	}
+
+	if(isClass(func) && !(func.prototype instanceof Blackprint.Engine.Node))
+		throw new Error(_classExtendError);
 
 	Blackprint.interface[templatePath] = func;
 }
