@@ -26,9 +26,7 @@ Blackprint.ModuleContext = function(name){
 };
 
 // This function will be replaced when using browser and have loaded Blackprint Sketch
-Blackprint.LoadScope = function(options){
-	return Blackprint;
-}
+Blackprint.LoadScope = options=> Blackprint;
 
 Blackprint.loadBrowserInterface = true;
 Blackprint.loadModuleFromURL = async function(url, options){
