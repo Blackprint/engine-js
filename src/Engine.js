@@ -148,26 +148,19 @@ Blackprint.Engine = class Engine{
 		if(func === void 0)
 			return console.error('Node handler for', namespace, "was not found, maybe .registerNode() haven't being called?") && void 0;
 
-		// Processing scope is different with iface scope
-		var node = {}, iface = {
-			interface:'default',
-			title:'No Title',
-			namespace,
-			importing:true,
-			env: Blackprint.Environment.map
-		};
+		// Call the registered func (from this.registerNode)
+		var node;
+		if(isClass(func))
+			node = new func(this);
+		else func(node = new Blackprint.Node(this));
+
+		// Obtain iface from the node
+		let iface = node.iface;
+		if(iface === void 0)
+			throw new Error(namespace+"> 'node.iface' was not found, do you forget to call 'node.setInterface()'?");
 
 		iface.node = node;
-		Object.setPrototypeOf(iface, Engine.Node.prototype);
-
-		// Call the registered func (from this.registerNode)
-		func(node, iface);
-
-		if(Blackprint.interface[iface.interface] === void 0)
-			return console.error('Node interface for', iface.interface, "was not found, maybe .registerInterface() haven't being called?") && void 0;
-
-		// Initialize for interface
-		Engine.Node.interface(Blackprint.interface[iface.interface], iface);
+		iface.namespace = namespace;
 
 		var savedData = options.data;
 		delete options.data;
@@ -183,7 +176,7 @@ Blackprint.Engine = class Engine{
 			this.iface[iface.id] = iface;
 
 		// Create the linker between the node and the iface
-		Engine.Node.prepare(node, iface);
+		Blackprint.Interface.prepare(node, iface);
 
 		if(iface.i !== void 0)
 			this.ifaceList[iface.i] = iface;
@@ -204,6 +197,7 @@ Blackprint.Engine = class Engine{
 // For storing registered nodes
 Blackprint.nodes = {};
 
+let _classNodeError = ".registerNode: Class must be instance of Blackprint.Node";
 // This function will be replaced when using Blackprint Sketch
 //
 // Register node handler
@@ -211,6 +205,9 @@ Blackprint.nodes = {};
 // - node = Blackprint binding
 // - iface = ScarletsFrame binding <~> element
 Blackprint.registerNode = function(namespace, func){
+	if(isClass(func) && !(func.prototype instanceof Blackprint.Node))
+		throw new Error(_classNodeError);
+
 	namespace = namespace.split('/');
 
 	let isExist = deepProperty(Blackprint.nodes, namespace);
@@ -230,8 +227,8 @@ Blackprint.registerNode = function(namespace, func){
 	deepProperty(Blackprint.nodes, namespace, func);
 }
 
-let _classExtendError = ".registerInterface: Class must be instance of Blackprint.Engine.Node";
-Blackprint.interface = {default: NoOperation};
+let _classIfaceError = ".registerInterface: Class must be instance of Blackprint.Interface";
+Blackprint._iface = {'BP/default': NoOperation};
 Blackprint.registerInterface = function(templatePath, options, func){
 	if(templatePath.slice(0, 5) !== 'BPIC/')
 		throw new Error("The first parameter of 'registerInterface' must be started with BPIC to avoid name conflict. Please name the interface similar with 'templatePrefix' for your module that you have set on 'blackprint.config.js'.");
@@ -239,16 +236,16 @@ Blackprint.registerInterface = function(templatePath, options, func){
 	if(func === void 0)
 		func = options;
 	else if(options.extend !== void 0){
-		if(!(func.extend.prototype instanceof Blackprint.Engine.Node))
-			throw new Error(_classExtendError);
+		if(!(options.extend.prototype instanceof Blackprint.Interface))
+			throw new Error(_classIfaceError);
 
-		func.extend = options.extend;
+		func._extend = options.extend;
 	}
 
-	if(isClass(func) && !(func.prototype instanceof Blackprint.Engine.Node))
-		throw new Error(_classExtendError);
+	if(isClass(func) && !(func.prototype instanceof Blackprint.Interface))
+		throw new Error(_classIfaceError);
 
-	Blackprint.interface[templatePath] = func;
+	Blackprint._iface[templatePath] = func;
 }
 
 var Engine = Blackprint.Engine;
