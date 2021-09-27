@@ -1,5 +1,5 @@
 // For Deno
-// import Blackprint from 'https://cdn.skypack.dev/@blackprint/engine@0.1.0';
+// import Blackprint from 'https://cdn.skypack.dev/@blackprint/engine@0.3.0';
 // import Blackprint from '../dist/engine.es6.js';
 
 // For Node
@@ -9,10 +9,11 @@ var Blackprint = require('../dist/engine.min.js');
 // These comment can be collapsed depend on your IDE
 
 // === Register Node Interface ===
-	// When creating your own interface please use specific interface naming
-	// 'LibraryName/FeatureName/NodeName'
+	// When creating your own interface please use specific interface naming if possible
+	// 'BPIC/LibraryName/FeatureName/NodeName'
+
 	// Example below is using 'i-' to make it easier to understand
-	Blackprint.registerInterface('i-button', function(iface){
+	Blackprint.registerInterface('BPIC/i-button', function(iface){
 		// Will be used for 'Example/Button/Simple' node
 		iface.clicked = function(ev){
 			console.log("Engine: 'Trigger' button clicked, going to run the handler");
@@ -20,7 +21,8 @@ var Blackprint = require('../dist/engine.min.js');
 		}
 	});
 
-	Blackprint.registerInterface('i-input', function(iface, bind){
+	// You can use function and use 'bind' to simplify your code
+	Blackprint.registerInterface('BPIC/i-input', function(iface, bind){
 		var theValue = '';
 		bind({
 			data:{
@@ -37,17 +39,15 @@ var Blackprint = require('../dist/engine.min.js');
 		});
 	});
 
-	Blackprint.registerInterface('i-logger', function(iface, bind){
-		var log = '...';
-		bind({
-			get log(){
-				return log;
-			},
-			set log(val){
-				log = val;
-				console.log("Logger:", val);
-			}
-		});
+	// You can use class and use getter/setter to improve performance and memory efficiency
+	Blackprint.registerInterface('BPIC/i-logger', class extends Blackprint.Interface {
+		get log(){
+			return this._log;
+		}
+		set log(val){
+			this._log = val;
+			console.log("Logger:", val);
+		}
 	});
 
 // Mask the console color, to separate the console.log call from Register Node Handler
@@ -59,9 +59,9 @@ var Blackprint = require('../dist/engine.min.js');
 // === Register Node Handler ===
 // Exact copy of register-handler.js from the browser version
 // https://github.com/Blackprint/blackprint.github.io/blob/master/src/js/register-handler.js
-	Blackprint.registerNode('Example/Math/Multiply', function(node, iface){
+	Blackprint.registerNode('Example/Math/Multiply', function(node){
+		let iface = node.setInterface(); // Let's use default node interface
 		iface.title = "Multiply";
-		// iface.interface = undefined; // Let's use default node interface
 
 		// Handle all output port here
 		node.output = {
@@ -104,11 +104,10 @@ var Blackprint = require('../dist/engine.min.js');
 		}
 	});
 
-	Blackprint.registerNode('Example/Math/Random', function(node, iface){
+	Blackprint.registerNode('Example/Math/Random', function(node){
+		let iface = node.setInterface(); // Let's use default node interface
 		iface.title = "Random";
 		iface.description = "Number (0-100)";
-
-		// iface.interface = undefined; // Let's use default node interface
 
 		node.output = {
 			Out:Number
@@ -136,12 +135,10 @@ var Blackprint = require('../dist/engine.min.js');
 		}
 	});
 
-	Blackprint.registerNode('Example/Display/Logger', function(node, iface){
+	Blackprint.registerNode('Example/Display/Logger', function(node){
+		let iface = node.setInterface('BPIC/i-logger');
 		iface.title = "Logger";
 		iface.description = 'Print anything into text';
-
-		// Let's use ../nodes/Logger.js
-		iface.interface = 'i-logger';
 
 		node.input = {
 			Any: Blackprint.PortArrayOf(null) // Any data type, and can be used for many cable
@@ -177,12 +174,10 @@ var Blackprint = require('../dist/engine.min.js');
 		}
 	});
 
-	Blackprint.registerNode('Example/Button/Simple', function(node, iface){
+	Blackprint.registerNode('Example/Button/Simple', function(node){
+		let iface = node.setInterface('BPIC/i-button');
 		// node = under ScarletsFrame element control
 		iface.title = "Button";
-
-		// Let's use ../Nodes/Button.js
-		iface.interface = 'i-button';
 
 		// node = under Blackprint node flow control
 		node.output = {
@@ -196,12 +191,10 @@ var Blackprint = require('../dist/engine.min.js');
 		}
 	});
 
-	Blackprint.registerNode('Example/Input/Simple', function(node, iface){
+	Blackprint.registerNode('Example/Input/Simple', function(node){
+		let iface = node.setInterface('BPIC/i-input');
 		// iface = under ScarletsFrame element control
 		iface.title = "Input";
-
-		// Let's use ../nodes/input.js
-		iface.interface = 'i-input';
 
 		// node = under Blackprint node flow control
 		node.output = {
