@@ -68,7 +68,14 @@ function ObjectLinker(obj, key, val){
 }
 
 const isClass = Blackprint._utils.isClass = (function(){
-  const classDefaultProp = {name:true, length:true, prototype:true, arguments:true, caller:true};
+  const classDefaultProp = {
+  	name:true,
+  	length:true,
+  	prototype:true,
+  	arguments:true,
+  	caller:true,
+  	_scopeURL:true, // Private data when using Blackprint modules
+  };
 
   return function(func){
     // Class constructor is also a function
