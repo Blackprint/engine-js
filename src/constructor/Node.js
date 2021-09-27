@@ -55,6 +55,18 @@ Blackprint.Node = class Node extends Blackprint.Engine.CustomEvent {
 			}
 		}
 
+		if(iface.data !== void 0){
+			let desc = Object.getOwnPropertyDescriptor(iface, 'data');
+			if(desc.set === void 0){
+				let data = iface.data;
+				Object.defineProperty(iface, 'data', {
+					configurable: false,
+					get:()=> data,
+					set:v=> Object.assign(data, v),
+				});
+			}
+		}
+
 		iface.interface = path;
 		return this.iface = iface;
 	}
