@@ -12,7 +12,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		// this.value;
 		this.default = def;
 
-		// this.feature == PortListener | PortArrayOf | PortAsync
+		// this.feature == BP_Port.Listener | BP_Port.ArrayOf | BP_Port.Async
 	}
 
 	disconnectAll(){
@@ -65,7 +65,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 						if(target === void 0 || cable.connected === false){
 							port.iface._requesting = void 0;
-							if(port.feature === Blackprint.PortArrayOf)
+							if(port.feature === BP_Port.ArrayOf)
 								return [];
 
 							// console.log(34, cable);
@@ -79,7 +79,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 						}
 
 						port.iface._requesting = void 0;
-						if(port.feature === Blackprint.PortArrayOf)
+						if(port.feature === BP_Port.ArrayOf)
 							return [target.value];
 
 						return target.value || target.default;

@@ -43,7 +43,7 @@ class PortLink{
 			def = null;
 		}
 		else{
-			if(val.portFeature === Blackprint.PortArrayOf){
+			if(val.portFeature === BP_Port.ArrayOf){
 				haveFeature = val.portFeature;
 				type = val.portType;
 
@@ -53,17 +53,17 @@ class PortLink{
 				}
 				else def = [];
 			}
-			else if(val.portFeature === Blackprint.PortTrigger){
+			else if(val.portFeature === BP_Port.Trigger){
 				type = Function;
 				def = val.default;
 			}
-			else if(val.portFeature === Blackprint.PortDefault){
+			else if(val.portFeature === BP_Port.Default){
 				type = val.portType;
 				def = val.default;
 			}
 			else{
 				if(val.constructor === Array){
-					haveFeature = Blackprint.PortUnion;
+					haveFeature = BP_Port.Union;
 					val.name = 'Union';
 					type = val;
 					def = [];
@@ -84,7 +84,7 @@ class PortLink{
 
 		if(haveFeature){
 			linkedPort.feature = haveFeature;
-			if(haveFeature === Blackprint.PortArrayOf)
+			if(haveFeature === BP_Port.ArrayOf)
 				linkedPort.classAdd = ' Array';
 			linkedPort._call = val;
 		}
