@@ -105,6 +105,9 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 					}
 
 					port.iface._requesting = void 0;
+					if(port.feature !== BP_Port.ArrayOf)
+						return data[0];
+
 					return data;
 				}
 
