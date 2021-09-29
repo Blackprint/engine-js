@@ -70,12 +70,12 @@ var Blackprint = require('../dist/engine.min.js');
 
 		// Handle all input port here
 		var input = node.input = {
-			Exec: Blackprint.PortTrigger(function(){
+			Exec: Blackprint.Port.Trigger(function(){
 				node.output.Result = multiply();
 				console.log("Result has been set:", node.output.Result);
 			}),
 			A: Number,
-			B: Blackprint.PortValidator(Number, function(val){
+			B: Blackprint.Port.Validator(Number, function(val){
 				// Executed when input.B is being obtained
 				// And the output from other node is being assigned
 				// as current port value in this node
@@ -115,7 +115,7 @@ var Blackprint = require('../dist/engine.min.js');
 
 		var executed = false;
 		node.input = {
-			'Re-seed':Blackprint.PortTrigger(function(){
+			'Re-seed':Blackprint.Port.Trigger(function(){
 				executed = true;
 				node.output.Out = Math.round(Math.random()*100);
 			})
@@ -141,7 +141,7 @@ var Blackprint = require('../dist/engine.min.js');
 		iface.description = 'Print anything into text';
 
 		node.input = {
-			Any: Blackprint.PortArrayOf(null) // Any data type, and can be used for many cable
+			Any: Blackprint.Port.ArrayOf(null) // Any data type, and can be used for many cable
 		};
 
 		function refreshLogger(val){
