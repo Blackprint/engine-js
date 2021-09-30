@@ -19,14 +19,24 @@ if(exports.Blackprint === void 0){
 	else exports.Blackprint = Blackprint;
 }
 
-Blackprint.ModuleContext = function(name){
-	if(!(name in this.ModuleContext))
-		return this.ModuleContext[name] = {};
-	return this.ModuleContext[name];
+Blackprint.classMerge = function(main, ...sources){
+	let temp = {};
+	for (var i = 0; i < sources.length; i++)
+		Object.assign(temp, Object.getOwnPropertyDescriptors(sources[i].prototype));
+
+	delete temp.constructor;
+	delete temp.prototype;
+	Object.defineProperties(main.prototype, temp);
+}
+
+Blackprint.getContext = function(name){
+	if(!(name in this.getContext))
+		return this.getContext[name] = {};
+	return this.getContext[name];
 };
 
 // This function will be replaced when using browser and have loaded Blackprint Sketch
-Blackprint.LoadScope = options=> Blackprint;
+Blackprint.loadScope = options=> Blackprint;
 
 Blackprint.loadBrowserInterface = true;
 Blackprint.loadModuleFromURL = async function(url, options){
