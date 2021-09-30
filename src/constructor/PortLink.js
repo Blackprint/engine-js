@@ -61,17 +61,14 @@ class PortLink{
 				type = val.portType;
 				def = val.default;
 			}
+			else if(val.portFeature === BP_Port.Union){
+				haveFeature = BP_Port.Union;
+				type = val.portType;
+				def = [];
+			}
 			else{
-				if(val.constructor === Array){
-					haveFeature = BP_Port.Union;
-					val.name = 'Union';
-					type = val;
-					def = [];
-				}
-				else{
-					type = val.constructor;
-					def = val;
-				}
+				type = val.constructor;
+				def = val;
 			}
 		}
 
