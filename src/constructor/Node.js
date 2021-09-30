@@ -60,7 +60,8 @@ Blackprint.Node = class Node extends Blackprint.Engine.CustomEvent {
 			if(desc.set === void 0){
 				let data = iface.data;
 				Object.defineProperty(iface, 'data', {
-					configurable: false,
+					enumerable: true,
+					configurable: true,
 					get:()=> data,
 					set:v=> Object.assign(data, v),
 				});
