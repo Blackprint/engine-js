@@ -19,19 +19,9 @@ if(exports.Blackprint === void 0){
 	else exports.Blackprint = Blackprint;
 }
 
-Blackprint.classMerge = function(main, ...sources){
-	let temp = {};
-	for (var i = 0; i < sources.length; i++)
-		Object.assign(temp, Object.getOwnPropertyDescriptors(sources[i].prototype));
-
-	delete temp.constructor;
-	delete temp.prototype;
-	Object.defineProperties(main.prototype, temp);
-}
-
 Blackprint.getContext = function(name){
 	if(!(name in this.getContext))
-		return this.getContext[name] = {};
+		return this.getContext[name] = {IFace:{}};
 	return this.getContext[name];
 };
 
