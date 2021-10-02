@@ -2,10 +2,10 @@
 // CreateNode = Blackprint.Node then Blackprint.Interface
 Blackprint.Node = class Node extends Blackprint.Engine.CustomEvent {
 	constructor(instance){
-		super();
 		if(instance === void 0)
 			throw new Error("First parameter was not found, did you forget 'super(instance)' when extending Blackprint.Node?");
 
+		super();
 		this._instance = instance;
 		this._scope = instance.scope; // Only in Blackprint.Sketch
 	}
@@ -18,7 +18,7 @@ Blackprint.Node = class Node extends Blackprint.Engine.CustomEvent {
 		// Get the requested iface after initialize the node
 		let ifaceFunc = (isSketch ? Blackprint.Sketch._iface : Blackprint._iface)[path];
 		if(ifaceFunc === void 0)
-			throw new Error('Node interface for', path, "was not found, maybe .registerInterface() haven't being called?");
+			throw new Error('Node interface for '+path+" was not found, maybe .registerInterface() haven't being called?");
 
 		// Initialize for interface
 		let iface;
@@ -28,7 +28,7 @@ Blackprint.Node = class Node extends Blackprint.Engine.CustomEvent {
 			// Check for options
 			if(ifaceFunc._extend !== void 0)
 				iface = new ifaceFunc._extend(this);
-			else iface = new (isSketch ? Blackprint.Sketch.Interface: Blackprint.Interface)(this);
+			else iface = new Blackprint.Interface(this);
 
 			// If it was for Sketch, it will being handled by framework on Blackprint/src/page.sf
 			if(!isSketch){
