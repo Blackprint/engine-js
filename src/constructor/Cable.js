@@ -5,7 +5,7 @@ class Cable{
 		this.target = target;
 
 		// If false then we assume it's haven't been connected
-		this.await = 0;
+		this.disabled = 0;
 		this.connected = false;
 	}
 
@@ -13,12 +13,12 @@ class Cable{
 
 	activation(enable){
 		if(enable === void 0){ // Async mode
-			this.await++;
+			this.disabled++;
 			return;
 		}
 
 		if(enable === true){
-			if(--this.await !== 0)
+			if(--this.disabled !== 0)
 				return;
 
 			this.triggerConnected();
@@ -40,7 +40,7 @@ class Cable{
 		this.owner._trigger('connecting', this.target, activation);
 		this.target._trigger('connecting', this.owner, activation);
 
-		if(this.await !== 0)
+		if(this.disabled !== 0)
 			return;
 
 		this.triggerConnected();

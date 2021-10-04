@@ -63,7 +63,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 						var cable = port.cables[0];
 						var target = cable.owner === port ? cable.target : cable.owner;
 
-						if(target === void 0 || cable.connected === false){
+						if(target === void 0 || cable.connected === false || cable.disabled){
 							port.iface._requesting = void 0;
 							if(port.feature === BP_Port.ArrayOf)
 								return [];
@@ -92,7 +92,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 						var cable = cables[i];
 						var target = cable.owner === port ? cable.target : cable.owner;
 
-						if(target === void 0 || cable.connected === false)
+						if(target === void 0 || cable.connected === false || cable.disabled)
 							continue;
 
 						// Request the data first
@@ -178,6 +178,18 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			if(Blackprint.settings.visualizeFlow)
 				cable.visualizeFlow();
 		}
+	}
+
+	disableCables(enable=false){
+		var cables = this.cables;
+		var i = 0;
+
+		if(enable.constructor === Number) for(; i < cables.length; i++)
+			cables[i].disabled += enable;
+		else if(enable) for(; i < cables.length; i++)
+			cables[i].disabled = 1;
+		else for(; i < cables.length; i++)
+			cables[i].disabled = 0;
 	}
 }
 
