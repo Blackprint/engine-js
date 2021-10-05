@@ -80,7 +80,8 @@ Blackprint.Environment = {
 		}
 
 		// Don't delete field that has getter/setter
-		if(Object.getOwnPropertyDescriptor(map, key).set !== void 0){
+		let desc = Object.getOwnPropertyDescriptor(map, key);
+		if(desc && desc.set !== void 0){
 			map[key] = void 0;
 			return;
 		}
