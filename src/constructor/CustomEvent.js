@@ -100,6 +100,9 @@ Blackprint.Engine.CustomEvent = class CustomEvent{
 			}
 		}
 
+		if(eventName !== '*' && this._event['*'] !== void 0)
+			return this._trigger('*', a,b,c,d,e);
+
 		return true;
 	}
 }
