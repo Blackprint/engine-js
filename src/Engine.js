@@ -207,6 +207,13 @@ Blackprint.registerNode = function(namespace, func){
 	if(isClass(func) && !(func.prototype instanceof Blackprint.Node))
 		throw new Error(_classNodeError);
 
+	// Return for Decorator
+	if(func === void 0){
+		return function(claz){
+			Blackprint.registerNode(namespace, claz);
+		}
+	}
+
 	namespace = namespace.split('/');
 
 	let isExist = deepProperty(Blackprint.nodes, namespace);
@@ -232,13 +239,22 @@ Blackprint.registerInterface = function(templatePath, options, func){
 	if(templatePath.slice(0, 5) !== 'BPIC/')
 		throw new Error("The first parameter of 'registerInterface' must be started with BPIC to avoid name conflict. Please name the interface similar with 'templatePrefix' for your module that you have set on 'blackprint.config.js'.");
 
-	if(func === void 0)
+	if(func === void 0){
 		func = options;
+		options = {};
+	}
 	else if(options.extend !== void 0){
 		if(!(options.extend.prototype instanceof Blackprint.Interface))
 			throw new Error(_classIfaceError);
 
 		func._extend = options.extend;
+	}
+
+	// Return for Decorator
+	if(func === void 0){
+		return function(claz){
+			Blackprint.registerInterface(templatePath, options, claz);
+		}
 	}
 
 	if(isClass(func) && !(func.prototype instanceof Blackprint.Interface))
