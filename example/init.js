@@ -98,8 +98,8 @@ var Blackprint = require('../dist/engine.min.js');
 
 		// Event listener can only be registered after handle init
 		node.init = function(){
-			iface.on('cable.connect', function(port1, port2){
-				console.log(`Cable connected from ${port1.iface.title} (${port1.name}) to ${port2.iface.title} (${port2.name})`);
+			iface.on('cable.connect', function({port, target}){
+				console.log(`Cable connected from ${port.iface.title} (${port.name}) to ${target.iface.title} (${target.name})`);
 			});
 		}
 	});
@@ -164,8 +164,8 @@ var Blackprint = require('../dist/engine.min.js');
 				refreshLogger(node.input.Any);
 			});
 
-			iface.input.Any.on('value', function(port){
-				console.log("I connected to", port.name, "port from", port.iface.title, "that have new value:", port.value);
+			iface.input.Any.on('value', function(target){
+				console.log("I connected to", target.name, "target from", target.iface.title, "that have new value:", target.value);
 
 				// Let's take all data from all connected nodes
 				// Instead showing new single data-> val
