@@ -31,12 +31,10 @@ class Cable{
 
 	connecting(){
 		var that = this;
-		function activation(arg){
-			that.activation(arg);
-		}
+		function activate(arg){ that.activation(arg) }
 
-		this.owner._trigger('connecting', this.target, activation);
-		this.target._trigger('connecting', this.owner, activation);
+		this.owner._trigger('connecting', {target: this.target, activate});
+		this.target._trigger('connecting', {target: this.owner, activate});
 
 		if(this.disabled)
 			return;
@@ -47,11 +45,19 @@ class Cable{
 	triggerConnected(){
 		this.connected = true;
 
-		this.target.iface._trigger('cable.connect', this.target, this.owner, this);
-		this.owner.iface._trigger('cable.connect', this.owner, this.target, this);
+		this.target.iface._trigger('cable.connect', {
+			cable: this,
+			port: this.target,
+			target: this.owner,
+		});
+		this.owner.iface._trigger('cable.connect', {
+			cable: this,
+			port: this.owner,
+			target: this.target,
+		});
 
-		this.target._trigger('connect', this.owner, this);
-		this.owner._trigger('connect', this.target, this);
+		this.owner._trigger('connect', {target: this.target, cable: this});
+		this.target._trigger('connect', {target: this.owner, cable: this});
 
 		var out, inp;
 		if(this.target.source === 'input'){
@@ -78,10 +84,14 @@ class Cable{
 				this.owner.cables.splice(i, 1);
 
 			if(this.connected){
-				this.owner.iface._trigger('cable.disconnect', this.owner, this.target);
 				this.owner._trigger('disconnect', this.target);
+				this.owner.iface._trigger('cable.disconnect', {
+					cable: this,
+					port: this.owner,
+					target: this.target
+				});
 			}
-			else this.owner.iface._trigger('cable.cancel', this.owner, this);
+			else this.owner.iface._trigger('cable.cancel', {port: this.owner, cable: this});
 		}
 
 		// Remove from connected target
@@ -90,8 +100,12 @@ class Cable{
 			if(i !== -1)
 				this.target.cables.splice(i, 1);
 
-			this.target.iface._trigger('cable.disconnect', this.target, this.owner);
 			this.target._trigger('disconnect', this.owner);
+			this.target.iface._trigger('cable.disconnect', {
+				cable: this,
+				port: this.target,
+				target: this.owner
+			});
 		}
 	}
 }
