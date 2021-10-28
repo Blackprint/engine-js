@@ -71,9 +71,12 @@ Blackprint.Engine.CustomEvent = class CustomEvent{
 	}
 
 	// Max args = 5
-	_trigger(eventName, a,b,c,d,e){
+	_trigger(eventName, obj){
 		if(this._event === void 0)
 			return false;
+
+		if(arguments.length > 2)
+			throw new Error("._trigger only accept 2 parameter");
 
 		var events = this._event[eventName];
 		if(events === void 0 || events.length === 0){
@@ -81,7 +84,7 @@ Blackprint.Engine.CustomEvent = class CustomEvent{
 
 			let hasFallback = events.$_fallback[eventName];
 			if(hasFallback){
-				hasFallback(a,b,c,d,e);
+				hasFallback(obj);
 
 				if(hasFallback.once)
 					delete events.$_fallback[eventName];
@@ -92,7 +95,7 @@ Blackprint.Engine.CustomEvent = class CustomEvent{
 
 		for (var i = 0; i < events.length; i++){
 			var ev = events[i];
-			ev.call(this, a,b,c,d,e);
+			ev.call(this, obj);
 
 			if(ev.once){
 				delete ev.once;
@@ -101,7 +104,7 @@ Blackprint.Engine.CustomEvent = class CustomEvent{
 		}
 
 		if(eventName !== '*' && this._event['*'] !== void 0)
-			return this._trigger('*', a,b,c,d,e);
+			return this._trigger('*', obj);
 
 		return true;
 	}
