@@ -4,10 +4,14 @@ Blackprint.Engine.CustomEvent = class CustomEvent{
 	on(eventName, func, options){
 		if(this._event === void 0){
 			Object.defineProperty(this, '_event', {
-				value:{
-					$_fallback: {}
-				}
+				value:{ $_fallback: {} }
 			});
+		}
+
+		if(func.constructor === Object){
+			let temp = options;
+			options = func;
+			func = temp;
 		}
 
 		if(eventName.includes(' ')){
@@ -23,20 +27,44 @@ Blackprint.Engine.CustomEvent = class CustomEvent{
 			return this;
 		}
 
-		if(this._event[eventName] === void 0)
-			this._event[eventName] = [];
+		let eventList = this._event[eventName];
+		if(eventList === void 0)
+			eventList = this._event[eventName] = [];
 
-		this._event[eventName].push(func);
+		if(options && options.slot !== void 0){
+			for (var i = 0; i < eventList.length; i++) {
+				if(eventList[i].slot === options.slot){
+					eventList.splice(i, 1);
+					break;
+				}
+			}
+
+			func.slot = options.slot;
+		}
+
+		eventList.push(func);
 		return this;
 	}
 
-	once(eventName, func){
+	once(eventName, func, options){
+		if(func.constructor === Object){
+			let temp = options;
+			options = func;
+			func = temp;
+		}
+
 		func.once = true;
 		this.on.apply(this, arguments);
 		return this;
 	}
 
 	off(eventName, func, options){
+		if(func.constructor === Object){
+			let temp = options;
+			options = func;
+			func = temp;
+		}
+
 		if(eventName.includes(' ')){
 			eventName = eventName.split(' ');
 			for (var i = 0; i < eventName.length; i++)
