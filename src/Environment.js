@@ -2,8 +2,8 @@
 // Environment map can be accessed with 'iface.env' on Sketch or Engine
 
 Blackprint.Environment = {
-	list: [],
-	map: {},
+	list: [], // This shouldn't being used
+	map: {}, // Use this instead
 
 	import(arr){
 		var map = this.map;
