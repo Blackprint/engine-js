@@ -98,7 +98,6 @@ Blackprint.Engine.CustomEvent = class CustomEvent{
 		return this;
 	}
 
-	// Max args = 5
 	_trigger(eventName, obj){
 		if(this._event === void 0)
 			return false;

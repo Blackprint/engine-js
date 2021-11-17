@@ -1,8 +1,8 @@
 class PortLink{
 	static construct(portLink, which, iface){
 		Object.defineProperties(portLink, {
-			_which:{value:which},
-			_iface:{value:iface},
+			_which:{value: which},
+			_iface:{value: iface},
 			_extracted:{writable:true, value:false},
 		});
 
@@ -18,6 +18,11 @@ class PortLink{
 	}
 
 	add(portName, val){
+		if(val == null){
+			console.error("Source: ", {constructor: Blackprint.nodes.Graphics.Sprite});
+			throw new Error(`${this._iface.namespace} (port: ${this._which}.${portName}): Port template couldn't be null/undefined`);
+		}
+
 		var nodeEls = this._iface[this._which];
 
 		// Determine type and add default value for each type
