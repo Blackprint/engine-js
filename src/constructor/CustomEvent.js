@@ -59,7 +59,7 @@ Blackprint.Engine.CustomEvent = class CustomEvent{
 	}
 
 	off(eventName, func, options){
-		if(func.constructor === Object){
+		if(func !== void 0 && func.constructor === Object){
 			let temp = options;
 			options = func;
 			func = temp;
