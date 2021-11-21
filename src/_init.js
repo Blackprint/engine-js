@@ -43,5 +43,5 @@ Blackprint.loadModuleFromURL = async function(url, options){
 	if(Blackprint.loadModuleFromURL.browser === void 0)
 		return await Promise.all(url.map(v=> import(v)));
 
-	return Blackprint.loadModuleFromURL.browser(url, options);
+	return await Blackprint.loadModuleFromURL.browser(url, options);
 };
