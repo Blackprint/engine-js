@@ -11,6 +11,8 @@ export function resolve(specifier, context, defaultResolve) {
 	// passed along to the later hooks below.
 	if(specifier.startsWith('https://'))
 		return { url: specifier };
+	else if(specifier.startsWith('http://localhost:') || specifier.startsWith('http://localhost/'))
+		return { url: specifier };
 	else if(parentURL && parentURL.startsWith('https://'))
 		return { url: new URL(specifier, parentURL).href };
 
