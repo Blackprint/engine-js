@@ -5,6 +5,10 @@ Blackprint.Environment = {
 	list: [], // This shouldn't being used
 	map: {}, // Use this instead
 
+	isBrowser: false,
+	isNodeJS: false,
+	isDeno: false,
+
 	import(arr){
 		var map = this.map;
 		if(arr.constructor !== Array)
@@ -89,3 +93,10 @@ Blackprint.Environment = {
 		delete map[key];
 	}
 };
+
+if(window.HTMLVideoElement !== void 0)
+	Blackprint.Environment.isBrowser = true;
+else if(typeof process !== "undefined" && process.execPath !== void 0)
+	Blackprint.Environment.isNodeJS = true;
+else
+	Blackprint.Environment.isDeno = true;
