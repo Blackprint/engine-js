@@ -13,7 +13,7 @@ if(Blackprint._utils === void 0)
 let isBrowser = window.HTMLVideoElement !== void 0;
 if(exports.Blackprint === void 0){
 	if(!isBrowser) // as Node.js/Deno module
-		Blackprint = Object.assign(module.exports, Blackprint);
+		window.Blackprint = Blackprint = Object.assign(module.exports, Blackprint);
 
 	// Wrap exports in 'Blackprint' object for Browser
 	else exports.Blackprint = Blackprint;
@@ -28,9 +28,58 @@ Blackprint.getContext = function(name){
 // This function will be replaced when using browser and have loaded Blackprint Sketch
 Blackprint.loadScope = options=> Blackprint;
 
+let allowModuleOrigin = null;
+Blackprint.allowModuleOrigin = function(list){
+	if(allowModuleOrigin !== null) return;
+
+	if(list.constructor === String && list !== '*')
+		allowModuleOrigin = [list];
+	else allowModuleOrigin = list;
+
+	if(allowModuleOrigin === false || allowModuleOrigin === '*')
+		return;
+
+	list = allowModuleOrigin;
+	for (var i = 0; i < list.length; i++) {
+		let temp = list[i];
+
+		if(temp.startsWith('localhost')){
+			list[i] = 'http://'+temp+'/';
+			list[i] = 'https://'+temp+'/';
+		}
+
+		if(temp.startsWith('https:'))
+			continue;
+
+		list[i] = 'https://'+temp+'/';
+	}
+}
+
 Blackprint.loadBrowserInterface = true;
 Blackprint.loadModuleFromURL = async function(url, options){
 	if(url.constructor !== Array) url = [url];
+
+	if(!allowModuleOrigin)
+		throw new Error("Load from URL is not allowed for any origin");
+
+	// Check allowed URL origin to avoid suspicious module load
+	if(allowModuleOrigin !== '*'){
+		let list = allowModuleOrigin;
+		for (var i = 0; i < url.length; i++) {
+			let check = url[i];
+			let found = false;
+
+			for (var a = 0; a < list.length; a++) {
+				if(check.startsWith(list[a])){
+					found = true;
+					break;
+				}
+			}
+
+			if(found === false)
+				throw new Error("Load from URL is not allowed for this origin: "+check);
+		}
+	}
 
 	// Do security check, block insecure URL
 	for (var i = 0; i < url.length; i++){
