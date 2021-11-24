@@ -1,10 +1,12 @@
 // For Deno
 // import Blackprint from 'https://cdn.skypack.dev/@blackprint/engine@0.3.0';
-// import Blackprint from '../dist/engine.es6.js';
 
 // For Node
-// var Blackprint = require('@blackprint/engine');
-var Blackprint = require('../dist/engine.min.js');
+var Blackprint = require('@blackprint/engine');
+
+// Run from your CLI
+// deno run init.js
+// node init.js
 
 // These comment can be collapsed depend on your IDE
 
@@ -21,22 +23,19 @@ var Blackprint = require('../dist/engine.min.js');
 		}
 	});
 
-	// You can use function and use 'bind' to simplify your code
-	Blackprint.registerInterface('BPIC/i-input', function(iface, bind){
+	Blackprint.registerInterface('BPIC/i-input', function(iface){
 		var theValue = '';
-		bind({
-			data:{
-				set value(val){
-					theValue = val;
+		iface.data = {
+			set value(val){
+				theValue = val;
 
-					if(iface.node.changed !== void 0)
-						iface.node.changed(val);
-				},
-				get value(){
-					return theValue;
-				}
+				if(iface.node.changed !== void 0)
+					iface.node.changed(val);
+			},
+			get value(){
+				return theValue;
 			}
-		});
+		};
 	});
 
 	// You can use class and use getter/setter to improve performance and memory efficiency
