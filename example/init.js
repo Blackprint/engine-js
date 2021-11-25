@@ -1,3 +1,6 @@
+// This is just an example, using self registration without URL module
+// Please use init.mjs instead of init.js
+
 // For Deno
 // import Blackprint from 'https://cdn.skypack.dev/@blackprint/engine@0.3.0';
 
