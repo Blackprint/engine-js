@@ -1,3 +1,33 @@
+# 0.3.0
+
+### Feature
+- Interfaces now can be accessed from `instance.iface[id]`
+- Add custom environment data
+- Load module from URL (default to disabled)
+
+### Breaking Changes
+This changes is supposed to improve efficiency, and reduce possible future breaking changes.
+
+- `.outputs, .inputs, .properties` field is changed into `.output, .input, .property` for `node` and `iface`
+- `outputs:[]` field is now changed to `output:[]` for JSON export
+- `Instance.importJSON()` now returning promise and need to be `await`-ed before using `.getNode` or `.getNodes`
+- `Blackprint.Engine.registerNode()` will now being merged and replaced with `Blackprint.registerNode()`
+- When using class for `Blackprint.registerNode` it must extends `Blackprint.Node`
+- When constructing Node, `node.interface = '...'` now must be changed to `node.setInterface('...')` before accessing the target interface
+- `Blackprint.Addons` was changed to `Blackprint.getContext`
+- `Blackprint.Node` was changed to `Blackprint.Interface`
+- For sketch (browser only): `Blackprint.registerInterface()` will be renamed to `Blackprint.Sketch.registerInterface()`
+- For non-sketch: `Blackprint.Engine.registerInterface()` will be renamed to `Blackprint.registerInterface()`
+- When using class for `Blackprint.registerInterface` or `Blackprint.Sketch.registerInterface`, the class must extends `Blackprint.Interface`
+- `BPAO` must be changed to `BPIC`
+- `Blackprint.PortArrayOf` now changed to `Blackprint.Port.ArrayOf`
+- `Blackprint.PortDefault` now changed to `Blackprint.Port.Default`
+- `Blackprint.PortSwitch` now changed to `Blackprint.Port.Switch`
+- `Blackprint.PortTrigger` now changed to `Blackprint.Port.Trigger`
+- `Blackprint.PortUnion` now changed to `Blackprint.Port.Union`
+- `Blackprint.PortValidator` now changed to `Blackprint.Port.Validator`
+- Events emitted from node/iface/sketch will now only have one object parameter, therefore `._trigger` will only accept `(eventName, ?object)` parameter.
+
 # 0.2.0
 
 ### Breaking Changes

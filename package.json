@@ -1,8 +1,8 @@
 {
   "name": "@blackprint/engine",
   "description": "Blackprint engine for JavaScript environment",
-  "version": "0.2.0",
-  "author": "ScarletsFiction",
+  "version": "0.3.0",
+  "author": "Blackprint",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -12,7 +12,7 @@
     "url": "https://github.com/Blackprint/engine-js/issues"
   },
   "homepage": "http://stefansarya.gitbook.io/blackprint",
-  "main": "dist/engine.js",
+  "main": "dist/engine.min.js",
   "module": "dist/engine.es6.js",
   "exports": {
     "default": "./dist/engine.min.js",
