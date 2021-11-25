@@ -1,7 +1,14 @@
 // Modified from https://nodejs.org/api/esm.html#esm_https_loader
 import https from 'https';
+import http from 'http';
 import readline from 'readline';
 import fs from 'fs';
+
+function isSecure(url){
+	if(url.startsWith('http://localhost:') || url.startsWith('http://localhost/'))
+		return true;
+	return false;
+}
 
 export function resolve(specifier, context, defaultResolve) {
 	const { parentURL = null } = context;
@@ -9,24 +16,13 @@ export function resolve(specifier, context, defaultResolve) {
 	// Normally Node.js would error on specifiers starting with 'https://', so
 	// this hook intercepts them and converts them into absolute URLs to be
 	// passed along to the later hooks below.
-	if(specifier.startsWith('https://'))
+	if(isSecure(specifier))
 		return { url: specifier };
-	else if(specifier.startsWith('http://localhost:') || specifier.startsWith('http://localhost/'))
-		return { url: specifier };
-	else if(parentURL && parentURL.startsWith('https://'))
+	else if(parentURL && isSecure(parentURL))
 		return { url: new URL(specifier, parentURL).href };
 
 	// Let Node.js handle all other specifiers.
 	return defaultResolve(specifier, context, defaultResolve);
-}
-
-export function getFormat(url, context, defaultGetFormat) {
-	// This loader assumes all network-provided JavaScript is ES module code.
-	if(url.startsWith('https://'))
-		return { format: 'module' };
-
-	// Let Node.js handle all other URLs.
-	return defaultGetFormat(url, context, defaultGetFormat);
 }
 
 function request(url, callback) {
@@ -34,7 +30,13 @@ function request(url, callback) {
 	readline.cursorTo(process.stdout, 0, null);
 	process.stdout.write(`[Downloading] ${url}\r`);
 
-	https.get(url, function(response){
+	let loader = https;
+	if(url.startsWith('http://')){
+		if(!isSecure(url)) throw new Error("URL must use https or localhost");
+		loader = http;
+	}
+
+	loader.get(url, function(response){
 		if(response.headers.location)
 			request(response.headers.location, callback);
 		else callback(response);
@@ -44,10 +46,11 @@ function request(url, callback) {
 	});
 }
 
-export function getSource(url, context, defaultGetSource) {
+export function load(url, context, defaultGetSource) {
 	// For JavaScript to be loaded over the network, we need to fetch and return it.
-	if (url.startsWith('https://')) {
-		let dir = url.slice(8).replace(/\\/g, '/').replace(/[*"|:?<>]/g, '-');
+	if (isSecure(url)) {
+		let dir = url.replace(/(https|http):\/\//, '')
+			.replace(/\\/g, '/').replace(/[*"|:?<>]/g, '-');
 
 		if(dir.includes('/../')){
 			console.error("/../ currently not allowed");
@@ -86,13 +89,13 @@ export function getSource(url, context, defaultGetSource) {
 								if(err)
 									console.log("Error writing cache for", url, 'with message:\n', err);
 
-								resolve({ source: data });
+								resolve({ format: 'module', source: data });
 							});
 						});
 					});
 				}
 
-				resolve({ source: data });
+				resolve({ format: 'module', source: data });
 			});
 		});
 	}
