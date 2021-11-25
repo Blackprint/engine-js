@@ -4,9 +4,12 @@
 - Interfaces now can be accessed from `instance.iface[id]`
 - Add custom environment data
 - Load module from URL (default to disabled)
+- Add support for using Decorator when registering node/interface
+- Add support for listening to all event with "*"
 
 ### Breaking Changes
-This changes is supposed to improve efficiency, and reduce possible future breaking changes.
+Because the implementation will be similar with [engine-php](https://github.com/Blackprint/engine-php) and [engine-go](https://github.com/Blackprint/engine-go).
+This changes is supposed to improve efficiency, and reduce possible future breaking changes.<br>
 
 - `.outputs, .inputs, .properties` field is changed into `.output, .input, .property` for `node` and `iface`
 - `outputs:[]` field is now changed to `output:[]` for JSON export
@@ -16,8 +19,8 @@ This changes is supposed to improve efficiency, and reduce possible future break
 - When constructing Node, `node.interface = '...'` now must be changed to `node.setInterface('...')` before accessing the target interface
 - `Blackprint.Addons` was changed to `Blackprint.getContext`
 - `Blackprint.Node` was changed to `Blackprint.Interface`
-- For sketch (browser only): `Blackprint.registerInterface()` will be renamed to `Blackprint.Sketch.registerInterface()`
-- For non-sketch: `Blackprint.Engine.registerInterface()` will be renamed to `Blackprint.registerInterface()`
+- For sketch (browser only): `Blackprint.registerInterface()` was renamed to `Blackprint.Sketch.registerInterface()`
+- For non-sketch: `Blackprint.Engine.registerInterface()` was renamed to `Blackprint.registerInterface()`
 - When using class for `Blackprint.registerInterface` or `Blackprint.Sketch.registerInterface`, the class must extends `Blackprint.Interface`
 - `BPAO` must be changed to `BPIC`
 - `Blackprint.PortArrayOf` now changed to `Blackprint.Port.ArrayOf`
