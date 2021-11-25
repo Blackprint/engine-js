@@ -5,7 +5,9 @@ import readline from 'readline';
 import fs from 'fs';
 
 function isSecure(url){
-	if(url.startsWith('http://localhost:') || url.startsWith('http://localhost/'))
+	if(url.startsWith('http://localhost:')
+		|| url.startsWith('http://localhost/')
+		|| url.startsWith('https://'))
 		return true;
 	return false;
 }
