@@ -12,12 +12,15 @@ if(Blackprint._utils === void 0)
 
 let isBrowser = window.HTMLVideoElement !== void 0;
 if(exports.Blackprint === void 0){
-	if(!isBrowser) // as Node.js/Deno module
-		window.Blackprint = Blackprint = Object.assign(module.exports, Blackprint);
+	if(window !== exports)
+		Object.assign(exports, Blackprint);
 
-	// Wrap exports in 'Blackprint' object for Browser
-	else exports.Blackprint = Blackprint;
+	if(window.Blackprint === void 0)
+		Blackprint = window.Blackprint = (window !== exports ? exports : Blackprint);
 }
+
+// Blackprint must be initialized once
+if(Blackprint.Engine !== void 0) return;
 
 Blackprint.getContext = function(name){
 	if(!(name in this.getContext))
