@@ -18,7 +18,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 	disconnectAll(){
 		var cables = this.cables;
 		for (var i = cables.length - 1; i >= 0; i--)
-			cables[i].destroy();
+			cables[i].disconnect();
 	}
 
 	// Set for the linked port (Handle for ScarletsFrame)
@@ -141,7 +141,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 				}
 
 				port.value = val;
-				port._trigger('value', port);
+				port._trigger('value', { target: port });
 				port.sync();
 			}
 		}
@@ -174,7 +174,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			if(target.iface._requesting === void 0 && target.iface.node.update)
 				target.iface.node.update(target, owner, cable);
 
-			target._trigger('value', this);
+			target._trigger('value', { target: this, cable });
 			if(Blackprint.settings.visualizeFlow)
 				cable.visualizeFlow();
 		}

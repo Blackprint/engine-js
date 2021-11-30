@@ -31,28 +31,8 @@ Blackprint.Node = class Node extends Blackprint.Engine.CustomEvent {
 			else iface = new Blackprint.Interface(this);
 
 			// If it was for Sketch, it will being handled by framework on Blackprint/src/page.sf
-			if(!isSketch){
-				// function argument = 2
-				if(ifaceFunc.length === 2){
-					ifaceFunc(iface, function bindingFunction(bind, target = iface){
-						var temp = Object.getOwnPropertyDescriptors(bind);
-						Object.defineProperties(target, temp);
-
-						for(var key in temp){
-							let val = temp[key].value; // don't have getter/setter property?
-							if(!val || val.constructor !== Object)
-								continue; // If also not an object
-
-							bindingFunction(val, val);
-							Object.defineProperty(target, key, {
-								get:()=> val,
-								set:v=> Object.assign(val, v)
-							});
-						}
-					});
-				}
-				else ifaceFunc(iface);
-			}
+			if(!isSketch)
+				ifaceFunc(iface);
 		}
 
 		if(iface.data !== void 0){
