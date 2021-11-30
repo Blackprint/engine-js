@@ -42,7 +42,7 @@ Blackprint.Engine = class Engine{
 		}
 
 		var inserted = this.ifaceList;
-		var handlers = [];
+		var handlers = []; // nodes
 
 		// Prepare all nodes depend on the namespace
 		// before we create cables for them
@@ -106,7 +106,7 @@ Blackprint.Engine = class Engine{
 			}
 		}
 
-		// Call handler init after creation processes was finished
+		// Call node init after creation processes was finished
 		for (var i = 0; i < handlers.length; i++){
 			let temp = handlers[i];
 			temp.init && temp.init();

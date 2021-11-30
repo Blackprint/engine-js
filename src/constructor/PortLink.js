@@ -18,11 +18,6 @@ class PortLink{
 	}
 
 	add(portName, val){
-		if(val == null){
-			console.error("Source: ", {constructor: Blackprint.nodes.Graphics.Sprite});
-			throw new Error(`${this._iface.namespace} (port: ${this._which}.${portName}): Port template couldn't be null/undefined`);
-		}
-
 		var nodeEls = this._iface[this._which];
 
 		// Determine type and add default value for each type
@@ -37,10 +32,6 @@ class PortLink{
 				def = false;
 			else if(type === String)
 				def = '';
-			else if(type === Array)
-				def = [];
-			else if(type === Object)
-				def = {};
 			else def = null;
 		}
 		else if(val === null){
@@ -69,12 +60,15 @@ class PortLink{
 			else if(val.portFeature === BP_Port.Union){
 				haveFeature = BP_Port.Union;
 				type = val.portType;
-				def = [];
+				def = val.default;
 			}
 			else{
 				type = val.constructor;
 				def = val;
 			}
+
+			// Default must be null (because it's defined but don't have data)
+			if(def === void 0) def = null;
 		}
 
 		var linkedPort = this._iface.newPort(portName, type, def, this._which, this._iface);
@@ -110,7 +104,7 @@ class PortLink{
 		// Destroy cable first
 		var cables = ref[portName].cables;
 		for (var i = 0; i < cables.length; i++)
-			cables[i].destroy();
+			cables[i].disconnect();
 
 		delete this[portName];
 
