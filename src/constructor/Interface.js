@@ -3,7 +3,7 @@ Blackprint.Interface = class Interface extends Blackprint.Engine.CustomEvent{
 		// Type extract for port data type
 		// Create reactiveness of node and iface's ports
 
-		iface.const = {};
+		node.const = iface.const = {};
 		if(node.output !== void 0){
 			Object.setPrototypeOf(node.output, Engine.PortLink.prototype);
 			Engine.PortLink.construct(node.output, 'output', iface);
