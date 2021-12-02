@@ -91,49 +91,50 @@ class Cable{
 
 	disconnect(which){ // which = port
 		let found = false;
+		let {owner, target} = this;
 
 		// Remove from cable owner
-		if(this.owner && (!which || this.owner === which)){
-			var i = this.owner.cables.indexOf(this);
+		if(owner && (!which || owner === which)){
+			var i = owner.cables.indexOf(this);
 			if(i !== -1)
-				this.owner.cables.splice(i, 1);
+				owner.cables.splice(i, 1);
 
 			if(this.connected){
 				let temp = {
 					cable: this,
-					port: this.owner,
-					target: this.target
+					port: owner,
+					target: target
 				};
 
-				this.owner._trigger('disconnect', temp);
-				this.owner.iface._trigger('cable.disconnect', temp);
+				owner._trigger('disconnect', temp);
+				owner.iface._trigger('cable.disconnect', temp);
 			}
-			else this.owner.iface._trigger('cable.cancel', {port: this.owner, cable: this});
+			else owner.iface._trigger('cable.cancel', {port: owner, cable: this});
 
-			if(this.owner === this.input) this.input = void 0;
-			if(this.owner === this.output) this.output = void 0;
+			if(owner === this.input) this.input = void 0;
+			if(owner === this.output) this.output = void 0;
 			this.owner = void 0;
 
 			found = true;
 		}
 
 		// Remove from connected target
-		if(this.target && this.connected && (!which || this.target === which)){
-			var i = this.target.cables.indexOf(this);
+		if(target && this.connected && (!which || target === which)){
+			var i = target.cables.indexOf(this);
 			if(i !== -1)
-				this.target.cables.splice(i, 1);
+				target.cables.splice(i, 1);
 
 			let temp = {
 				cable: this,
-				port: this.target,
-				target: this.owner
+				port: target,
+				target: owner
 			};
 
-			this.target._trigger('disconnect', temp);
-			this.target.iface._trigger('cable.disconnect', temp);
+			target._trigger('disconnect', temp);
+			target.iface._trigger('cable.disconnect', temp);
 
-			if(this.target === this.input) this.input = void 0;
-			if(this.target === this.output) this.output = void 0;
+			if(target === this.input) this.input = void 0;
+			if(target === this.output) this.output = void 0;
 			this.target = void 0;
 
 			found = true;
