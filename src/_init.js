@@ -84,12 +84,17 @@ Blackprint.loadModuleFromURL = async function(url, options){
 		}
 	}
 
-	// Do security check, block insecure URL
-	for (var i = 0; i < url.length; i++){
+	let loadedList = Object.values(Blackprint.modulesURL).map(v=> v._url);
+	for (var i = url.length-1; i >= 0; i--){
 		let temp = url[i];
-		if(temp.indexOf('http:') === 0 && /^http:\/\/localhost[:\/]/m.test(temp) === false){
+
+		// Do security check, block insecure URL
+		if(temp.indexOf('http:') === 0 && /^http:\/\/localhost[:\/]/m.test(temp) === false)
 			throw "Remote URL must use https to avoid security issues, but got: "+temp;
-		}
+
+		// Remove loaded module from the list
+		if(loadedList.includes(temp))
+			url.splice(i, 1);
 	}
 
 	if(Blackprint.loadModuleFromURL.browser === void 0)
