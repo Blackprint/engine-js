@@ -98,12 +98,12 @@ Blackprint.Engine.CustomEvent = class CustomEvent{
 		return this;
 	}
 
-	_trigger(eventName, obj){
+	emit(eventName, obj){
 		if(this._event === void 0)
 			return false;
 
 		if(arguments.length > 2)
-			throw new Error("._trigger only accept 2 parameter");
+			throw new Error(".emit only accept 2 parameter, please wrap the others on a object");
 
 		var events = this._event[eventName];
 		if(events === void 0 || events.length === 0){
@@ -131,7 +131,7 @@ Blackprint.Engine.CustomEvent = class CustomEvent{
 		}
 
 		if(eventName !== '*' && this._event['*'] !== void 0)
-			return this._trigger('*', obj);
+			return this.emit('*', obj);
 
 		return true;
 	}

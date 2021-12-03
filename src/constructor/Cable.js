@@ -39,8 +39,8 @@ class Cable{
 		var that = this;
 		function activate(arg){ that.activation(arg) }
 
-		this.owner._trigger('connecting', {target: this.target, activate});
-		this.target._trigger('connecting', {target: this.owner, activate});
+		this.owner.emit('connecting', {target: this.target, activate});
+		this.target.emit('connecting', {target: this.owner, activate});
 
 		if(this.disabled)
 			return;
@@ -65,12 +65,12 @@ class Cable{
 		this.input = inp;
 		this.output = out;
 
-		this.target.iface._trigger('cable.connect', {
+		this.target.iface.emit('cable.connect', {
 			cable: this,
 			port: this.target,
 			target: this.owner,
 		});
-		this.owner.iface._trigger('cable.connect', {
+		this.owner.iface.emit('cable.connect', {
 			cable: this,
 			port: this.owner,
 			target: this.target,
@@ -78,15 +78,20 @@ class Cable{
 
 		let temp = {target: out, cable: this};
 
-		inp._trigger('connect', temp);
-		out._trigger('connect', {target: inp, cable: this});
+		inp.emit('connect', temp);
+		out.emit('connect', {target: inp, cable: this});
 
 		// ToDo: recheck why we need to check if the constructor is not a function
 		if(inp.iface.node.update && inp.type.constructor !== Function)
 			inp.iface.node.update(inp, out, this);
 
-		if(out.value !== void 0 && inp._trigger('value', temp) && Blackprint.settings.visualizeFlow)
-			this.visualizeFlow();
+		if(out.value !== void 0){
+			inp.emit('value', temp);
+			inp.iface.emit('port.value', {port: inp, target: out, cable: this});
+
+			if(Blackprint.settings.visualizeFlow)
+				this.visualizeFlow();
+		}
 	}
 
 	disconnect(which){ // which = port
@@ -106,10 +111,10 @@ class Cable{
 					target: target
 				};
 
-				owner._trigger('disconnect', temp);
-				owner.iface._trigger('cable.disconnect', temp);
+				owner.emit('disconnect', temp);
+				owner.iface.emit('cable.disconnect', temp);
 			}
-			else owner.iface._trigger('cable.cancel', {port: owner, cable: this});
+			else owner.iface.emit('cable.cancel', {port: owner, cable: this});
 
 			if(owner === this.input) this.input = void 0;
 			if(owner === this.output) this.output = void 0;
@@ -130,8 +135,8 @@ class Cable{
 				target: owner
 			};
 
-			target._trigger('disconnect', temp);
-			target.iface._trigger('cable.disconnect', temp);
+			target.emit('disconnect', temp);
+			target.iface.emit('cable.disconnect', temp);
 
 			if(target === this.input) this.input = void 0;
 			if(target === this.output) this.output = void 0;
