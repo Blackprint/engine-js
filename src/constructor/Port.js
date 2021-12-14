@@ -1,3 +1,5 @@
+let TypeAny = {name:'Any'};
+
 Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 	constructor(name, type, def, source, iface){
 		super();
@@ -136,6 +138,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 						}
 						else throw new Error(port.iface.title+"> "+getDataType(val) + " can't be converted as a " + port.type.name);
 					}
+					else if(port.type === TypeAny); // Pass
 					else if(!(val instanceof port.type))
 						throw new Error(port.iface.title+"> "+getDataType(val) + " is not instance of "+port.type.name);
 				}

@@ -35,7 +35,7 @@ class PortLink{
 			else def = null;
 		}
 		else if(val === null){
-			type = {name:'Any'};
+			type = TypeAny;
 			def = null;
 		}
 		else{
