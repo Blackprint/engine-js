@@ -25,7 +25,7 @@ class Cable{
 
 		if(enable === true){
 			this.disabled = false;
-			this.triggerConnected();
+			this._connected();
 			return;
 		}
 
@@ -45,10 +45,10 @@ class Cable{
 		if(this.disabled)
 			return;
 
-		this.triggerConnected();
+		this._connected();
 	}
 
-	triggerConnected(){
+	_connected(){
 		this.connected = true;
 
 		var out, inp;
