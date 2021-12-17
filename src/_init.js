@@ -22,10 +22,32 @@ if(exports.Blackprint === void 0){
 // Blackprint must be initialized once
 if(Blackprint.Engine !== void 0) return;
 
-Blackprint.getContext = function(name){
-	if(!(name in this.getContext))
-		return this.getContext[name] = {IFace:{}};
-	return this.getContext[name];
+// Will  be used for `Blackprint.registerNode`
+Blackprint.modulesURL = {};
+Blackprint._modulesURL = [];
+
+let _getContextWait = {};
+Blackprint.getContext = async function(name){
+	if(!(name in _Context))
+		return await new Promise(function(resolve){
+			_getContextWait[name] = resolve;
+		});
+
+	return _Context[name];
+};
+
+let _Context = Blackprint.getContext._context = {};
+Blackprint.createContext = function(name){
+	if(name in _Context) return _Context[name];
+
+	let temp = _Context[name] = {IFace:{}};
+	if(name in _getContextWait){
+		setTimeout(function(){
+			_getContextWait[name](temp);
+		}, 1);
+	}
+
+	return temp;
 };
 
 // This function will be replaced when using browser and have loaded Blackprint Sketch
