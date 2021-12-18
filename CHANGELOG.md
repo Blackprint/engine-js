@@ -1,3 +1,28 @@
+# 0.4.3
+
+### Bug Fix
+- Avoid multiple constructor call
+- Fix undefined cable value when being connected from input to output from sketch editor
+
+### Feature
+- Add `input` and `output` properties for `Cable`
+- Port `value` event can be retrieved from IFace object with `port.value`
+- You now can use `.emit` for triggering your custom event for IFace/Node/Port
+
+### Breaking Changes
+- Port event data will be wrapped with object
+
+```js
+// Before
+Input.Port.Stuff.on('value', function(target){});
+
+// After
+Input.Port.Stuff.on('value', function({ target, cable }){
+	// cable.value === target.value
+	// cable.value: is more recommended than using `target.value`
+});
+```
+
 # 0.3.0
 
 ### Feature
@@ -5,7 +30,7 @@
 - Add custom environment data
 - Load module from URL (default to disabled)
 - Add support for using Decorator when registering node/interface
-- Add support for listening to all event with "*"
+- Add support for listening to all event with "\*"
 
 ### Breaking Changes
 Because the implementation will be similar with [engine-php](https://github.com/Blackprint/engine-php) and [engine-go](https://github.com/Blackprint/engine-go).

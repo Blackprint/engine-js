@@ -4,7 +4,8 @@
 <p align="center">Run exported Blackprint on any JavaScript environment.</p>
 
 <p align="center">
-    <a href='https://github.com/Blackprint/Blackprint/blob/master/LICENSE'><img src='https://img.shields.io/badge/License-MIT-brightgreen.svg' height='20'></a>
+  <a href='https://github.com/Blackprint/Blackprint/blob/master/LICENSE'><img src='https://img.shields.io/badge/License-MIT-brightgreen.svg' height='20'></a>
+  <a href='https://discord.gg/cz9rh3a7d6'><img src='https://img.shields.io/discord/915881655921704971.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2' height='20'></a>
 </p>
 
 This repository is designed to be used together with [Blackprint](https://github.com/Blackprint/Blackprint) as the engine on the Browser, Node.js, Deno, and other JavaScript environment.
@@ -22,7 +23,7 @@ Please specify the version when importing, breaking changes may happen on v0.\*.
 
 Browser
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@blackprint/engine@0.3.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/@blackprint/engine@0.4"></script>
 <script>
     let instance = new Blackprint.Engine();
     instance.importJSON("{...}");
@@ -32,7 +33,7 @@ Browser
 Node.js
 ```sh
 # Add the dependency first
-npm i @blackprint/engine@0.3.0
+npm i @blackprint/engine@0.4
 ```
 
 ```js
@@ -44,7 +45,7 @@ instance.importJSON("{...}");
 
 Deno
 ```js
-import Blackprint from 'https://cdn.skypack.dev/@blackprint/engine@0.3.0';
+import Blackprint from 'https://cdn.skypack.dev/@blackprint/engine@0.4';
 
 let instance = new Blackprint.Engine();
 instance.importJSON("{...}");

@@ -1,7 +1,7 @@
 {
   "name": "@blackprint/engine",
   "description": "Blackprint engine for JavaScript environment",
-  "version": "0.3.0",
+  "version": "0.4.3",
   "author": "Blackprint",
   "license": "MIT",
   "repository": {
@@ -11,11 +11,12 @@
   "bugs": {
     "url": "https://github.com/Blackprint/engine-js/issues"
   },
-  "homepage": "http://stefansarya.gitbook.io/blackprint",
+  "homepage": "https://blackprint.github.io/",
   "main": "dist/engine.min.js",
   "module": "dist/engine.es6.js",
   "exports": {
     "default": "./dist/engine.min.js",
+    "module": "./dist/engine.es6.js",
     "deno": "./dist/engine.es6.js"
   },
   "keywords": [
