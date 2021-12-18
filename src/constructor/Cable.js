@@ -14,7 +14,7 @@ class Cable{
 	visualizeFlow(){}
 	get value(){
 		this.visualizeFlow();
-		return this.owner.value;
+		return this.output.value;
 	}
 
 	activation(enable){
@@ -35,22 +35,7 @@ class Cable{
 		}
 	}
 
-	connecting(){
-		var that = this;
-		function activate(arg){ that.activation(arg) }
-
-		this.owner.emit('connecting', {target: this.target, activate});
-		this.target.emit('connecting', {target: this.owner, activate});
-
-		if(this.disabled)
-			return;
-
-		this._connected();
-	}
-
-	_connected(){
-		this.connected = true;
-
+	_refreshType(){
 		var out, inp;
 		if(this.target.source === 'input'){
 			inp = this.target;
@@ -64,16 +49,40 @@ class Cable{
 		this.typeName = out.type.name;
 		this.input = inp;
 		this.output = out;
+	}
 
-		this.target.iface.emit('cable.connect', {
+	connecting(){
+		var that = this;
+		function activate(arg){ that.activation(arg) }
+
+		this._refreshType();
+
+		this.input.emit('connecting', {target: this.output, activate});
+		this.output.emit('connecting', {target: this.input, activate});
+
+		if(this.disabled)
+			return;
+
+		this._connected();
+	}
+
+	_connected(){
+		this.connected = true;
+
+		if(this.input === void 0 || this.output === void 0)
+			this._refreshType();
+
+		let {input: inp, output: out} = this;
+
+		inp.iface.emit('cable.connect', {
 			cable: this,
-			port: this.target,
-			target: this.owner,
+			port: inp,
+			target: out,
 		});
-		this.owner.iface.emit('cable.connect', {
+		out.iface.emit('cable.connect', {
 			cable: this,
-			port: this.owner,
-			target: this.target,
+			port: out,
+			target: inp,
 		});
 
 		let temp = {target: out, cable: this};
@@ -95,8 +104,9 @@ class Cable{
 	}
 
 	disconnect(which){ // which = port
-		let found = false;
 		let {owner, target} = this;
+		let hasOwner = false;
+		let hasTarget = false;
 
 		// Remove from cable owner
 		if(owner && (!which || owner === which)){
@@ -116,11 +126,7 @@ class Cable{
 			}
 			else owner.iface.emit('cable.cancel', {port: owner, cable: this});
 
-			if(owner === this.input) this.input = void 0;
-			if(owner === this.output) this.output = void 0;
-			this.owner = void 0;
-
-			found = true;
+			hasOwner = true;
 		}
 
 		// Remove from connected target
@@ -138,14 +144,22 @@ class Cable{
 			target.emit('disconnect', temp);
 			target.iface.emit('cable.disconnect', temp);
 
+			hasTarget = true;
+		}
+
+		if(hasOwner || hasTarget) this.connected = false;
+
+		// Remove references after the event was triggered
+		if(hasOwner){
+			if(owner === this.input) this.input = void 0;
+			if(owner === this.output) this.output = void 0;
+			this.owner = void 0;
+		}
+		if(hasTarget){
 			if(target === this.input) this.input = void 0;
 			if(target === this.output) this.output = void 0;
 			this.target = void 0;
-
-			found = true;
 		}
-
-		if(found) this.connected = false;
 	}
 }
 
