@@ -18,7 +18,7 @@ Blackprint.Node = class Node extends Blackprint.Engine.CustomEvent {
 		// Get the requested iface after initialize the node
 		let ifaceFunc = (isSketch ? Blackprint.Sketch._iface : Blackprint._iface)[path];
 		if(ifaceFunc === void 0)
-			throw new Error('Node interface for '+path+" was not found, maybe .registerInterface() haven't being called?" + (isSketch ? "(for Sketch Interface)" : ""));
+			throw new Error('Node interface for '+path+" was not found, maybe .registerInterface() haven't being called?" + (isSketch ? " (for Sketch Interface)" : ""));
 
 		// Initialize for interface
 		let iface;
