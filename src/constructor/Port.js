@@ -186,7 +186,9 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			cables[i].disabled = 0;
 	}
 
-	_cableConnectError(name, obj){
+	_cableConnectError(name, obj, isWarning){
+		if(isWarning) return;
+
 		let msg = `Cable error: ${name}`;
 		if(obj.iface) msg += `\nIFace: ${obj.iface.namespace}`;
 
@@ -281,7 +283,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 			if(_cables.length !== 0){
 				_cables[0].disconnect();
-				this._cableConnectError('cable.replaced', {cable, target: this});
+				this._cableConnectError('cable.replaced', {cable, target: this}, true);
 			}
 		}
 
