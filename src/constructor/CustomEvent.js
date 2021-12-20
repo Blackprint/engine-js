@@ -130,8 +130,10 @@ Blackprint.Engine.CustomEvent = class CustomEvent{
 			}
 		}
 
-		if(eventName !== '*' && this._event['*'] !== void 0)
+		if(eventName !== '*' && this._event['*'] !== void 0){
+			obj.eventName = eventName;
 			return this.emit('*', obj);
+		}
 
 		return true;
 	}
