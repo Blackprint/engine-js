@@ -127,18 +127,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 				// Data type validation
 				if(val.constructor !== port.type){
-					if(port.type === String || port.type === Number){
-						if(val.constructor === Number)
-							val = String(val);
-						else if(val.constructor === String){
-							if(isNaN(val) === true)
-								throw new Error(port.iface.title+"> "+val + " is not a Number");
-
-							val = Number(val);
-						}
-						else throw new Error(port.iface.title+"> "+getDataType(val) + " can't be converted as a " + port.type.name);
-					}
-					else if(port.type === TypeAny); // Pass
+					if(port.type === TypeAny); // Pass
 					else if(!(val instanceof port.type))
 						throw new Error(port.iface.title+"> "+getDataType(val) + " is not instance of "+port.type.name);
 				}
@@ -195,6 +184,126 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			cables[i].disabled = 1;
 		else for(; i < cables.length; i++)
 			cables[i].disabled = 0;
+	}
+
+	_cableConnectError(name, obj){
+		let msg = `Cable error: ${name}`;
+		if(obj.iface) msg += `\nIFace: ${obj.iface.namespace}`;
+
+		if(obj.port)
+			msg += `\nFrom port: ${obj.port.name}\n - Type: ${obj.port.source} (${obj.port.type.name})`;
+
+		if(obj.target)
+			msg += `\nTo port: ${obj.target.name}\n - Type: ${obj.target.source} (${obj.target.type.name})`;
+
+		throw new Error(msg);
+	}
+
+	connectCable(cable){
+		if(cable === void 0 && this._scope !== void 0)
+			cable = this._scope('cables').currentCable;
+
+		// It's not a cable might
+		if(cable === void 0)
+			return;
+
+		if(cable.owner === this) // It's referencing to same port
+			return cable.disconnect();
+
+		// Remove cable if ...
+		if((cable.source === 'output' && this.source !== 'input') // Output source not connected to input
+			|| (cable.source === 'input' && this.source !== 'output')  // Input source not connected to output
+			|| (cable.source === 'property' && this.source !== 'property')  // Property source not connected to property
+		){
+			this._cableConnectError('cable.wrong_pair', {cable, port: this});
+			cable.disconnect();
+			return;
+		}
+
+		if(cable.owner.source === 'output'){
+			if((this.feature === BP_Port.ArrayOf && !BP_Port.ArrayOf.validate(this.type, cable.owner.type))
+			   || (this.feature === BP_Port.Union && !BP_Port.Union.validate(this.type, cable.owner.type))){
+				this._cableConnectError('cable.wrong_type', {cable, iface: this.iface, port: cable.owner, target: this});
+				return cable.disconnect();
+			}
+		}
+
+		else if(this.source === 'output'){
+			if((cable.owner.feature === BP_Port.ArrayOf && !BP_Port.ArrayOf.validate(cable.owner.type, this.type))
+			   || (cable.owner.feature === BP_Port.Union && !BP_Port.Union.validate(cable.owner.type, this.type))){
+				this._cableConnectError('cable.wrong_type', {cable, iface: this.iface, port: this, target: cable.owner});
+				return cable.disconnect();
+			}
+		}
+
+		// ToDo: recheck why we need to check if the constructor is a function
+		var isInstance = true;
+		if(cable.owner.type !== this.type
+		   && cable.owner.type.constructor === Function
+		   && this.type.constructor === Function)
+			isInstance = cable.owner.type instanceof this.type || this.type instanceof cable.owner.type;
+
+		var valid = false;
+		if(cable.owner.type.portFeature === BP_Port.Validator
+			|| this.type.portFeature === BP_Port.Validator
+		){
+			isInstance = valid = true;
+		}
+
+		// Remove cable if type restriction
+		if(!isInstance || !valid && (
+			   cable.owner.type === Function && this.type !== Function
+			|| cable.owner.type !== Function && this.type === Function
+		)){
+			this._cableConnectError('cable.wrong_type_pair', {cable, target: this});
+			cable.disconnect();
+			return;
+		}
+
+		var sourceCables = cable.owner.cables;
+
+		// Remove cable if there are similar connection for the ports
+		for (var i = 0; i < sourceCables.length; i++) {
+			if(this.cables.includes(sourceCables[i])){
+				this._cableConnectError('cable.duplicate_removed', {cable, target: this});
+				cable.disconnect();
+				return;
+			}
+		}
+
+		// Put port reference to the cable
+		cable.target = this;
+
+		// Remove old cable if the port not support array
+		if(this.feature !== BP_Port.ArrayOf && this.type !== Function){
+			var removal = cable.target.source === 'input' ? cable.target : cable.owner;
+			let _cables = removal.cables; // Cables in input port
+
+			if(_cables.length !== 0){
+				_cables[0].disconnect();
+				this._cableConnectError('cable.replaced', {cable, target: this});
+			}
+		}
+
+		// Connect this cable into port's cable list
+		this.cables.push(cable);
+		cable.connecting();
+
+		return true;
+	}
+
+	connectPort(port){
+		if(!(port instanceof Engine.Port))
+			throw new Error("First parameter must be instance of Port");
+
+		var cable = new Engine.Cable(port);
+
+		if(this.connectCable(cable)){
+			port.cables.push(cable);
+			return true;
+		}
+
+		return false;
 	}
 }
 
