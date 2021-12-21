@@ -67,7 +67,7 @@ Blackprint.Engine = class Engine{
 
 			// Every nodes that using this namespace name
 			for (var a = 0; a < nodes.length; a++){
-				var node = inserted[nodes[a].i];
+				var iface = inserted[nodes[a].i];
 
 				// If have output connection
 				if(nodes[a].output !== void 0){
@@ -75,9 +75,9 @@ Blackprint.Engine = class Engine{
 
 					// Every output port that have connection
 					for(var portName in out){
-						var linkPortA = node.output[portName];
+						var linkPortA = iface.output[portName];
 						if(linkPortA === void 0){
-							console.error("Node port not found for", node, "with name:", portName);
+							console.error("Node port not found for", iface, "with name:", portName);
 							continue;
 						}
 
@@ -160,16 +160,13 @@ Blackprint.Engine = class Engine{
 			throw new Error(namespace+"> 'node.iface' was not found, do you forget to call 'node.setInterface()'?");
 
 		iface.namespace = namespace;
+		options ??= {};
 
 		var savedData = options.data;
 		delete options.data;
 
 		// Assign the iface options
 		Object.assign(iface, options);
-
-		// Assign the saved options if exist
-		// Must be called here to avoid port trigger
-		iface.imported && iface.imported(savedData);
 
 		if(iface.id !== void 0)
 			this.iface[iface.id] = iface;
@@ -181,7 +178,10 @@ Blackprint.Engine = class Engine{
 			this.ifaceList[iface.i] = iface;
 		else this.ifaceList.push(iface);
 
+		// Assign the saved options if exist
+		// Must be called here to avoid port trigger
 		iface.importing = false;
+		iface.imported && iface.imported(savedData);
 		node.imported && node.imported(savedData);
 
 		if(handlers !== void 0)
