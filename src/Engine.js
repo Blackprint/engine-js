@@ -1,5 +1,6 @@
-Blackprint.Engine = class Engine{
+Blackprint.Engine = class Engine extends CustomEvent {
 	constructor(){
+		super();
 		this.iface = {}; // { id => object }
 		this.ifaceList = []; // ToDo: Improve
 		this.settings = {};
@@ -192,6 +193,8 @@ Blackprint.Engine = class Engine{
 		return iface;
 	}
 }
+
+Blackprint.Engine.CustomEvent = CustomEvent;
 
 // For storing registered nodes
 Blackprint.nodes = {};
