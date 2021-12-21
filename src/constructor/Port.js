@@ -119,7 +119,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 		// Can only obtain data when accessing input port
 		if(port.source !== 'input'){
-			prepare.set = function(val){
+			prepare.set = function(val){ // for output/property port
 				if(val === void 0 || val === null){
 					port.value = port.default;
 					return;
@@ -134,7 +134,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 				port.value = val;
 				port.emit('value', { target: port });
-				port.sync();
+				port.sync(); // emit event to all input port connected to this port
 			}
 		}
 
@@ -144,30 +144,19 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		return prepare;
 	}
 
+	// this= output/property, target=input
 	sync(){
 		// Check all connected cables, if any node need to synchronize
 		var cables = this.cables;
 		for (var i = 0; i < cables.length; i++) {
-			var target, owner;
 			var cable = cables[i];
+			var input = cable.input;
 
-			if(cable.owner === this){
-				owner = this;
-				target = cable.target;
+			if(input.iface._requesting === void 0 && input.iface.node.update)
+				input.iface.node.update(input, this, cable);
 
-				if(target === void 0)
-					continue;
-			}
-			else{
-				target = this;
-				owner = cable.target;
-			}
-
-			if(target.iface._requesting === void 0 && target.iface.node.update)
-				target.iface.node.update(target, owner, cable);
-
-			target.emit('value', { target: this, cable });
-			target.iface.emit('port.value', { port: target, target: this, cable });
+			input.emit('value', { target: this, cable });
+			input.iface.emit('port.value', { port: input, target: this, cable });
 
 			if(Blackprint.settings.visualizeFlow)
 				cable.visualizeFlow();
@@ -186,9 +175,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			cables[i].disabled = 0;
 	}
 
-	_cableConnectError(name, obj, isWarning){
-		if(isWarning) return;
-
+	_cableConnectError(name, obj){
 		let msg = `Cable error: ${name}`;
 		if(obj.iface) msg += `\nIFace: ${obj.iface.namespace}`;
 
@@ -198,7 +185,8 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		if(obj.target)
 			msg += `\nTo port: ${obj.target.name}\n - Type: ${obj.target.source} (${obj.target.type.name})`;
 
-		throw new Error(msg);
+		obj.message = msg;
+		this.iface.node._instance.emit(name, obj);
 	}
 
 	connectCable(cable){
@@ -282,8 +270,8 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			let _cables = removal.cables; // Cables in input port
 
 			if(_cables.length !== 0){
+				this._cableConnectError('cable.replaced', {cable, target: this});
 				_cables[0].disconnect();
-				this._cableConnectError('cable.replaced', {cable, target: this}, true);
 			}
 		}
 
