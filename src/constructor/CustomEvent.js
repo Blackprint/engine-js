@@ -117,6 +117,11 @@ Blackprint.Engine.CustomEvent = class CustomEvent{
 					delete events.$_fallback[eventName];
 			}
 
+			if(eventName !== '*' && this._event['*'] !== void 0){
+				obj.eventName = eventName;
+				return this.emit('*', obj);
+			}
+
 			return hasFallback !== void 0;
 		}
 
