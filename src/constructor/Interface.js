@@ -28,7 +28,7 @@ Blackprint.Interface = class Interface extends Blackprint.Engine.CustomEvent{
 			iface.const.Property = node.property;
 		}
 
-		Object.defineProperty(iface, '_requesting', {writable:true, value:false});
+		Object.defineProperty(iface, '_requesting', {writable:true, value:void 0});
 	}
 
 	constructor(node){
