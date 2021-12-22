@@ -1,3 +1,15 @@
+# 0.4.4
+
+### Bug Fix
+- Fix incorrect default value
+- Move `iface.imported` call order near `node.imported`
+- Fix incorrect port event data (`target` should be `port`)
+- Fix `*` event that was not being called
+
+### Feature
+- `Blackprint.Engine` is now using `CustomEvent`
+- You can now connect cable with script
+
 # 0.4.3
 
 ### Bug Fix
