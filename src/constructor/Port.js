@@ -176,7 +176,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 	}
 
 	_cableConnectError(name, obj){
-		let msg = `Cable error: ${name}`;
+		let msg = `Cable notify: ${name}`;
 		if(obj.iface) msg += `\nIFace: ${obj.iface.namespace}`;
 
 		if(obj.port)
@@ -205,7 +205,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			|| (cable.source === 'input' && this.source !== 'output')  // Input source not connected to output
 			|| (cable.source === 'property' && this.source !== 'property')  // Property source not connected to property
 		){
-			this._cableConnectError('cable.wrong_pair', {cable, port: this});
+			this._cableConnectError('cable.wrong_pair', {cable, port: this, target: cable.owner});
 			cable.disconnect();
 			return;
 		}
@@ -245,7 +245,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			   cable.owner.type === Function && this.type !== Function
 			|| cable.owner.type !== Function && this.type === Function
 		)){
-			this._cableConnectError('cable.wrong_type_pair', {cable, target: this});
+			this._cableConnectError('cable.wrong_type_pair', {cable, port: this, target: cable.owner});
 			cable.disconnect();
 			return;
 		}
@@ -255,7 +255,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		// Remove cable if there are similar connection for the ports
 		for (var i = 0; i < sourceCables.length; i++) {
 			if(this.cables.includes(sourceCables[i])){
-				this._cableConnectError('cable.duplicate_removed', {cable, target: this});
+				this._cableConnectError('cable.duplicate_removed', {cable, port: this, target: cable.owner});
 				cable.disconnect();
 				return;
 			}
@@ -270,8 +270,15 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			let _cables = removal.cables; // Cables in input port
 
 			if(_cables.length !== 0){
-				this._cableConnectError('cable.replaced', {cable, target: this});
-				_cables[0].disconnect();
+				_cables = _cables[0];
+
+				if(_cables === cable)
+					_cables = _cables[1];
+
+				if(_cables !== void 0){
+					this._cableConnectError('cable.replaced', {cable, oldCable: _cables, port: this, target: cable.owner});
+					_cables.disconnect();
+				}
 			}
 		}
 
