@@ -13,7 +13,9 @@ class Cable{
 
 	visualizeFlow(){}
 	get value(){
-		this.visualizeFlow();
+		if(Blackprint.settings.visualizeFlow)
+			this.visualizeFlow();
+
 		return this.output.value;
 	}
 
@@ -90,16 +92,12 @@ class Cable{
 		inp.emit('connect', temp);
 		out.emit('connect', {target: inp, cable: this});
 
-		// ToDo: recheck why we need to check if the constructor is not a function
-		if(inp.iface.node.update && inp.type.constructor !== Function)
+		if(inp.iface.node.update)
 			inp.iface.node.update(inp, out, this);
 
 		if(out.value !== void 0){
 			inp.emit('value', temp);
 			inp.iface.emit('port.value', {port: inp, target: out, cable: this});
-
-			if(Blackprint.settings.visualizeFlow)
-				this.visualizeFlow();
 		}
 	}
 

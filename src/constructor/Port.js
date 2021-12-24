@@ -40,9 +40,6 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 					if(target === void 0)
 						continue;
 
-					if(Blackprint.settings.visualizeFlow)
-						cables[i].visualizeFlow();
-
 					target.iface.input[target.name].default(port, cables[i]);
 				}
 			};
@@ -63,47 +60,52 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 					// Return single data
 					if(port.cables.length === 1){
 						var cable = port.cables[0];
-						var target = cable.owner === port ? cable.target : cable.owner;
 
-						if(target === void 0 || cable.connected === false || cable.disabled){
+						if(cable.connected === false || cable.disabled){
 							port.iface._requesting = void 0;
 							if(port.feature === BP_Port.ArrayOf)
 								return [];
 
-							// console.log(34, cable);
-							return target.default;
+							return port.default;
 						}
 
+						var output = cable.output;
+
 						// Request the data first
-						if(target.iface.node.request){
-							if(target.iface.node.request(target, port.iface) !== false && Blackprint.settings.visualizeFlow)
+						if(output.iface.node.request){
+							if(output.iface.node.request(output, port.iface) !== false && Blackprint.settings.visualizeFlow)
 								cable.visualizeFlow();
 						}
+						else if(Blackprint.settings.visualizeFlow)
+							cable.visualizeFlow();
 
 						port.iface._requesting = void 0;
 						if(port.feature === BP_Port.ArrayOf)
-							return [target.value];
+							return [output.value];
 
-						return target.value || target.default;
+						return output.value || port.default;
 					}
 
 					// Return multiple data as an array
+					// ToDo: implement data caching when the cable isn't modified
 					var cables = port.cables;
 					var data = [];
 					for (var i = 0; i < cables.length; i++) {
 						var cable = cables[i];
-						var target = cable.owner === port ? cable.target : cable.owner;
-
-						if(target === void 0 || cable.connected === false || cable.disabled)
+						if(cable.connected === false || cable.disabled)
 							continue;
 
+						var output = cable.output;
+
 						// Request the data first
-						if(target.iface.node.request){
-							if(target.iface.node.request(target, port.iface) !== false && Blackprint.settings.visualizeFlow)
+						if(output.iface.node.request){
+							if(output.iface.node.request(output, port.iface) !== false && Blackprint.settings.visualizeFlow)
 								cable.visualizeFlow();
 						}
+						else if(Blackprint.settings.visualizeFlow)
+							cable.visualizeFlow();
 
-						data.push(target.value || target.default);
+						data.push(output.value || port.default);
 					}
 
 					port.iface._requesting = void 0;
@@ -113,6 +115,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 					return data;
 				}
 
+				// else type: output port, let's just return the value
 				return port.value;
 			}
 		};
@@ -157,9 +160,6 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 			input.emit('value', { target: this, cable });
 			input.iface.emit('port.value', { port: input, target: this, cable });
-
-			if(Blackprint.settings.visualizeFlow)
-				cable.visualizeFlow();
 		}
 	}
 
@@ -264,10 +264,19 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		// Put port reference to the cable
 		cable.target = this;
 
+		let inp, out;
+		if(cable.target.source === 'input'){
+			inp = cable.target;
+			out = cable.owner;
+		}
+		else {
+			inp = cable.owner;
+			out = cable.target;
+		}
+
 		// Remove old cable if the port not support array
-		if(this.feature !== BP_Port.ArrayOf && this.type !== Function){
-			var removal = cable.target.source === 'input' ? cable.target : cable.owner;
-			let _cables = removal.cables; // Cables in input port
+		if(inp.feature !== BP_Port.ArrayOf && inp.type !== Function){
+			let _cables = inp.cables; // Cables in input port
 
 			if(_cables.length !== 0){
 				_cables = _cables[0];
@@ -276,7 +285,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 					_cables = _cables[1];
 
 				if(_cables !== void 0){
-					this._cableConnectError('cable.replaced', {cable, oldCable: _cables, port: this, target: cable.owner});
+					inp._cableConnectError('cable.replaced', {cable, oldCable: _cables, port: inp, target: out});
 					_cables.disconnect();
 				}
 			}
