@@ -92,10 +92,10 @@ class Cable{
 		inp.emit('connect', temp);
 		out.emit('connect', {target: inp, cable: this});
 
-		if(inp.iface.node.update)
-			inp.iface.node.update(inp, out, this);
-
 		if(out.value !== void 0){
+			if(inp.iface.node.update)
+				inp.iface.node.update(inp, out, this);
+
 			inp.emit('value', temp);
 			inp.iface.emit('port.value', {port: inp, target: out, cable: this});
 		}

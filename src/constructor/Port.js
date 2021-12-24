@@ -153,13 +153,13 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		var cables = this.cables;
 		for (var i = 0; i < cables.length; i++) {
 			var cable = cables[i];
-			var input = cable.input;
+			var inp = cable.input;
 
-			if(input.iface._requesting === void 0 && input.iface.node.update)
-				input.iface.node.update(input, this, cable);
+			if(inp.iface.node.update && inp.iface._requesting === void 0)
+				inp.iface.node.update(inp, this, cable);
 
-			input.emit('value', { target: this, cable });
-			input.iface.emit('port.value', { port: input, target: this, cable });
+			inp.emit('value', { target: this, cable });
+			inp.iface.emit('port.value', { port: inp, target: this, cable });
 		}
 	}
 
