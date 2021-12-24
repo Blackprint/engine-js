@@ -89,6 +89,7 @@ class Cable{
 
 		let temp = {target: out, cable: this};
 
+		inp._cache = void 0;
 		inp.emit('connect', temp);
 		out.emit('connect', {target: inp, cable: this});
 
@@ -146,6 +147,9 @@ class Cable{
 		}
 
 		if(hasOwner || hasTarget) this.connected = false;
+
+		if(this.input !== void 0)
+			this.input._cache = void 0;
 
 		// Remove references after the event was triggered
 		if(hasOwner){

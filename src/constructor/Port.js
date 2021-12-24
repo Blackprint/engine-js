@@ -28,7 +28,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 	createLinker(){
 		var port = this;
 
-		// Only for output
+		// Only for output (type: trigger/function)
 		if(this.source === 'output' && this.type === Function){
 			// Disable sync
 			port.sync = false;
@@ -36,11 +36,16 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			return function(){
 				var cables = port.cables;
 				for (var i = 0; i < cables.length; i++) {
-					var target = cables[i].owner === port ? cables[i].target : cables[i].owner;
+					var cable = cables[i];
+
+					var target = cable.input;
 					if(target === void 0)
 						continue;
 
-					target.iface.input[target.name].default(port, cables[i]);
+					if(Blackprint.settings.visualizeFlow)
+						cable.visualizeFlow();
+
+					target.iface.input[target.name].default();
 				}
 			};
 		}
@@ -54,6 +59,8 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 					if(port.cables.length === 0)
 						return port.default;
 
+					if(port._cache !== void 0) return port._cache;
+
 					// Flag current node is requesting value to other node
 					port.iface._requesting = true;
 
@@ -64,30 +71,28 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 						if(cable.connected === false || cable.disabled){
 							port.iface._requesting = void 0;
 							if(port.feature === BP_Port.ArrayOf)
-								return [];
+								return port._cache = [];
 
-							return port.default;
+							return port._cache = port.default;
 						}
 
 						var output = cable.output;
 
 						// Request the data first
-						if(output.iface.node.request){
-							if(output.iface.node.request(output, port.iface) !== false && Blackprint.settings.visualizeFlow)
-								cable.visualizeFlow();
-						}
-						else if(Blackprint.settings.visualizeFlow)
+						if(output.iface.node.request)
+							output.iface.node.request(output, port.iface);
+
+						if(Blackprint.settings.visualizeFlow)
 							cable.visualizeFlow();
 
 						port.iface._requesting = void 0;
 						if(port.feature === BP_Port.ArrayOf)
-							return [output.value];
+							return port._cache = [output.value];
 
-						return output.value || port.default;
+						return port._cache = (output.value || port.default);
 					}
 
 					// Return multiple data as an array
-					// ToDo: implement data caching when the cable isn't modified
 					var cables = port.cables;
 					var data = [];
 					for (var i = 0; i < cables.length; i++) {
@@ -98,11 +103,10 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 						var output = cable.output;
 
 						// Request the data first
-						if(output.iface.node.request){
-							if(output.iface.node.request(output, port.iface) !== false && Blackprint.settings.visualizeFlow)
-								cable.visualizeFlow();
-						}
-						else if(Blackprint.settings.visualizeFlow)
+						if(output.iface.node.request)
+							output.iface.node.request(output, port.iface);
+
+						if(Blackprint.settings.visualizeFlow)
 							cable.visualizeFlow();
 
 						data.push(output.value || port.default);
@@ -110,9 +114,9 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 					port.iface._requesting = void 0;
 					if(port.feature !== BP_Port.ArrayOf)
-						return data[0];
+						return port._cache = data[0];
 
-					return data;
+					return port._cache = data;
 				}
 
 				// else type: output port, let's just return the value
@@ -154,6 +158,8 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		for (var i = 0; i < cables.length; i++) {
 			var cable = cables[i];
 			var inp = cable.input;
+
+			inp._cache = void 0;
 
 			if(inp.iface.node.update && inp.iface._requesting === void 0)
 				inp.iface.node.update(inp, this, cable);
