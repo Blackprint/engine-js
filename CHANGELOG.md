@@ -1,3 +1,13 @@
+# 0.4.5
+
+### Feature
+- Use cache when obtaining data from input port
+
+### Bug Fix
+- Fix data flow visualization
+- Fix cable connection from port with type of array
+- Fix `node.update` function that being called when port value haven't been defined
+
 # 0.4.4
 
 ### Bug Fix

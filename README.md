@@ -261,7 +261,7 @@ class IMyTemplate extends Context.IFace.MyTemplate {
     IInput.PortName1
       // When connected output node have updated the value
       // Also called after 'connect' event
-      .on('value', Context.EventSlot, function(target){
+      .on('value', Context.EventSlot, function({ target }){
         console.log("PortName1:", target);
       })
 
