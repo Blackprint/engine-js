@@ -159,7 +159,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			var cable = cables[i];
 			var inp = cable.input;
 
-			inp._cache = void 0;
+			if(inp !== void 0) inp._cache = void 0;
 
 			if(inp.iface.node.update && inp.iface._requesting === void 0)
 				inp.iface.node.update(inp, this, cable);
