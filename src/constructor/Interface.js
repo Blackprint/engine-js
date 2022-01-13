@@ -3,29 +3,29 @@ Blackprint.Interface = class Interface extends Blackprint.Engine.CustomEvent{
 		// Type extract for port data type
 		// Create reactiveness of node and iface's ports
 
-		node.const = iface.const = {};
+		node.ref = iface.ref = {};
 		if(node.output !== void 0){
 			Object.setPrototypeOf(node.output, Engine.PortLink.prototype);
 			Engine.PortLink.construct(node.output, 'output', iface);
 
-			iface.const.IOutput = iface.output;
-			iface.const.Output = node.output;
+			iface.ref.IOutput = iface.output;
+			iface.ref.Output = node.output;
 		}
 
 		if(node.input !== void 0){
 			Object.setPrototypeOf(node.input, Engine.PortLink.prototype);
 			Engine.PortLink.construct(node.input, 'input', iface);
 
-			iface.const.IInput = iface.input;
-			iface.const.Input = node.input;
+			iface.ref.IInput = iface.input;
+			iface.ref.Input = node.input;
 		}
 
 		if(node.property !== void 0){
 			Object.setPrototypeOf(node.property, Engine.PortLink.prototype);
 			Engine.PortLink.construct(node.property, 'property', iface);
 
-			iface.const.IProperty = iface.property;
-			iface.const.Property = node.property;
+			iface.ref.IProperty = iface.property;
+			iface.ref.Property = node.property;
 		}
 
 		Object.defineProperty(iface, '_requesting', {writable:true, value:void 0});
