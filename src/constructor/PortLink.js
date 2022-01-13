@@ -13,7 +13,7 @@ class PortLink{
 			portLink.add(portName, portLink[portName]);
 
 		// Check if a browser
-		if(typeof sf !== 'undefined' && sf.Obj.set !== void 0)
+		if(typeof sf !== 'undefined' && sf.Obj !== void 0 && sf.Obj.set !== void 0)
 			portLink._extracted = true;
 	}
 
@@ -109,7 +109,7 @@ class PortLink{
 		delete this[portName];
 
 		// Check if a browser or not
-		if(typeof sf !== 'undefined' && sf.Obj.delete !== void 0)
+		if(typeof sf !== 'undefined' && sf.Obj !== void 0 && sf.Obj.delete !== void 0)
 			sf.Obj.delete(ref, portName);
 		else
 			delete ref[portName];
