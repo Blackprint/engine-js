@@ -1,14 +1,18 @@
 Blackprint.Engine = class Engine extends CustomEvent {
 	constructor(){
 		super();
-		this.iface = {}; // { id => object }
-		this.ifaceList = []; // ToDo: Improve
 		this.settings = {};
+		this.ifaceList = []; // ToDo: Improve
+
+		this.iface = {}; // { id => IFace }
+		this.ref = {}; // { id => Port references }
 	}
 
 	clearNodes(){
-		this.iface = {};
 		this.ifaceList.splice(0);
+
+		this.iface = {};
+		this.ref = {};
 	}
 
 	async importJSON(json){
@@ -169,8 +173,10 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		// Assign the iface options
 		Object.assign(iface, options);
 
-		if(iface.id !== void 0)
+		if(iface.id !== void 0){
 			this.iface[iface.id] = iface;
+			this.ref[iface.id] = iface.ref;
+		}
 
 		// Create the linker between the node and the iface
 		Blackprint.Interface.prepare(node, iface);
