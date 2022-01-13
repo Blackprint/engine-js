@@ -2,15 +2,50 @@ Blackprint.Engine = class Engine extends CustomEvent {
 	constructor(){
 		super();
 		this.settings = {};
-		this.ifaceList = []; // ToDo: Improve
+		this.ifaceList = []; // IFace
 
 		this.iface = {}; // { id => IFace }
 		this.ref = {}; // { id => Port references }
 	}
 
-	clearNodes(){
-		this.ifaceList.splice(0);
+	deleteNode(iface){
+		let list = this.ifaceList;
+		var i = list.indexOf(iface);
 
+		if(i !== -1)
+			list.splice(i, 1);
+		else return scope.sketch.emit('error', {
+			type: 'node_delete_not_found',
+			data: {iface}
+		});
+
+		iface.node.destroy && iface.node.destroy();
+		iface.destroy && iface.destroy();
+
+		var check = Blackprint.Interface._ports;
+		for (var i = 0; i < check.length; i++) {
+			var portList = iface[check[i]];
+
+			for(var port in portList){
+				portList[port].disconnectAll();
+			}
+		}
+
+		// Delete reference
+		delete this.iface[iface.id];
+		delete this.ref[iface.id];
+	}
+
+	clearNodes(){
+		let list = this.ifaceList;
+		for (var i = 0; i < list.length; i++) {
+			let iface = list[i];
+
+			iface.node.destroy && iface.node.destroy();
+			iface.destroy && iface.destroy();
+		}
+
+		this.ifaceList.splice(0);
 		this.iface = {};
 		this.ref = {};
 	}
