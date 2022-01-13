@@ -152,7 +152,7 @@ class Cable{
 			this.input._cache = void 0;
 
 		// Remove references after the event was triggered
-		if(hasOwner){
+		/*if(hasOwner){
 			if(owner === this.input) this.input = void 0;
 			if(owner === this.output) this.output = void 0;
 			this.owner = void 0;
@@ -161,7 +161,7 @@ class Cable{
 			if(target === this.input) this.input = void 0;
 			if(target === this.output) this.output = void 0;
 			this.target = void 0;
-		}
+		}*/
 	}
 }
 
