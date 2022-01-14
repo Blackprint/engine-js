@@ -155,10 +155,13 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 	sync(){
 		// Check all connected cables, if any node need to synchronize
 		var cables = this.cables;
+
 		for (var i = 0; i < cables.length; i++) {
 			var cable = cables[i];
-			var inp = cable.input;
+			if(cable.hasBranch)
+				continue;
 
+			var inp = cable.input;
 			if(inp !== void 0) inp._cache = void 0;
 
 			if(inp.iface.node.update && inp.iface._requesting === void 0)
