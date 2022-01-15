@@ -57,6 +57,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		if(json.constructor !== Object)
 			json = JSON.parse(json);
 
+		let oldIfaces = this.iface;
+
 		if(options !== void 0) options = {};
 		if(!options.appendMode) this.clearNodes();
 
@@ -99,6 +101,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 					id: temp.id, // Named ID (if exist)
 					i: temp.i, // List Index
 					data: temp.data, // if exist
+					oldIface: oldIfaces[temp.id],
 				}, handlers);
 			}
 		}
@@ -216,8 +219,11 @@ Blackprint.Engine = class Engine extends CustomEvent {
 			this.ref[iface.id] = iface.ref;
 		}
 
+		if(options.oldIface !== void 0)
+			Blackprint.Interface.reuse(iface, options.oldIface);
+
 		// Create the linker between the node and the iface
-		Blackprint.Interface.prepare(node, iface);
+		else Blackprint.Interface.prepare(node, iface);
 
 		if(iface.i !== void 0)
 			this.ifaceList[iface.i] = iface;
