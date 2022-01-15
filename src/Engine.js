@@ -50,12 +50,15 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		this.ref = {};
 	}
 
-	async importJSON(json){
+	async importJSON(json, options){
 		if(window.sf && window.sf.loader)
 			await window.sf.loader.task;
 
 		if(json.constructor !== Object)
 			json = JSON.parse(json);
+
+		if(options !== void 0) options = {};
+		if(!options.appendMode) this.clearNodes();
 
 		var metadata = json._;
 		delete json._;
