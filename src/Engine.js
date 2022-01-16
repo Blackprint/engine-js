@@ -59,7 +59,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 		let oldIfaces = this.iface;
 
-		if(options !== void 0) options = {};
+		if(options === void 0) options = {};
 		if(!options.appendMode) this.clearNodes();
 
 		var metadata = json._;
