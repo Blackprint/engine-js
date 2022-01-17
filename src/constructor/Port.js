@@ -1,4 +1,4 @@
-let TypeAny = {name:'Any'};
+let TypeAny = {name:'Any', any:true};
 
 Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 	constructor(name, type, def, source, iface){
@@ -202,12 +202,12 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		if(cable === void 0 && this._scope !== void 0)
 			cable = this._scope('cables').currentCable;
 
-		if(cable.branch != null && cable.branch.length !== 0)
-			throw new Error("Can't attach cable that have branch to this port");
-
 		// It's not a cable might
 		if(cable === void 0)
 			return;
+
+		if(cable.branch != null && cable.branch.length !== 0)
+			throw new Error("Can't attach cable that have branch to this port");
 
 		if(cable.owner === this) // It's referencing to same port
 			return cable.disconnect();
