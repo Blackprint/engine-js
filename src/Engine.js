@@ -219,11 +219,11 @@ Blackprint.Engine = class Engine extends CustomEvent {
 			this.ref[iface.id] = iface.ref;
 		}
 
-		if(options.oldIface !== void 0)
-			Blackprint.Interface.reuse(iface, options.oldIface);
+		if(options.oldIface !== void 0 && options.oldIface.namespace === iface.namespace)
+			Blackprint.Interface._reuse(iface, options.oldIface);
 
 		// Create the linker between the node and the iface
-		else Blackprint.Interface.prepare(node, iface);
+		else Blackprint.Interface._prepare(node, iface);
 
 		if(iface.i !== void 0)
 			this.ifaceList[iface.i] = iface;

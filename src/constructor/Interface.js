@@ -1,5 +1,5 @@
 Blackprint.Interface = class Interface extends Blackprint.Engine.CustomEvent{
-	static prepare(node, iface){
+	static _prepare(node, iface){
 		// Type extract for port data type
 		// Create reactiveness of node and iface's ports
 
@@ -34,7 +34,7 @@ Blackprint.Interface = class Interface extends Blackprint.Engine.CustomEvent{
 		Object.defineProperty(iface, '_requesting', {writable:true, value:void 0});
 	}
 
-	static reuse(newIface, oldIface){
+	static _reuse(newIface, oldIface){
 		let iface = newIface;
 		let node = newIface.node;
 
@@ -55,10 +55,14 @@ Blackprint.Interface = class Interface extends Blackprint.Engine.CustomEvent{
 			let temp = cleanUp[i];
 			if(temp === void 0) continue;
 
-			temp.cables.splice(0);
-			temp.classAdd = "";
-			temp.value = temp.default;
-			temp.iface = iface;
+			for(let key in temp){
+				let port = temp[key];
+
+				port.cables.splice(0);
+				port.classAdd = "";
+				port.value = port.default;
+				port.iface = iface;
+			}
 		}
 
 		Object.defineProperty(iface, '_requesting', {writable:true, value:void 0});
