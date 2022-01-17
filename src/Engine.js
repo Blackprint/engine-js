@@ -14,7 +14,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 		if(i !== -1)
 			list.splice(i, 1);
-		else return scope.sketch.emit('error', {
+		else return this.emit('error', {
 			type: 'node_delete_not_found',
 			data: {iface}
 		});
