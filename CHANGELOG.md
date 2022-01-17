@@ -1,3 +1,22 @@
+# 0.5.0
+
+### Features
+- Add `instance.ref` where the `instance` can be `new Blackprint.Engine` or `new Blackprint.Sketch` this `ref` will have reference to `Output` or `Input` port
+- Add `node.destroy` as an alternative for `iface.destroy`, this will be called by the engine and shouldn't be manually called
+- Add `instance.deleteNode` to delete node manually by using code
+- Add options for `importJSON`
+- Reuse port and event listener from an iface that have an ID
+
+### Breaking Changes
+- `iface.const` and `node.const` now changed into `iface.ref` and `node.ref`
+- `importJSON` now will clear the instance first
+- `Validator` port type was removed
+
+### Bug Fix
+- Fix error when using sQuery
+- Fix error when the node doesn't have input port
+- Fix `iface.destroy` that was not being called when the nodes was cleared
+
 # 0.4.5
 
 ### Feature

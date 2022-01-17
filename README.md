@@ -25,7 +25,7 @@ Please specify the version when importing, breaking changes may happen on v0.\*.
 
 Browser
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@blackprint/engine@0.4"></script>
+<script src="https://cdn.jsdelivr.net/npm/@blackprint/engine@0.5"></script>
 <script>
     let instance = new Blackprint.Engine();
     instance.importJSON("{...}");
@@ -35,7 +35,7 @@ Browser
 Node.js
 ```sh
 # Add the dependency first
-npm i @blackprint/engine@0.4
+npm i @blackprint/engine@0.5
 ```
 
 ```js
@@ -47,7 +47,7 @@ instance.importJSON("{...}");
 
 Deno
 ```js
-import Blackprint from 'https://cdn.skypack.dev/@blackprint/engine@0.4';
+import Blackprint from 'https://cdn.skypack.dev/@blackprint/engine@0.5';
 
 let instance = new Blackprint.Engine();
 instance.importJSON("{...}");
@@ -159,7 +159,7 @@ Context.IFace.MyTemplate = class IMyTemplate extends Blackprint.Interface {
         const {
             IInput, IOutput, IProperty, // Port interface
             Input, Output, Property, // Port value
-        } = this.const;
+        } = this.ref;
 
         // Port interface can be used for registering event listener
         // Port value can be used for get/set the port value
@@ -247,7 +247,7 @@ class IMyTemplate extends Context.IFace.MyTemplate {
     const {
       IInput, IOutput, // Port interface
       Input, Output, // Port value
-    } = My.const; // My.const === this.const
+    } = My.ref; // My.ref === this.ref
 
     // Update the port value
     Output.PortName2 = 123; // This will also trigger 'value' event to connected input ports
