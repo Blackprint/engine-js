@@ -245,15 +245,8 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		   && this.type.constructor === Function)
 			isInstance = cable.owner.type instanceof this.type || this.type instanceof cable.owner.type;
 
-		var valid = false;
-		if(cable.owner.type.portFeature === BP_Port.Validator
-			|| this.type.portFeature === BP_Port.Validator
-		){
-			isInstance = valid = true;
-		}
-
 		// Remove cable if type restriction
-		if(!isInstance || !valid && (
+		if(!isInstance || (
 			   cable.owner.type === Function && this.type !== Function
 			|| cable.owner.type !== Function && this.type === Function
 		)){
