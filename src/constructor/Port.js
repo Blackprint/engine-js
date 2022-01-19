@@ -89,8 +89,10 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 						if(port.feature === BP_Port.ArrayOf)
 							return port._cache = [output.value];
 
-						return port._cache = (output.value || port.default);
+						return port._cache = output.value ?? port.default;
 					}
+
+					let isNotArrayPort = port.feature !== BP_Port.ArrayOf;
 
 					// Return multiple data as an array
 					var cables = port.cables;
@@ -109,13 +111,15 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 						if(Blackprint.settings.visualizeFlow)
 							cable.visualizeFlow();
 
-						data.push(output.value || port.default);
+						if(isNotArrayPort){
+							port.iface._requesting = void 0;
+							return port._cache = output.value ?? port.default;
+						}
+
+						data.push(output.value ?? port.default);
 					}
 
 					port.iface._requesting = void 0;
-					if(port.feature !== BP_Port.ArrayOf)
-						return port._cache = data[0];
-
 					return port._cache = data;
 				}
 
@@ -130,13 +134,11 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 				if(port.value === val)
 					return;
 
-				if(val === void 0 || val === null){
-					port.value = port.default;
-					return;
-				}
+				if(val == null)
+					val = port.default;
 
 				// Data type validation
-				if(val.constructor !== port.type){
+				else if(val.constructor !== port.type){
 					if(port.type === TypeAny); // Pass
 					else if(!(val instanceof port.type))
 						throw new Error(port.iface.title+"> "+getDataType(val) + " is not instance of "+port.type.name);
