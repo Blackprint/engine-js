@@ -53,11 +53,13 @@ Blackprint.Interface = class Interface extends Blackprint.Engine.CustomEvent{
 		let cleanUp = [iface.output, iface.input];
 		for (var i = 0; i < cleanUp.length; i++) {
 			let temp = cleanUp[i];
-			if(temp === void 0) continue;
 
+			if(temp === void 0) continue;
 			temp.$EM = void 0;
 
 			for(let key in temp){
+				if(key === '$EM') continue;
+
 				let port = temp[key];
 				delete port._event;
 

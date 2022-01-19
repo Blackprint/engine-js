@@ -4,6 +4,7 @@ class CustomEvent {
 	on(eventName, func, options){
 		if(this._event === void 0){
 			Object.defineProperty(this, '_event', {
+				configurable: true,
 				value:{ $_fallback: {} }
 			});
 		}
