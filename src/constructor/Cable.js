@@ -51,6 +51,25 @@ class Cable{
 		this.typeName = out.type.name;
 		this.input = inp;
 		this.output = out;
+
+		if(this.source !== 'output'){
+			this.owner = out;
+			this.target = inp;
+			this.source = this.owner.source;
+
+			let temp1 = this.head1.slice(0);
+			this.head1 = this.head2.slice(0);
+			this.head2 = temp1;
+
+			if(this._scope !== void 0){
+				let cables = this._scope('cables');
+				let list = cables.list;
+				list.move(list.indexOf(this), 0);
+			}
+		}
+
+		delete this.branch;
+		this.hasBranch = false;
 	}
 
 	connecting(){
