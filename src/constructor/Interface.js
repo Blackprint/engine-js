@@ -38,7 +38,7 @@ Blackprint.Interface = class Interface extends Blackprint.Engine.CustomEvent{
 		let iface = newIface;
 		let node = newIface.node;
 
-		// iface._event = oldIface._event;
+		iface._event = oldIface._event;
 		node.ref = iface.ref = oldIface.ref;
 
 		iface.output = iface.ref.IOutput;
@@ -61,7 +61,7 @@ Blackprint.Interface = class Interface extends Blackprint.Engine.CustomEvent{
 				if(key === '$EM') continue;
 
 				let port = temp[key];
-				delete port._event;
+				// delete port._event;
 
 				port.cables.splice(0);
 				port.iface = iface;
