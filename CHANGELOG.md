@@ -1,3 +1,15 @@
+# 0.5.1
+
+### Bug Fix
+- Fix error when moving nodes from sketch
+- Fix `Any` type data when trying to drop cable to the node header
+- Fix incorrect cable arrangement when the sketch is being reimported
+- Fix cable order when being connected from input port
+- Fix port value that was not updated because of cache
+
+### Performance
+- Skip if the port value was unchanged
+
 # 0.5.0
 
 ### Features
