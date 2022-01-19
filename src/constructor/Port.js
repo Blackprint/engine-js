@@ -127,6 +127,9 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		// Can only obtain data when accessing input port
 		if(port.source !== 'input'){
 			prepare.set = function(val){ // for output/property port
+				if(port.value === val)
+					return;
+
 				if(val === void 0 || val === null){
 					port.value = port.default;
 					return;
