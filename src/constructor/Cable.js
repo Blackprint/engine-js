@@ -95,6 +95,7 @@ class Cable{
 
 		let {input: inp, output: out} = this;
 
+		inp._cache = void 0;
 		inp.iface.emit('cable.connect', {
 			cable: this,
 			port: inp,
@@ -108,7 +109,6 @@ class Cable{
 
 		let temp = {target: out, cable: this};
 
-		inp._cache = void 0;
 		inp.emit('connect', temp);
 		out.emit('connect', {target: inp, cable: this});
 
@@ -125,6 +125,9 @@ class Cable{
 		let {owner, target} = this;
 		let hasOwner = false;
 		let hasTarget = false;
+
+		if(this.input !== void 0)
+			this.input._cache = void 0;
 
 		// Remove from cable owner
 		if(owner && (!which || owner === which)){
@@ -166,9 +169,6 @@ class Cable{
 		}
 
 		if(hasOwner || hasTarget) this.connected = false;
-
-		if(this.input !== void 0)
-			this.input._cache = void 0;
 
 		// Remove references after the event was triggered
 		/*if(hasOwner){
