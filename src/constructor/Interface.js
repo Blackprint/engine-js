@@ -55,11 +55,12 @@ Blackprint.Interface = class Interface extends Blackprint.Engine.CustomEvent{
 			let temp = cleanUp[i];
 			if(temp === void 0) continue;
 
+			temp.$EM = void 0;
+
 			for(let key in temp){
 				let port = temp[key];
 
 				port.cables.splice(0);
-				port.classAdd = "";
 				port.iface = iface;
 
 				if(port.source === "output")
