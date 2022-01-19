@@ -1,4 +1,4 @@
-# 0.5.1
+# 0.5.2
 
 ### Bug Fix
 - Fix error when moving nodes from sketch
@@ -6,6 +6,7 @@
 - Fix incorrect cable arrangement when the sketch is being reimported
 - Fix cable order when being connected from input port
 - Fix port value that was not updated because of cache
+- Fix default port value
 
 ### Performance
 - Skip if the port value was unchanged
