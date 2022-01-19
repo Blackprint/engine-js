@@ -55,7 +55,12 @@ Blackprint.Interface = class Interface extends Blackprint.Engine.CustomEvent{
 			let temp = cleanUp[i];
 
 			if(temp === void 0) continue;
-			temp.$EM = void 0;
+
+			Object.defineProperty(temp, '$EM', {
+				configurable: true,
+				writable: true,
+				value: void 0
+			});
 
 			for(let key in temp){
 				if(key === '$EM') continue;
