@@ -27,11 +27,15 @@ Blackprint.modulesURL = {};
 Blackprint._modulesURL = [];
 
 let _getContextWait = {};
+let _getContextWaitPromise = {};
 Blackprint.getContext = async function(name){
-	if(!(name in _Context))
-		return await new Promise(function(resolve){
+	if(!(name in _Context)){
+		_getContextWaitPromise[name] ??= new Promise(function(resolve){
 			_getContextWait[name] = resolve;
 		});
+
+		return await _getContextWaitPromise[name];
+	}
 
 	return _Context[name];
 };
