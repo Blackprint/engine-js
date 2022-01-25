@@ -88,7 +88,24 @@ Blackprint.Interface = class Interface extends Blackprint.Engine.CustomEvent{
 		this.env = Blackprint.Environment.map;
 	}
 
-	newPort(portName, type, def, which, node){
-		return new Blackprint.Engine.Port(portName, type, def, which, node);
+	_newPort(portName, type, def, which){
+		return new Blackprint.Engine.Port(portName, type, def, which, this);
+	}
+
+	createPort(which, name, type){
+		if(which !== 'input' && which !== 'output')
+			throw new Error("Can only create port for 'input' and 'output'");
+
+		if(type === void 0)
+			throw new Error("Type is required for creating new port");
+
+		return this.node[which]._add(name, type);
+	}
+
+	deletePort(which, name){
+		if(which !== 'input' && which !== 'output')
+			throw new Error("Can only delete port for 'input' and 'output'");
+
+		return this.node[which]._delete(name);
 	}
 }

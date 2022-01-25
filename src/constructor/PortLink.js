@@ -10,14 +10,14 @@ class PortLink{
 
 		// Create linker for all port
 		for(var portName in portLink)
-			portLink.add(portName, portLink[portName]);
+			portLink._add(portName, portLink[portName]);
 
 		// Check if a browser
 		if(typeof sf !== 'undefined' && sf.Obj !== void 0 && sf.Obj.set !== void 0)
 			portLink._extracted = true;
 	}
 
-	add(portName, val){
+	_add(portName, val){
 		var nodeEls = this._iface[this._which];
 
 		// Determine type and add default value for each type
@@ -71,7 +71,7 @@ class PortLink{
 			if(def === void 0) def = null;
 		}
 
-		var linkedPort = this._iface.newPort(portName, type, def, this._which, this._iface);
+		var linkedPort = this._iface._newPort(portName, type, def, this._which);
 
 		if(this._extracted === true)
 			sf.Obj.set(nodeEls, portName, linkedPort);
@@ -98,7 +98,7 @@ class PortLink{
 		return linkedPort;
 	}
 
-	delete(portName){
+	_delete(portName){
 		var ref = this._iface[this._which];
 
 		// Destroy cable first
@@ -115,5 +115,11 @@ class PortLink{
 			delete ref[portName];
 	}
 }
+
+// ToDo: Deprecate name alias
+Object.defineProperties(PortLink.prototype, {
+	add: {value: PortLink.prototype._add},
+	delete: {value: PortLink.prototype._delete},
+});
 
 Blackprint.Engine.PortLink = PortLink;
