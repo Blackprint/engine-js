@@ -3,30 +3,26 @@ Blackprint.Interface = class Interface extends Blackprint.Engine.CustomEvent{
 		// Type extract for port data type
 		// Create reactiveness of node and iface's ports
 
-		node.ref = iface.ref = {};
-		if(node.output !== void 0){
-			Object.setPrototypeOf(node.output, Engine.PortLink.prototype);
-			Engine.PortLink.construct(node.output, 'output', iface);
+		let clazz = node.constructor;
 
+		node.ref = iface.ref = {};
+		if(clazz.output !== void 0){
+			node.output = new Engine.PortLink(node, 'output', clazz.output);
 			iface.ref.IOutput = iface.output;
 			iface.ref.Output = node.output;
 		}
 
-		if(node.input !== void 0){
-			Object.setPrototypeOf(node.input, Engine.PortLink.prototype);
-			Engine.PortLink.construct(node.input, 'input', iface);
-
+		if(clazz.input !== void 0){
+			node.input = new Engine.PortLink(node, 'input', clazz.input);
 			iface.ref.IInput = iface.input;
 			iface.ref.Input = node.input;
 		}
 
-		if(node.property !== void 0 || iface.property !== void 0)
-			throw new Error("'node.property' and 'iface.property' is reserved field for Blackprint");
+		if(node.property !== void 0 || iface.property !== void 0 || clazz.property !== void 0)
+			throw new Error("'node.property', 'iface.property', and 'static property' is reserved field for Blackprint");
 
-		// if(node.property !== void 0){
-		// 	Object.setPrototypeOf(node.property, Engine.PortLink.prototype);
-		// 	Engine.PortLink.construct(node.property, 'property', iface);
-
+		// if(clazz.property !== void 0){
+		//	node.property = new Engine.PortLink(node, 'property', clazz.property);
 		// 	iface.ref.IProperty = iface.property;
 		// 	iface.ref.Property = node.property;
 		// }
@@ -90,22 +86,5 @@ Blackprint.Interface = class Interface extends Blackprint.Engine.CustomEvent{
 
 	_newPort(portName, type, def, which){
 		return new Blackprint.Engine.Port(portName, type, def, which, this);
-	}
-
-	createPort(which, name, type){
-		if(which !== 'input' && which !== 'output')
-			throw new Error("Can only create port for 'input' and 'output'");
-
-		if(type === void 0)
-			throw new Error("Type is required for creating new port");
-
-		return this.node[which]._add(name, type);
-	}
-
-	deletePort(which, name){
-		if(which !== 'input' && which !== 'output')
-			throw new Error("Can only delete port for 'input' and 'output'");
-
-		return this.node[which]._delete(name);
 	}
 }

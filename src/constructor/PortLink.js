@@ -1,20 +1,24 @@
-class PortLink{
-	static construct(portLink, which, iface){
-		Object.defineProperties(portLink, {
-			_which:{value: which},
-			_iface:{value: iface},
+class PortLink {
+	constructor(node, which, portMeta){
+		let iface = node.iface;
+
+		Object.defineProperties(this, {
+			_which: {value: which},
+			_iface: {value: iface},
 			_extracted:{writable:true, value:false},
 		});
 
 		iface[which] = {}; // Handled by ScarletsFrame
 
 		// Create linker for all port
-		for(var portName in portLink)
-			portLink._add(portName, portLink[portName]);
+		for(var portName in portMeta){
+			if(portName.slice(0, 1) === '_') continue;
+			this._add(portName, portMeta[portName]);
+		}
 
 		// Check if a browser
 		if(typeof sf !== 'undefined' && sf.Obj !== void 0 && sf.Obj.set !== void 0)
-			portLink._extracted = true;
+			this._extracted = true;
 	}
 
 	_add(portName, val){
@@ -51,7 +55,7 @@ class PortLink{
 			}
 			else if(val.portFeature === BP_Port.Trigger){
 				type = Function;
-				def = val.default;
+				def = val.default.bind(this._iface.node);
 			}
 			else if(val.portFeature === BP_Port.Default){
 				type = val.portType;
@@ -115,11 +119,5 @@ class PortLink{
 			delete ref[portName];
 	}
 }
-
-// ToDo: Deprecate name alias
-Object.defineProperties(PortLink.prototype, {
-	add: {value: PortLink.prototype._add},
-	delete: {value: PortLink.prototype._delete},
-});
 
 Blackprint.Engine.PortLink = PortLink;
