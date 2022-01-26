@@ -63,6 +63,27 @@ Blackprint.Node = class Node extends Blackprint.Engine.CustomEvent {
 		return this[which]._add(name, type);
 	}
 
+	renamePort(which, name, to){
+		let iPort = this.iface[which];
+
+		if(!(name in iPort))
+			throw new Error(which+" port with name '"+name+"' was not found");
+
+		if(to in iPort)
+			throw new Error(which+" port with name '"+to+"' already exist");
+
+		let temp = iPort[to] = iPort[name];
+		delete iPort[name];
+
+		temp.name = to;
+
+		let port = this[which];
+		Object.defineProperty(port, to, Object.getOwnPropertyDescriptor(port, name));
+		delete port[name];
+
+		return true;
+	}
+
 	deletePort(which, name){
 		if(which !== 'input' && which !== 'output')
 			throw new Error("Can only delete port for 'input' and 'output'");
