@@ -9,6 +9,7 @@ Blackprint.Node = class Node extends Blackprint.Engine.CustomEvent {
 		this._instance = instance;
 		this._scope = instance.scope; // Only in Blackprint.Sketch
 	}
+
 	setInterface(path='BP/default'){
 		if(this.iface !== void 0)
 			throw new Error('node.setInterface() can only be called once');
@@ -50,5 +51,22 @@ Blackprint.Node = class Node extends Blackprint.Engine.CustomEvent {
 
 		iface.interface = path;
 		return this.iface = iface;
+	}
+
+	createPort(which, name, type){
+		if(which !== 'input' && which !== 'output')
+			throw new Error("Can only create port for 'input' and 'output'");
+
+		if(type === void 0)
+			throw new Error("Type is required for creating new port");
+
+		return this[which]._add(name, type);
+	}
+
+	deletePort(which, name){
+		if(which !== 'input' && which !== 'output')
+			throw new Error("Can only delete port for 'input' and 'output'");
+
+		return this[which]._delete(name);
 	}
 };
