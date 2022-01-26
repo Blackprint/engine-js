@@ -27,6 +27,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 			var portList = iface[check[i]];
 
 			for(var port in portList){
+				if(port.slice(0, 1) === '_') continue;
 				portList[port].disconnectAll();
 			}
 		}
