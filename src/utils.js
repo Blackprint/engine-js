@@ -102,3 +102,15 @@ const isClass = Blackprint._utils.isClass = (function(){
     return false;
   }
 })();
+
+Blackprint.utils ??= {};
+Blackprint.utils.renameTypeName = function(obj, minimumChar=0){
+	for(let key in obj){
+		if(minimumChar !== 0 && obj[key].name.length > minimumChar)
+			continue;
+
+		Object.defineProperty(obj[key], 'name', {
+			configurable: true, value: key
+		});
+	}
+}
