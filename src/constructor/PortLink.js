@@ -25,6 +25,10 @@ class PortLink {
 
 	_add(portName, val){
 		var iPort = this._iface[this._which];
+		let exist = iPort[portName];
+
+		if(portName in iPort)
+			return exist;
 
 		// Determine type and add default value for each type
 		var type, def, haveFeature;
@@ -107,12 +111,11 @@ class PortLink {
 	_delete(portName){
 		var iPort = this._iface[this._which];
 
-		// Destroy cable first
-		var cables = iPort[portName].cables;
-		for (var i = 0; i < cables.length; i++)
-			cables[i].disconnect();
+		if(!(portName in iPort))
+			return;
 
-		delete this[portName];
+		// Destroy cable first
+		iPort[portName].disconnectAll();
 
 		// Check if a browser or not
 		if(this._sf === true){
@@ -123,6 +126,7 @@ class PortLink {
 		}
 
 		delete iPort[portName];
+		delete this[this._which][portName];
 	}
 }
 
