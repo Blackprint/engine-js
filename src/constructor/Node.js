@@ -60,7 +60,12 @@ Blackprint.Node = class Node extends Blackprint.Engine.CustomEvent {
 		if(type === void 0)
 			throw new Error("Type is required for creating new port");
 
-		return this[which]._add(name, type);
+		if(type.constructor === Function
+		   || (type.constructor === Object && type.portFeature !== void 0)){
+			return this[which]._add(name, type);
+		}
+
+		throw new Error("Type must be a class object or from Blackprint.Port.{feature}");
 	}
 
 	renamePort(which, name, to){
