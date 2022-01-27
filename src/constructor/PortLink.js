@@ -115,18 +115,19 @@ class PortLink {
 			return;
 
 		// Destroy cable first
-		iPort[portName].disconnectAll();
+		let port = iPort[portName];
+		port.disconnectAll();
 
 		// Check if a browser or not
 		if(this._sf === true){
-			let i = iPort._list(iPort[portName]);
+			let i = iPort._list.indexOf(port);
 
 			if(i !== -1)
 				iPort._list.splice(i, 1);
 		}
 
 		delete iPort[portName];
-		delete this[this._which][portName];
+		delete this[portName];
 	}
 }
 
