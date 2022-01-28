@@ -14,20 +14,20 @@
 	- Before: `node.input.delete(name)`
 - Input/output port name that start with `_` will be ignored
 - Rename some function and mark it as private
-- `node.input` and `node.output` now must be changed to static class variable
+- `node.input` and `node.output` construction now must be changed to static class variable
 
 <details>
 	<summary>Click here to open details</summary>
 
 ```js
 class MyCustomNode extends Blackprint.Node {
-	// Before
-	input = { MyInput: Number };
-	output = { MyOutput: Number };
+    // Before
+    input = { MyInput: Number };
+    output = { MyOutput: Number };
 
-	// After
-	static input = { MyInput: Number };
-	static output = { MyOutput: Number };
+    // After
+    static input = { MyInput: Number };
+    static output = { MyOutput: Number };
 }
 ```
 </details>
