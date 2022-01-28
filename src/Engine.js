@@ -4,6 +4,9 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		this.settings = {};
 		this.ifaceList = []; // IFace
 
+		this.variables = {}; // { path => { value } }
+		this.functions = {}; // { path => { name, description, input, output, nodes: [] } }
+
 		this.iface = {}; // { id => IFace }
 		this.ref = {}; // { id => Port references }
 	}
