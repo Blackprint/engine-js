@@ -90,7 +90,7 @@ class PortLink {
 		if(haveFeature){
 			linkedPort.feature = haveFeature;
 			if(haveFeature === BP_Port.ArrayOf)
-				linkedPort.classAdd = ' Array';
+				linkedPort.classAdd = 'ArrayOf ';
 
 			linkedPort._call = val;
 		}

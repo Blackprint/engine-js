@@ -4,7 +4,7 @@
 // for union port, please split it to different port to handle it
 BP_Port.ArrayOf = function(type){
 	if(type !== null && type.constructor === Array)
-		type.name = 'Array '+type[0].constructor.name;
+		throw new Error("Currently Blackprint.Port.ArrayOf only accept one types");
 
 	return {
 		portFeature: BP_Port.ArrayOf,
