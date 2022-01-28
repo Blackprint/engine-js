@@ -69,6 +69,18 @@ Blackprint.registerNode('LibraryName/FeatureName/Template',
 class MyTemplate extends Blackprint.Node{
     // this == node
 
+    // You can use type data like Number/String or "Blackprint.Port"
+    // use "Blackprint.Port.Trigger" if it's callable port
+    static input = {
+        PortName1: Blackprint.Port.Default(Number, 123)
+    };
+
+    // Output only accept 1 type data
+    // use "Function" if it's callable port
+    static output = {
+        PortName2: Number
+    };
+
     constructor(instance){
         super(instance);
 
@@ -78,18 +90,6 @@ class MyTemplate extends Blackprint.Node{
         let iface = this.setInterface('BPIC/LibraryName/FeatureName/Template');
         iface.title = 'My Title';
         iface.description = 'My Description';
-
-        // You can use type data like Number/String or "Blackprint.Port"
-        // use "Blackprint.Port.Trigger" if it's callable port
-        this.input = {
-            PortName1: Blackprint.Port.Default(Number, 123)
-        };
-
-        // Output only accept 1 type data
-        // use "Function" if it's callable port
-        this.output = {
-            PortName2: Number
-        };
     }
 
     // Put logic as minimum as you can in .registerNode
@@ -129,9 +129,6 @@ Context.IFace.MyTemplate = class IMyTemplate extends Blackprint.Interface {
     constructor(node){
         super(node); // 'node' object from .registerNode
 
-        // Constructor for Interface can be executed twice when using Cloned Container
-        // If you're assigning data on this contructor, you should check if it already has the data
-        if(this.myData !== undefined) return;
         this.myData = 123;
         this._log = '...';
 
@@ -216,9 +213,6 @@ class IMyTemplate extends Context.IFace.MyTemplate {
   constructor(node){
     super(node); // 'node' object from .registerNode
 
-    // Constructor for Interface can be executed twice when using Cloned Container
-    // If you're assigning data on this contructor, you should check if it already has the data
-    if(this.keepMe !== undefined) return;
     this.keepMe = $('<div>');
     this.keepMe.text("Hello world!");
     this.keepMe.css({
