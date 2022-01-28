@@ -1,3 +1,37 @@
+# 0.6.0
+
+### Features
+- Add feature to rename port
+- Add utils to help fix minified class name
+- Add instance storage for variables, functions
+
+### Breaking Changes
+- Creating input/output port dynamically now become:
+	- After: `node.createPort("input" | "output", name, type)`
+	- Before: `node.input.add(name, type)`
+- Deleting input/output port dynamically now become:
+	- After: `node.deletePort("input" | "output", name)`
+	- Before: `node.input.delete(name)`
+- Input/output port name that start with `_` will be ignored
+- Rename some function and mark it as private
+- `node.input` and `node.output` now must be changed to static class variable
+
+<details>
+	<summary>Click here to open details</summary>
+
+```js
+class MyCustomNode extends Blackprint.Node {
+	// Before
+	input = { MyInput: Number };
+	output = { MyOutput: Number };
+
+	// After
+	static input = { MyInput: Number };
+	static output = { MyOutput: Number };
+}
+```
+</details>
+
 # 0.5.2
 
 ### Bug Fix
