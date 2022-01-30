@@ -268,6 +268,7 @@ Blackprint.registerNode = function(namespace, func){
 	if(func === void 0){
 		return function(claz){
 			Blackprint.registerNode(namespace, claz);
+			return claz;
 		}
 	}
 
@@ -311,6 +312,7 @@ Blackprint.registerInterface = function(templatePath, options, func){
 	if(func === void 0){
 		return function(claz){
 			Blackprint.registerInterface(templatePath, options, claz);
+			return claz;
 		}
 	}
 
