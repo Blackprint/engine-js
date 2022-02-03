@@ -4,8 +4,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		this.settings = {};
 		this.ifaceList = []; // IFace
 
-		this.variables = {}; // { path => { value } }
-		this.functions = {}; // { path => { name, description, input, output, nodes: [] } }
+		this.variables = {}; // { name => { value, type, title, category } }
+		this.functions = {}; // { name => { variables, input, output, used: [], node, title, category, description } }
 
 		this.iface = {}; // { id => IFace }
 		this.ref = {}; // { id => Port references }
@@ -246,12 +246,30 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 		return iface;
 	}
+
+	createVariable(id, type){
+		if(id in this.variables)
+			throw new Error("Variable id already exist");
+
+		// BPVariable = ./nodes/Var.js
+		this.variables[id] = new BPVariable(id, type);
+	}
+
+	createFunction(id){
+		if(id in this.functions)
+			throw new Error("Function id already exist");
+
+		// BPFunction = ./nodes/Fn.js
+		this.functions[id] = new BPFunction(id);
+	}
 }
 
 Blackprint.Engine.CustomEvent = CustomEvent;
 
 // For storing registered nodes
-Blackprint.nodes = {};
+Blackprint.nodes = {
+	BP: {hidden: !true} // Internal nodes
+};
 
 let _classNodeError = ".registerNode: Class must be instance of Blackprint.Node";
 // This function will be replaced when using Blackprint Sketch
