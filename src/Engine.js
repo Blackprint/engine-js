@@ -1,7 +1,6 @@
 Blackprint.Engine = class Engine extends CustomEvent {
 	constructor(){
 		super();
-		this.settings = {};
 		this.ifaceList = []; // IFace
 
 		this.variables = {}; // { name => { value, type, title, category } }
