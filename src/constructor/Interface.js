@@ -85,7 +85,7 @@ Blackprint.Interface = class Interface extends Blackprint.Engine.CustomEvent{
 		this.env = Blackprint.Environment.map;
 	}
 
-	_newPort(portName, type, def, which){
-		return new Blackprint.Engine.Port(portName, type, def, which, this);
+	_newPort(portName, type, def, which, haveFeature){
+		return new Blackprint.Engine.Port(portName, type, def, which, this, haveFeature);
 	}
 }

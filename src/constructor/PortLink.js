@@ -31,69 +31,13 @@ class PortLink {
 			return exist;
 
 		// Determine type and add default value for each type
-		var type, def, haveFeature;
-		if(typeof val === 'function'){
-			type = val;
+		let { type, def, haveFeature } = determinePortType(val, this);
 
-			// Give default value for each data type
-			if(type === Number)
-				def = 0;
-			else if(type === Boolean)
-				def = false;
-			else if(type === String)
-				def = '';
-			else def = null;
-		}
-		else if(val === null){
-			type = TypeAny;
-			def = null;
-		}
-		else{
-			if(val.portFeature === BP_Port.ArrayOf){
-				haveFeature = val.portFeature;
-				type = val.portType;
-
-				if(type === null){
-					type = {name:'Any', any:true};
-					def = null;
-				}
-				else def = [];
-			}
-			else if(val.portFeature === BP_Port.Trigger){
-				type = Function;
-				def = val.default.bind(this._iface.node);
-			}
-			else if(val.portFeature === BP_Port.Default){
-				type = val.portType;
-				def = val.default;
-			}
-			else if(val.portFeature === BP_Port.Union){
-				haveFeature = BP_Port.Union;
-				type = val.portType;
-				def = val.default;
-			}
-			else{
-				type = val.constructor;
-				def = val;
-			}
-
-			// Default must be null (because it's defined but don't have data)
-			if(def === void 0) def = null;
-		}
-
-		var linkedPort = this._iface._newPort(portName, type, def, this._which);
+		var linkedPort = this._iface._newPort(portName, type, def, this._which, haveFeature);
 		iPort[portName] = linkedPort;
 
 		if(this._sf === true)
 			iPort._list.push(linkedPort);
-
-		if(haveFeature){
-			linkedPort.feature = haveFeature;
-			if(haveFeature === BP_Port.ArrayOf)
-				linkedPort.classAdd = 'ArrayOf ';
-
-			linkedPort._call = val;
-		}
 
 		var linkValue = linkedPort.createLinker();
 
@@ -132,3 +76,57 @@ class PortLink {
 }
 
 Blackprint.Engine.PortLink = PortLink;
+
+function determinePortType(val, that){
+	var type, def, haveFeature;
+	if(typeof val === 'function'){
+		type = val;
+
+		// Give default value for each data type
+		if(type === Number)
+			def = 0;
+		else if(type === Boolean)
+			def = false;
+		else if(type === String)
+			def = '';
+		else def = null;
+	}
+	else if(val === null){
+		type = TypeAny;
+		def = null;
+	}
+	else{
+		if(val.portFeature === BP_Port.ArrayOf){
+			haveFeature = val.portFeature;
+			type = val.portType;
+
+			if(type === null){
+				type = {name:'Any', any:true};
+				def = null;
+			}
+			else def = [];
+		}
+		else if(val.portFeature === BP_Port.Trigger){
+			type = Function;
+			def = val.default.bind(that._iface.node);
+		}
+		else if(val.portFeature === BP_Port.Default){
+			type = val.portType;
+			def = val.default;
+		}
+		else if(val.portFeature === BP_Port.Union){
+			haveFeature = BP_Port.Union;
+			type = val.portType;
+			def = val.default;
+		}
+		else{
+			type = val.constructor;
+			def = val;
+		}
+
+		// Default must be null (because it's defined but don't have data)
+		if(def === void 0) def = null;
+	}
+
+	return { type, def, haveFeature };
+}

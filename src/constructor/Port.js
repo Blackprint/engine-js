@@ -1,7 +1,7 @@
 let TypeAny = {name:'Any', any:true};
 
 Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
-	constructor(name, type, def, source, iface){
+	constructor(name, type, def, source, iface, haveFeature){
 		super();
 
 		this.name = name;
@@ -15,6 +15,14 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		this.default = def;
 
 		// this.feature == BP_Port.Listener | BP_Port.ArrayOf | BP_Port.Async
+
+		if(haveFeature){
+			this.feature = haveFeature;
+			if(haveFeature === BP_Port.ArrayOf)
+				this.classAdd = 'ArrayOf ';
+
+			this._call = val;
+		}
 	}
 
 	disconnectAll(){
@@ -248,7 +256,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		if(cable.owner.type !== this.type
 		   && cable.owner.type.constructor === Function
 		   && this.type.constructor === Function){
-		   	if(cable.owner.source === 'output')
+			if(cable.owner.source === 'output')
 				isInstance = cable.owner.type.prototype instanceof this.type;
 			else isInstance =  this.type.prototype instanceof cable.owner.type;
 		}
