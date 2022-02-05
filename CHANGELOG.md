@@ -1,3 +1,11 @@
+# 0.6.1
+
+### Bug Fix
+- Fix `registerNode` and `registerInterface` to be used for decorator
+
+### Features
+- Add `Blackprint.OutputPort` and `Blackprint.InputPort` for testing or scripting
+
 # 0.6.0
 
 ### Features
