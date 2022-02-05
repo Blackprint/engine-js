@@ -323,6 +323,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			throw new Error("First parameter must be instance of Port");
 
 		var cable = new Engine.Cable(port);
+		if(port._ghost) cable._ghost = true;
 
 		if(this.connectCable(cable)){
 			port.cables.push(cable);

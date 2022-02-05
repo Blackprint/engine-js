@@ -19,6 +19,7 @@ Blackprint.OutputPort = class extends PortGhost {
 		var { type, def, haveFeature } = determinePortType(type, fakeIface);
 
 		super('Blackprint.OutputPort', type, def, 'output', fakeIface, haveFeature);
+		this._ghost = true;
 	}
 }
 
@@ -27,5 +28,6 @@ Blackprint.InputPort = class extends PortGhost {
 		var { type, def, haveFeature } = determinePortType(type, fakeIface);
 
 		super('Blackprint.InputPort', type, def, 'input', fakeIface, haveFeature);
+		this._ghost = true;
 	}
 }
