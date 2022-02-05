@@ -18,10 +18,9 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 		if(haveFeature){
 			this.feature = haveFeature;
+
 			if(haveFeature === BP_Port.ArrayOf)
 				this.classAdd = 'ArrayOf ';
-
-			this._call = val;
 		}
 	}
 
