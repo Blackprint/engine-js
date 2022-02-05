@@ -2,10 +2,12 @@
 // Please use init.mjs instead of init.js
 
 // For Deno
-// import Blackprint from 'https://cdn.skypack.dev/@blackprint/engine@0.3.0';
+// import Blackprint from './../dist/engine.es6.js';
+// import Blackprint from 'https://cdn.skypack.dev/@blackprint/engine@0.6';
 
 // For Node
-var Blackprint = require('@blackprint/engine');
+var Blackprint = require('./../dist/engine.min.js');
+// var Blackprint = require('@blackprint/engine');
 
 // Run from your CLI
 // deno run init.js
@@ -18,34 +20,36 @@ var Blackprint = require('@blackprint/engine');
 	// 'BPIC/LibraryName/FeatureName/NodeName'
 
 	// Example below is using 'i-' to make it easier to understand
-	Blackprint.registerInterface('BPIC/i-button', function(iface){
+	Blackprint.registerInterface('BPIC/i-button', class extends Blackprint.Interface {
 		// Will be used for 'Example/Button/Simple' node
-		iface.clicked = function(ev){
+		clicked(ev){
 			console.log("Engine: 'Trigger' button clicked, going to run the handler");
-			iface.node.clicked && iface.node.clicked(ev);
+			this.node.clicked && this.node.clicked(ev);
 		}
 	});
 
-	Blackprint.registerInterface('BPIC/i-input', function(iface){
-		var theValue = '';
-		iface.data = {
-			set value(val){
-				theValue = val;
+	Blackprint.registerInterface('BPIC/i-input', class extends Blackprint.Interface {
+		constructor(node){
+			super(node);
 
-				if(iface.node.changed !== void 0)
-					iface.node.changed(val);
-			},
-			get value(){
-				return theValue;
-			}
-		};
+			let iface = this;
+
+			let theValue = '...';
+			this.data = {
+				get value(){ return theValue },
+				set value(val){
+					theValue = val;
+
+					if(iface.node.changed !== void 0)
+						iface.node.changed(val);
+				},
+			};
+		}
 	});
 
 	// You can use class and use getter/setter to improve performance and memory efficiency
 	Blackprint.registerInterface('BPIC/i-logger', class extends Blackprint.Interface {
-		get log(){
-			return this._log;
-		}
+		get log(){ return this._log }
 		set log(val){
 			this._log = val;
 			console.log("Logger:", val);
@@ -59,114 +63,114 @@ var Blackprint = require('@blackprint/engine');
 	}
 
 // === Register Node Handler ===
-// Exact copy of register-handler.js from the browser version
-// https://github.com/Blackprint/blackprint.github.io/blob/master/src/js/register-handler.js
-	Blackprint.registerNode('Example/Math/Multiply', function(node){
-		let iface = node.setInterface(); // Let's use default node interface
-		iface.title = "Multiply";
-
+	Blackprint.registerNode('Example/Math/Multiply', class extends Blackprint.Node {
 		// Handle all output port here
-		node.output = {
+		static output = {
 			Result:Number,
 		};
 
 		// Handle all input port here
-		var input = node.input = {
+		static input = {
 			Exec: Blackprint.Port.Trigger(function(){
-				node.output.Result = multiply();
-				console.log("Result has been set:", node.output.Result);
+				this.output.Result = this.multiply();
+				console.log("Result has been set:", this.output.Result);
 			}),
 			A: Number,
-			B: Blackprint.Port.Validator(Number, function(val){
-				// Executed when input.B is being obtained
-				// And the output from other node is being assigned
-				// as current port value in this node
-				console.log(iface.title, '- Port B got input:', val);
-				return Number(val);
-			}),
+			B: null,
 		};
 
-		// Your own processing mechanism
-		function multiply(){
-			console.log('Multiplying', input.A, 'with', input.B);
-			return input.A * input.B;
+		constructor(instance){
+			super(instance);
+
+			let iface = this.setInterface(); // Let's use default node interface
+			iface.title = "Multiply";
 		}
 
-		// When any output value from other node are updated
-		// Let's immediately change current node result
-		node.update = function(cable){
-			node.output.Result = multiply();
-		}
+		// Event listener can only be registered after/when init
+		init(){
+			let iface = this.iface;
 
-		// Event listener can only be registered after handle init
-		node.init = function(){
 			iface.on('cable.connect', function({port, target}){
 				console.log(`Cable connected from ${port.iface.title} (${port.name}) to ${target.iface.title} (${target.name})`);
 			});
 		}
+
+		// When any output value from other node are updated
+		// Let's immediately change current node result
+		update(cable){
+			this.output.Result = this.multiply();
+		}
+
+		// Your own processing mechanism
+		multiply(){
+			let input = this.input;
+			console.log('Multiplying', input.A, 'with', input.B);
+
+			return input.A * input.B;
+		}
 	});
 
-	Blackprint.registerNode('Example/Math/Random', function(node){
-		let iface = node.setInterface(); // Let's use default node interface
-		iface.title = "Random";
-		iface.description = "Number (0-100)";
+	Blackprint.registerNode('Example/Math/Random', class extends Blackprint.Node {
+		executed = false;
 
-		node.output = {
-			Out:Number
-		};
-
-		var executed = false;
-		node.input = {
+		static output = { Out:Number };
+		static input = {
 			'Re-seed':Blackprint.Port.Trigger(function(){
-				executed = true;
-				node.output.Out = Math.round(Math.random()*100);
+				this.executed = true;
+				this.output.Out = Math.round(Math.random()*100);
 			})
 		};
 
+		constructor(instance){
+			super(instance);
+
+			let iface = this.setInterface(); // Let's use default node interface
+			iface.title = "Random";
+			iface.description = "Number (0-100)";
+		}
+
 		// When the connected node is requesting for the output value
-		node.request = function(port, iface2){
+		request(port, iface2){
 			// Only run once this node never been executed
 			// Return false if no value was changed
-			if(executed === true)
+			if(this.executed === true)
 				return false;
 
 			console.warn('Value request for port:', port.name, "from node:", iface2.title);
 
 			// Let's create the value for him
-			node.input['Re-seed']();
+			this.input['Re-seed']();
 		}
 	});
 
-	Blackprint.registerNode('Example/Display/Logger', function(node){
-		let iface = node.setInterface('BPIC/i-logger');
-		iface.title = "Logger";
-		iface.description = 'Print anything into text';
-
-		node.input = {
+	Blackprint.registerNode('Example/Display/Logger', class extends Blackprint.Node {
+		static input = {
 			Any: Blackprint.Port.ArrayOf(null) // Any data type, and can be used for many cable
 		};
 
-		function refreshLogger(val){
-			if(val === null)
-				iface.log = 'null';
-			else if(val === void 0)
-				iface.log = 'undefined';
-			else if(val.constructor === Function)
-				iface.log = val.toString();
-			else if(val.constructor === String || val.constructor === Number)
-				iface.log = val;
-			else
-				iface.log = JSON.stringify(val);
+		constructor(instance){
+			super(instance);
+
+			let iface = this.setInterface('BPIC/i-logger');
+			iface.title = "Logger";
+			iface.description = 'Print anything into text';
 		}
 
-		node.init = function(){
+		init(){
+			let node = this;
+			let iface = this.iface;
+
+			function refreshLogger(val){
+				iface.log = JSON.stringify(val);
+			}
+
 			// Let's show data after new cable was connected or disconnected
 			iface.on('cable.connect cable.disconnect', function(){
 				console.log("A cable was changed on Logger, now refresing the input element");
 				refreshLogger(node.input.Any);
 			});
 
-			iface.input.Any.on('value', function(target){
+			iface.input.Any.on('value', function({ target }){
 				console.log("I connected to", target.name, "target from", target.iface.title, "that have new value:", target.value);
 
 				// Let's take all data from all connected nodes
@@ -176,50 +180,54 @@ var Blackprint = require('@blackprint/engine');
 		}
 	});
 
-	Blackprint.registerNode('Example/Button/Simple', function(node){
-		let iface = node.setInterface('BPIC/i-button');
-		// node = under ScarletsFrame element control
-		iface.title = "Button";
+	Blackprint.registerNode('Example/Button/Simple', class extends Blackprint.Node {
+		static output = { Clicked: Function };
 
-		// node = under Blackprint node flow control
-		node.output = {
-			Clicked:Function
-		};
+		constructor(instance){
+			super(instance);
+
+			let iface = this.setInterface('BPIC/i-button');
+			iface.title = "Button";
+		}
 
 		// Proxy event object from: node.clicked -> node.clicked -> output.Clicked
-		node.clicked = function(ev){
+		clicked(ev){
 			console.log('button/Simple: got', ev, "time to trigger to the other node");
-			node.output.Clicked(ev);
+			this.output.Clicked(ev);
 		}
 	});
 
-	Blackprint.registerNode('Example/Input/Simple', function(node){
-		let iface = node.setInterface('BPIC/i-input');
-		// iface = under ScarletsFrame element control
-		iface.title = "Input";
-
-		// node = under Blackprint node flow control
-		node.output = {
-			Changed:Function,
-			Value:String, // Default to empty string
+	Blackprint.registerNode('Example/Input/Simple', class extends Blackprint.Node {
+		static output = {
+			Changed: Function,
+			Value: String, // Default to empty string
 		};
 
-		iface.data = {
-			value:'...'
-		};
+		constructor(instance){
+			super(instance);
+
+			let iface = this.setInterface('BPIC/i-input');
+			iface.title = "Input";
+
+			iface.data = { value: '...' };
+		}
 
 		// Bring value from imported node to handle output
-		node.imported = function(data){
+		imported(data){
+			let iface = this.iface;
+
 			console.warn("Old data:", JSON.stringify(iface.data));
 			console.warn("Imported data:", JSON.stringify(data));
 
 			iface.data = data;
-			node.output.Value = data.value;
+			this.output.Value = data.value;
 		}
 
 		// Proxy string value from: node.changed -> node.changed -> output.Value
 		// And also call output.Changed() if connected to other node
-		node.changed = function(text, ev){
+		changed(text, ev){
+			let iface = this.iface;
+
 			// This node still being imported
 			if(iface.importing !== false)
 				return;
@@ -227,10 +235,10 @@ var Blackprint = require('@blackprint/engine');
 			console.log('The input box have new value:', text);
 
 			// node.data.value === text;
-			node.output.Value = iface.data.value;
+			this.output.Value = iface.data.value;
 
 			// This will call every connected node
-			node.output.Changed();
+			this.output.Changed();
 		}
 	});
 
