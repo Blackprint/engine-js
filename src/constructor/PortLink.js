@@ -79,6 +79,9 @@ Blackprint.Engine.PortLink = PortLink;
 
 function determinePortType(val, that){
 	var type, def, haveFeature;
+	if(val === void 0)
+		throw new Error("Port type can't be undefined, error when processing: "+that._iface.title+", "+that._which+' port');
+
 	if(typeof val === 'function'){
 		type = val;
 
