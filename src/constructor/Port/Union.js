@@ -10,7 +10,7 @@ BP_Port.Union = function(types){
 		names.push(temp.length > 2 ? temp : '?');
 	}
 
-	types.name = 'BP-Union'+names.join(' ');
+	types.name = 'BP-Union '+names.join(' ');
 	return {
 		portFeature: BP_Port.Union,
 		portType: types
