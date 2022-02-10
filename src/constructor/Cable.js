@@ -57,7 +57,7 @@ class Cable{
 			this.target = inp;
 			this.source = this.owner.source;
 
-			if(this._scope !== void 0){
+			if(this._scope !== void 0 && !Blackprint.settings.windowless){
 				let temp1 = this.head1.slice(0);
 				this.head1 = this.head2.slice(0);
 				this.head2 = temp1;

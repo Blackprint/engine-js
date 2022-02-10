@@ -329,7 +329,13 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 		if(port._scope != null){
 			let list = port.iface[port.source]._list;
-			let rect = port.findPortElement(list.getElement(port)).getBoundingClientRect();
+			let rect;
+
+			if(list.getElement == null || DOMRect.fromRect == null){
+				rect = new DOMRect(); // use fake DOMRect (usually for testing with Jest)
+				rect.height = rect.width = rect.y = rect.x = 10;
+			}
+			else rect = port.findPortElement(list.getElement(port)).getBoundingClientRect();
 
 			cable = port.createCable(rect, true);
 		}
