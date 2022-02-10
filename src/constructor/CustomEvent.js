@@ -5,6 +5,7 @@ class CustomEvent {
 		if(this._event === void 0){
 			Object.defineProperty(this, '_event', {
 				configurable: true,
+				writable: true,
 				value:{ $_fallback: {} }
 			});
 		}
