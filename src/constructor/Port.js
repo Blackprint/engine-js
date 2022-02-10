@@ -40,7 +40,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			// Disable sync
 			port.sync = false;
 
-			return function(){
+			return function(obj){
 				var cables = port.cables;
 				for (var i = 0; i < cables.length; i++) {
 					var cable = cables[i];
@@ -54,6 +54,8 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 					target.iface.input[target.name].default();
 				}
+
+				port.emit('call', obj);
 			};
 		}
 
@@ -323,13 +325,21 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		if(!(port instanceof Engine.Port))
 			throw new Error("First parameter must be instance of Port");
 
-		var cable = new Engine.Cable(port);
+		let cable;
+
+		if(port._scope != null){
+			let list = port.iface[port.source]._list;
+			let rect = port.findPortElement(list.getElement(port)).getBoundingClientRect();
+
+			cable = port.createCable(rect, true);
+		}
+		else cable = new Engine.Cable(port);
+
 		if(port._ghost) cable._ghost = true;
 
-		if(this.connectCable(cable)){
-			port.cables.push(cable);
+		port.cables.push(cable);
+		if(this.connectCable(cable))
 			return true;
-		}
 
 		return false;
 	}
