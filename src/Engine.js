@@ -69,13 +69,13 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		delete json._;
 
 		if(metadata !== void 0){
-			if(metadata.env !== void 0){
+			if(metadata.env !== void 0 && !options.noEnv){
 				let temp = Blackprint.Environment;
 				Object.assign(temp.map, metadata.env);
 				temp.list = Object.entries(temp.map).map(([k, v]) => ({key: k, value: v}));
 			}
 
-			if(metadata.moduleJS !== void 0){
+			if(metadata.moduleJS !== void 0 && !options.noModuleJS){
 				// wait for .min.mjs
 				await Blackprint.loadModuleFromURL(metadata.moduleJS, {
 					loadBrowserInterface: false
