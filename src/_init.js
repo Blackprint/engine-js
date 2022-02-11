@@ -3,6 +3,11 @@ let exports = module.exports; // This will be 'window' object on browser
 // Use the existing Blackprint Engine from window, or create the polyfill
 var Blackprint = window.Blackprint || {
 	settings(which, val){
+		if(which === 'windowless' && val){
+			window.DOMRect ??= class{};
+			window.ResizeObserver ??= class{};
+		}
+
 		Blackprint.settings[which] = val;
 	}
 };

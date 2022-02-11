@@ -188,10 +188,6 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		return got;
 	}
 
-	settings(which, val){
-		this.settings[which] = val;
-	}
-
 	createNode(namespace, options, handlers){
 		var func = deepProperty(Blackprint.nodes, namespace.split('/'));
 		if(func === void 0)
@@ -267,7 +263,7 @@ Blackprint.Engine.CustomEvent = CustomEvent;
 
 // For storing registered nodes
 Blackprint.nodes = {
-	BP: {hidden: !true} // Internal nodes
+	BP: {hidden: true} // Internal nodes, ToDo
 };
 
 let _classNodeError = ".registerNode: Class must be instance of Blackprint.Node";
