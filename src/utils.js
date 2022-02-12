@@ -144,19 +144,10 @@ Blackprint.utils.packageIsNewer = function(old, now){
 			return false;
 	}
 
-	oldVer = oldVer[1].replace(/[.-]/g, '');
-	nowVer = nowVer[1].replace(/[.-]/g, '');
+	oldVer = oldVer[1].replace(/-/g, '.').replace(/\.\.+/, '.');
+	nowVer = nowVer[1].replace(/-/g, '.').replace(/\.\.+/, '.');
 
-	if(oldVer.length < nowVer.length)
-		oldVer += '0'.repeat(nowVer.length - oldVer.length);
-
-	if(oldVer.length > nowVer.length)
-		nowVer += '0'.repeat(oldVer.length - nowVer.length);
-
-	oldVer = Number("1"+oldVer);
-	nowVer = Number("1"+nowVer);
-
-	return oldVer < nowVer;
+	return oldVer.localeCompare(nowVer, void 0, { numeric: true, sensitivity: 'base' }) === -1;
 }
 
 Blackprint.utils.diveModuleURL = function(moduleInfo, onBubbling){
