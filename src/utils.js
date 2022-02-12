@@ -119,11 +119,20 @@ Blackprint.utils.packageIsNewer = function(old, now){
 	let oldVer = old.match(/@([0-9.-]+)/);
 	let nowVer = now.match(/@([0-9.-]+)/);
 
+	if(old === now) return false;
+	if(oldVer == null && nowVer == null) return false;
+
 	// Check if using latest
 	if(oldVer == null) return false;
-	if(nowVer == null) return true;
-
 	old = old.slice(0, old.indexOf(oldVer[0]));
+
+	if(nowVer == null){
+		if(!now.includes(old))
+			return false;
+
+		return true;
+	}
+
 	now = now.slice(0, now.indexOf(nowVer[0]));
 
 	// Check if different packages/url
@@ -139,10 +148,10 @@ Blackprint.utils.packageIsNewer = function(old, now){
 	nowVer = nowVer[1].replace(/[.-]/g, '');
 
 	if(oldVer.length < nowVer.length)
-		nowVer = nowVer.slice(0, oldVer.length);
+		oldVer += '0'.repeat(nowVer.length - oldVer.length);
 
 	if(oldVer.length > nowVer.length)
-		oldVer = oldVer.slice(0, nowVer.length);
+		nowVer += '0'.repeat(oldVer.length - nowVer.length);
 
 	oldVer = Number("1"+oldVer);
 	nowVer = Number("1"+nowVer);
