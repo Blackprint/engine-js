@@ -1,7 +1,7 @@
 let exports = module.exports; // This will be 'window' object on browser
 
 // Use the existing Blackprint Engine from window, or create the polyfill
-var Blackprint = window.Blackprint || {
+var Blackprint = window.Blackprint || Object.assign(new CustomEvent(), {
 	settings(which, val){
 		if(which === 'windowless' && val){
 			window.DOMRect ??= class{};
@@ -10,7 +10,7 @@ var Blackprint = window.Blackprint || {
 
 		Blackprint.settings[which] = val;
 	}
-};
+});
 
 if(Blackprint._utils === void 0)
 	Blackprint._utils = {};
@@ -128,8 +128,69 @@ Blackprint.loadModuleFromURL = async function(url, options){
 			url.splice(i, 1);
 	}
 
+	// Remove old version if exist
+	if(loadedList.length !== 0 && url.length !== 0){
+		let hasUpdate = false;
+		let { packageIsNewer } = Blackprint.utils;
+
+		// ToDo: make this more efficient
+		that: for (var i = 0; i < loadedList.length; i++) {
+			let tempOld = loadedList[i];
+			for (var a = url.length - 1; a >= 0; a--) {
+				let tempNew = url[a];
+
+				if(packageIsNewer(tempOld, tempNew)){
+					Blackprint.deleteModuleFromURL(tempOld);
+					continue that;
+				}
+
+				if(packageIsNewer(tempNew, tempOld)){
+					url.splice(i, 1);
+					continue that;
+				}
+			}
+		}
+
+		if(hasUpdate) Blackprint.emit('moduleUpdate');
+	}
+
 	if(Blackprint.loadModuleFromURL.browser === void 0)
 		return await Promise.all(url.map(v=> import(v)));
 
 	return await Blackprint.loadModuleFromURL.browser(url, options);
 };
+
+Blackprint.deleteModuleFromURL = function(url){
+	url = url.replace(/[?#].*?$/m, '').replace(/@[0-9.\-]+/m, '');
+	let modules = Blackprint.modulesURL;
+
+	for(let key in modules){
+		if(url === key.replace(/[?#].*?$/m, '').replace(/@[0-9.\-]+/m, '')){
+			url = key;
+			break;
+		}
+	}
+
+	Blackprint.utils.diveModuleURL(modules[url], function(deepObject, deepProp, keys, bubble){
+		delete deepObject[deepProp];
+
+		// Bubbling check if the parent has no child anymore
+		for (var i = bubble.length-1; i >= 0; i--) {
+			let ref = bubble[i];
+
+			if(--ref.val._length <= 0){
+				if(i === 0){
+					delete Blackprint.nodes[keys[0]];
+					break;
+				}
+
+				let parent = bubble[i-1];
+				delete parent.val[ref.key];
+			}
+			else break;
+		}
+	});
+
+	if(modules[url] != null) Blackprint.emit('moduleDelete', { url });
+	delete modules[url];
+}

@@ -114,3 +114,60 @@ Blackprint.utils.renameTypeName = function(obj, minimumChar=0){
 		});
 	}
 }
+
+Blackprint.utils.packageIsNewer = function(old, now){
+	let oldVer = old.match(/@([0-9.-]+)/);
+	let nowVer = now.match(/@([0-9.-]+)/);
+
+	// Check if using latest
+	if(oldVer == null) return false;
+	if(nowVer == null) return true;
+
+	old = old.slice(0, old.indexOf(oldVer[0]));
+	now = now.slice(0, now.indexOf(nowVer[0]));
+
+	// Check if different packages/url
+	if(old !== now){
+		if(now.includes('://')) // URL
+			return false;
+
+		if(!old.includes('/'+now)) // Package name
+			return false;
+	}
+
+	oldVer = oldVer[1].replace(/[.-]/g, '');
+	nowVer = nowVer[1].replace(/[.-]/g, '');
+
+	if(oldVer.length < nowVer.length)
+		nowVer = nowVer.slice(0, oldVer.length);
+
+	if(oldVer.length > nowVer.length)
+		oldVer = oldVer.slice(0, nowVer.length);
+
+	oldVer = Number("1"+oldVer);
+	nowVer = Number("1"+nowVer);
+
+	return oldVer < nowVer;
+}
+
+Blackprint.utils.diveModuleURL = function(moduleInfo, onBubbling){
+	that: for(let key in moduleInfo){
+		if(key.slice(0, 1) === '_')
+			continue;
+
+		key = key.split('/');
+		let prop = key.pop();
+
+		// Dive
+		let obj = Blackprint.nodes;
+		let bubble = new Array(key.length);
+		for (var i = 0; i < key.length; i++){
+			let k = key[i];
+			obj = obj[k];
+			bubble[i] = {key:k, val:obj};
+			if(obj == null) continue that;
+		}
+
+		onBubbling(obj, prop, key, bubble);
+	}
+}
