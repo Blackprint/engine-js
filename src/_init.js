@@ -145,9 +145,11 @@ Blackprint.loadModuleFromURL = async function(url, options){
 				}
 
 				if(packageIsNewer(tempNew, tempOld)){
-					url.splice(i, 1);
+					url.splice(a, 1);
 					continue that;
 				}
+
+				hasUpdate = true;
 			}
 		}
 
