@@ -1,3 +1,19 @@
+# 0.6.2
+
+### Bug Fix
+- Fix module version checker
+- Add spaces to `BP-Union` class
+- Make `_event` field writable
+- Remove unused function and some minor changes
+- Fix incorrect field name
+- Fix some error when Sketch is being run on Jest environment
+
+### Features
+- Add port `call` listener (for Trigger port) and fix `connectPort`
+- Add feature for using newest module and delete nodes by module URL
+- Add options to skip some import data
+- Throw error when the port type is undefined
+
 # 0.6.1
 
 ### Bug Fix
