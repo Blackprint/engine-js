@@ -1,7 +1,7 @@
 let exports = module.exports; // This will be 'window' object on browser
 
 // Use the existing Blackprint Engine from window, or create the polyfill
-var Blackprint = window.Blackprint || Object.assign(new CustomEvent(), {
+var Blackprint = window.Blackprint || {
 	settings(which, val){
 		if(which === 'windowless' && val){
 			window.DOMRect ??= class{};
@@ -10,7 +10,7 @@ var Blackprint = window.Blackprint || Object.assign(new CustomEvent(), {
 
 		Blackprint.settings[which] = val;
 	}
-});
+};
 
 if(Blackprint._utils === void 0)
 	Blackprint._utils = {};
@@ -26,6 +26,8 @@ if(exports.Blackprint === void 0){
 
 // Blackprint must be initialized once
 if(Blackprint.Engine !== void 0) return;
+
+Object.setPrototypeOf(Blackprint, CustomEvent.prototype);
 
 // Will  be used for `Blackprint.registerNode`
 Blackprint.modulesURL = {};
