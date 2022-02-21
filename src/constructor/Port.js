@@ -56,6 +56,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 				}
 
 				port.emit('call', obj);
+				// port.iface.node._instance.emit('port.output.call', temp);
 			};
 		}
 
@@ -155,6 +156,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 				port.value = val;
 				port.emit('value', { port });
+				// port.iface.node._instance.emit('port.output.value', temp);
 				port.sync(); // emit event to all input port connected to this port
 			}
 		}
@@ -182,8 +184,10 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			if(inp.iface.node.update && inp.iface._requesting === void 0)
 				inp.iface.node.update(inp, this, cable);
 
-			inp.emit('value', { target: this, cable });
-			inp.iface.emit('port.value', { port: inp, target: this, cable });
+			let temp = { port: inp, target: this, cable };
+
+			inp.emit('value', temp);
+			inp.iface.emit('port.value', temp);
 		}
 	}
 
