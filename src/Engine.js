@@ -261,6 +261,9 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 Blackprint.Engine.CustomEvent = CustomEvent;
 
+// This need to be replaced if you want to use this to solve conflicting nodes
+Blackprint.onModuleConflict = ()=>{};
+
 // For storing registered nodes
 Blackprint.nodes = {
 	BP: {hidden: true} // Internal nodes, ToDo
@@ -290,7 +293,12 @@ Blackprint.registerNode = function(namespace, func){
 	let isExist = deepProperty(Blackprint.nodes, namespace);
 	if(isExist){
 		if(this._scopeURL && isExist._scopeURL !== this._scopeURL){
-			throw `Conflicting nodes with similar name was found\nNamespace: ${namespace.join('/')}\nFirst register from: ${isExist._scopeURL}\nTrying to register again from: ${this._scopeURL}`;
+			// Return true     = module conflict was solved from other script
+			// Return non-true = throw error as the node has conflict
+			if(await Blackprint.onModuleConflict() !== true)
+				throw `Conflicting nodes with similar name was found\nNamespace: ${namespace.join('/')}\nFirst register from: ${isExist._scopeURL}\nTrying to register again from: ${this._scopeURL}`;
+
+			isExist = deepProperty(Blackprint.nodes, namespace);
 		}
 
 		if(isExist._hidden)
