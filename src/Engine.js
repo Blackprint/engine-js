@@ -262,7 +262,23 @@ Blackprint.Engine = class Engine extends CustomEvent {
 Blackprint.Engine.CustomEvent = CustomEvent;
 
 // This need to be replaced if you want to use this to solve conflicting nodes
-Blackprint.onModuleConflict = ()=>{};
+Blackprint.onModuleConflict = async ()=>{};
+
+onModuleConflict.pending = [];
+function onModuleConflict(namespace, old, now){
+	onModuleConflict.pending.push({namespace, old, new: now});
+
+	if(onModuleConflict.async)
+		return onModuleConflict.async;
+
+	return onModuleConflict.async = new Promise((resolve, reject) => {
+		Blackprint.onModuleConflict().then(()=>{
+			onModuleConflict.async = null;
+			onModuleConflict.pending.splice(0);
+			resolve();
+		}).catch(reject);
+	});
+}
 
 // For storing registered nodes
 Blackprint.nodes = {
@@ -293,12 +309,21 @@ Blackprint.registerNode = function(namespace, func){
 	let isExist = deepProperty(Blackprint.nodes, namespace);
 	if(isExist){
 		if(this._scopeURL && isExist._scopeURL !== this._scopeURL){
+			let nm = namespace.join('/');
+
 			// Return true     = module conflict was solved from other script
 			// Return non-true = throw error as the node has conflict
-			if(await Blackprint.onModuleConflict() !== true)
-				throw `Conflicting nodes with similar name was found\nNamespace: ${namespace.join('/')}\nFirst register from: ${isExist._scopeURL}\nTrying to register again from: ${this._scopeURL}`;
+			let solved = onModuleConflict(nm, isExist._scopeURL, this._scopeURL);
+			let args = arguments;
 
-			isExist = deepProperty(Blackprint.nodes, namespace);
+			solved.then(val => {
+				if(val)
+					return Blackprint.registerNode.apply(Blackprint, args);
+
+				throw `Conflicting nodes with similar name was found\nNamespace: ${nm}\nFirst register from: ${isExist._scopeURL}\nTrying to register again from: ${this._scopeURL}`;
+			});
+
+			return;
 		}
 
 		if(isExist._hidden)
