@@ -30,7 +30,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 			for(var port in portList){
 				if(port.slice(0, 1) === '_') continue;
-				portList[port].disconnectAll();
+				portList[port].disconnectAll(this._remote != null);
 			}
 		}
 
@@ -198,6 +198,9 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		if(isClass(func))
 			node = new func(this);
 		else func(node = new Blackprint.Node(this));
+
+		// Disable data flow on any node ports
+		if(this.disablePorts) node.disablePorts = true;
 
 		// Obtain iface from the node
 		let iface = node.iface;

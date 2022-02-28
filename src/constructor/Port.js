@@ -24,10 +24,16 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		}
 	}
 
-	disconnectAll(){
+	disconnectAll(hasRemote){
 		var cables = this.cables;
-		for (var i = cables.length - 1; i >= 0; i--)
-			cables[i].disconnect();
+		for (var i = cables.length - 1; i >= 0; i--){
+			let cable = cables[i];
+
+			if(hasRemote)
+				cable._evDisconnected = true;
+
+			cable.disconnect();
+		}
 	}
 
 	// Set for the linked port (Handle for ScarletsFrame)
@@ -41,18 +47,20 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			port.sync = false;
 
 			return function(obj){
-				var cables = port.cables;
-				for (var i = 0; i < cables.length; i++) {
-					var cable = cables[i];
+				if(!port.iface.node.disablePorts){
+					var cables = port.cables;
+					for (var i = 0; i < cables.length; i++) {
+						var cable = cables[i];
 
-					var target = cable.input;
-					if(target === void 0)
-						continue;
+						var target = cable.input;
+						if(target === void 0)
+							continue;
 
-					if(Blackprint.settings.visualizeFlow)
-						cable.visualizeFlow();
+						if(Blackprint.settings.visualizeFlow)
+							cable.visualizeFlow();
 
-					target.iface.input[target.name].default();
+						target.iface.input[target.name].default();
+					}
 				}
 
 				port.emit('call', obj);
@@ -141,7 +149,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		// Can only obtain data when accessing input port
 		if(port.source !== 'input'){
 			prepare.set = function(val){ // for output/property port
-				if(port.value === val)
+				if(port.value === val || port.iface.node.disablePorts)
 					return;
 
 				if(val == null)

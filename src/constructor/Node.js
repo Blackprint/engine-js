@@ -8,6 +8,8 @@ Blackprint.Node = class Node extends Blackprint.Engine.CustomEvent {
 		super();
 		this._instance = instance;
 		this._scope = instance.scope; // Only in Blackprint.Sketch
+		this.syncThrottle = 250; // One syncOut per 250ms, last state will be synced
+		this.disablePorts = false; // Disable output port from synchronizing data to other nodes
 	}
 
 	setInterface(path='BP/default'){
@@ -95,4 +97,10 @@ Blackprint.Node = class Node extends Blackprint.Engine.CustomEvent {
 
 		return this[which]._delete(name);
 	}
+
+	// Will be replaced by @blackprint/remote-control/js/src/Node.js
+	syncOut(id, data){}
+
+	// To be replaced by the developer or user
+	syncIn(id, data){}
 };
