@@ -6,7 +6,7 @@ Blackprint.Environment = {
 	map: {}, // Use this instead
 
 	isBrowser: false,
-	isNodeJS: false,
+	isNode: false,
 	isDeno: false,
 
 	import(arr){
@@ -97,6 +97,6 @@ Blackprint.Environment = {
 if(window.HTMLVideoElement !== void 0)
 	Blackprint.Environment.isBrowser = true;
 else if(typeof process !== "undefined" && process.execPath !== void 0)
-	Blackprint.Environment.isNodeJS = true;
+	Blackprint.Environment.isNode = true;
 else
 	Blackprint.Environment.isDeno = true;
