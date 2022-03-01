@@ -1,4 +1,5 @@
 Blackprint.Interface = class Interface extends Blackprint.Engine.CustomEvent{
+	static _ports = ['input', 'output'];
 	static _prepare(node, iface){
 		// Type extract for port data type
 		// Create reactiveness of node and iface's ports
