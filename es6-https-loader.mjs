@@ -30,7 +30,7 @@ export function resolve(specifier, context, defaultResolve) {
 function request(url, callback) {
 	readline.clearLine(process.stdout, 0);
 	readline.cursorTo(process.stdout, 0, null);
-	process.stdout.write(`[Downloading] ${url}\r`);
+	process.stdout.write(`\x1b[1;32m[Downloading]\x1b[0m ${url}\r`);
 
 	let loader = https;
 	if(url.startsWith('http://')){
@@ -90,6 +90,11 @@ export function load(url, context, defaultGetSource) {
 							fs.writeFile(dir+`/${fileName}`, data, (err) => {
 								if(err)
 									console.log("Error writing cache for", url, 'with message:\n', err);
+								else{
+									readline.clearLine(process.stdout, 0);
+									readline.cursorTo(process.stdout, 0, null);
+									process.stdout.write(' '.repeat(14+url.length)+`\r`);
+								}
 
 								resolve({ format: 'module', source: data });
 							});
