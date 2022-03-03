@@ -181,6 +181,8 @@ Blackprint.deleteModuleFromURL = function(url){
 		}
 	}
 
+	let recheckList = new Set();
+	let nodes = Blackprint.nodes;
 	Blackprint.utils.diveModuleURL(modules[url], function(deepObject, deepProp, keys, bubble){
 		delete deepObject[deepProp];
 
@@ -188,18 +190,27 @@ Blackprint.deleteModuleFromURL = function(url){
 		for (var i = bubble.length-1; i >= 0; i--) {
 			let ref = bubble[i];
 
-			if(--ref.val._length <= 0){
-				if(i === 0){
-					delete Blackprint.nodes[keys[0]];
-					break;
-				}
+			if(i === 0){
+				recheckList.add(keys[0]);
+				break;
+			}
 
+			if(--ref.val._length <= 0){
 				let parent = bubble[i-1];
 				delete parent.val[ref.key];
 			}
 			else break;
 		}
 	});
+
+	that:for(let val of recheckList){
+		let nodeList = nodes[val];
+
+		for(let key in nodeList)
+			continue that;
+
+		delete nodes[val];
+	}
 
 	if(modules[url] != null) Blackprint.emit('moduleDelete', { url });
 	delete modules[url];
