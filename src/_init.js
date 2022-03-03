@@ -62,7 +62,13 @@ Blackprint.createContext = function(name){
 };
 
 // This function will be replaced when using browser and have loaded Blackprint Sketch
-Blackprint.loadScope = options=> Blackprint;
+Blackprint.loadScope = function(options){
+	let cleanURL = options.url.replace(/#.*?$/gm, '');
+	let temp = Object.create(Blackprint);
+
+	temp._scopeURL = cleanURL.replace(/\.sf\.mjs$/m, '.min.mjs');
+	return temp;
+};
 
 let allowModuleOrigin = null;
 Blackprint.allowModuleOrigin = function(list){

@@ -265,7 +265,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 Blackprint.Engine.CustomEvent = CustomEvent;
 
 // This need to be replaced if you want to use this to solve conflicting nodes
-Blackprint.onModuleConflict = async ()=>{};
+Blackprint.onModuleConflict = async (namespace, old, now) => {};
 
 onModuleConflict.pending = [];
 function onModuleConflict(namespace, old, now){
@@ -275,7 +275,7 @@ function onModuleConflict(namespace, old, now){
 		return onModuleConflict.async;
 
 	return onModuleConflict.async = new Promise((resolve, reject) => {
-		Blackprint.onModuleConflict().then(()=>{
+		Blackprint.onModuleConflict(namespace, old, now).then(()=>{
 			onModuleConflict.async = null;
 			onModuleConflict.pending.splice(0);
 			resolve();
@@ -288,7 +288,6 @@ Blackprint.nodes = {
 	BP: {hidden: true} // Internal nodes, ToDo
 };
 
-let _classNodeError = ".registerNode: Class must be instance of Blackprint.Node";
 // This function will be replaced when using Blackprint Sketch
 //
 // Register node handler
@@ -297,7 +296,19 @@ let _classNodeError = ".registerNode: Class must be instance of Blackprint.Node"
 // - iface = ScarletsFrame binding <~> element
 Blackprint.registerNode = function(namespace, func){
 	if(isClass(func) && !(func.prototype instanceof Blackprint.Node))
-		throw new Error(_classNodeError);
+		throw new Error(".registerNode: Class must be instance of Blackprint.Node");
+
+	if(this._scopeURL !== void 0){
+		let temp = Blackprint.modulesURL[this._scopeURL];
+
+		if(temp === void 0){
+			temp = Blackprint.modulesURL[this._scopeURL] = { _url: this._scopeURL };
+			Blackprint.emit('moduleAdded', {url: this._scopeURL});
+			Blackprint._modulesURL.push(temp);
+		}
+
+		temp[namespace] = true;
+	}
 
 	// Return for Decorator
 	if(func === void 0){
