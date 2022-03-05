@@ -5,6 +5,7 @@ Blackprint.Environment = {
 	list: [], // This shouldn't being used
 	map: {}, // Use this instead
 
+	loadFromURL: false,
 	isBrowser: false,
 	isNode: false,
 	isDeno: false,
@@ -94,9 +95,13 @@ Blackprint.Environment = {
 	}
 };
 
-if(window.HTMLVideoElement !== void 0)
+if(window.HTMLVideoElement !== void 0){
 	Blackprint.Environment.isBrowser = true;
+	Blackprint.Environment.loadFromURL = true;
+}
 else if(typeof process !== "undefined" && process.execPath !== void 0)
 	Blackprint.Environment.isNode = true;
-else
+else{
 	Blackprint.Environment.isDeno = true;
+	Blackprint.Environment.loadFromURL = true;
+}
