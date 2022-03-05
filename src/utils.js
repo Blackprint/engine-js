@@ -1,3 +1,4 @@
+Blackprint._utils.deepProperty = deepProperty;
 function deepProperty(obj, path, value, onCreate){
 	var temp;
 	if(value !== void 0){
