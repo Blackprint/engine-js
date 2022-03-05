@@ -50,11 +50,12 @@ function request(url, callback) {
 
 export function load(url, context, defaultGetSource) {
 	// For JavaScript to be loaded over the network, we need to fetch and return it.
-	if (isSecure(url)) {
+	if (!url.startsWith('file:') && isSecure(url)) {
 		let dir = url.replace(/(https|http):\/\//, '')
 			.replace(/\\/g, '/').replace(/[*"|:?<>]/g, '-');
 
 		if(dir.includes('/../')){
+			console.log(dir);
 			console.error("/../ currently not allowed");
 			throw new Error("Can't import module");
 		}
