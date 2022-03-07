@@ -4,3 +4,6 @@ src
 node_modules
 .github
 .git
+utils
+test.js
+test.mjs
