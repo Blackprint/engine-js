@@ -1,6 +1,11 @@
 let fs = require('fs');
 
-let compiled = fs.readFileSync('./dist/engine.min.js', 'utf8');
+let compiled = fs.readFileSync('../dist/engine.min.js', 'utf8');
+
+// Copy file to dist folder
+fs.writeFileSync('./dist/engine.min.js', compiled);
+fs.writeFileSync('./dist/engine.min.js.map', fs.readFileSync('../dist/engine.min.js.map', 'utf8'));
+
 if(!compiled.includes(' MIT Licensed */'))
 	throw new Error("Can't find template when copying the compiled module for 'engine.es6.js'");
 
