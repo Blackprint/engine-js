@@ -276,6 +276,9 @@ Blackprint.onModuleConflict = async map => {
 	throw report;
 };
 
+// Use this to always use the newest module
+// Blackprint.onModuleConflict = async map => Object.entries(map).forEach(v => v.useOld = false);
+
 onModuleConflict.pending = new Map();
 Blackprint._utils.onModuleConflict = onModuleConflict;
 function onModuleConflict(namespace, old, now, _call){
@@ -326,7 +329,7 @@ function onModuleConflict(namespace, old, now, _call){
 			Blackprint.deleteModuleFromURL(old);
 
 			// Call all the register callback
-			info.pending._call.forEach(v => v());
+			info.pending.forEach(v => v._call());
 		}
 
 		onModuleConflict.async = null;
