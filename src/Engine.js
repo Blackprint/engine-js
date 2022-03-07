@@ -297,7 +297,6 @@ function onModuleConflict(namespace, old, now, _call){
 			await Blackprint.onModuleConflict(onModuleConflict.pending);
 		} catch(e){
 			onModuleConflict.async = null;
-			onModuleConflict.pending.clear();
 
 			// Delete new URL as it's not load any new nodes
 			for(let [key, info] of onModuleConflict.pending){
@@ -308,6 +307,7 @@ function onModuleConflict(namespace, old, now, _call){
 				delete modulesURL[key];
 			}
 
+			onModuleConflict.pending.clear();
 			Blackprint.emit('error', {type:'module_conflict', message: `Module conflict can't be resolved`});
 			throw e;
 		}
