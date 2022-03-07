@@ -265,22 +265,73 @@ Blackprint.Engine = class Engine extends CustomEvent {
 Blackprint.Engine.CustomEvent = CustomEvent;
 
 // This need to be replaced if you want to use this to solve conflicting nodes
-Blackprint.onModuleConflict = async (namespace, old, now) => {};
+// - throw error = stop any import process
+// - return String (must be either old or now) = use nodes from that URL instead
+Blackprint.onModuleConflict = async map => {
+	let report = '\n';
+	for(let [key, val] of map){
+		report += `Conflicting nodes with similar name was found\n - Namespace: ${val.pending[0].namespace}\n - First register from: ${val.oldURL}\n - Trying to register again from: ${val.newURL}`;
+	}
 
-onModuleConflict.pending = [];
-function onModuleConflict(namespace, old, now){
-	onModuleConflict.pending.push({namespace, old, new: now});
+	throw report;
+};
+
+onModuleConflict.pending = new Map();
+Blackprint._utils.onModuleConflict = onModuleConflict;
+function onModuleConflict(namespace, old, now, _call){
+	let info = onModuleConflict.pending.get(now);
+	if(info == null){
+		info = {pending:[], oldURL: old, newURL: now, useOld: false};
+		onModuleConflict.pending.set(now, info);
+	}
+
+	info.pending.push({namespace, _call});
 
 	if(onModuleConflict.async)
 		return onModuleConflict.async;
 
-	return onModuleConflict.async = new Promise((resolve, reject) => {
-		Blackprint.onModuleConflict(namespace, old, now).then(()=>{
+	return onModuleConflict.async = (async () => {
+		let { modulesURL, _modulesURL } = Blackprint;
+
+		try {
+			await Blackprint.onModuleConflict(onModuleConflict.pending);
+		} catch(e){
 			onModuleConflict.async = null;
-			onModuleConflict.pending.splice(0);
-			resolve();
-		}).catch(reject);
-	});
+			onModuleConflict.pending.clear();
+
+			// Delete new URL as it's not load any new nodes
+			for(let [key, info] of onModuleConflict.pending){
+				let i = _modulesURL.indexOf(modulesURL[key]);
+				if(i !== -1)
+					_modulesURL.splice(i, 1);
+
+				delete modulesURL[key];
+			}
+
+			Blackprint.emit('error', {type:'module_conflict', message: `Module conflict can't be resolved`});
+			throw e;
+		}
+
+		for(let [key, info] of onModuleConflict.pending){
+			if(info.useOld){
+				let i = _modulesURL.indexOf(modulesURL[key]);
+				if(i !== -1)
+					_modulesURL.splice(i, 1);
+
+				delete modulesURL[key];
+				continue;
+			}
+
+			// Delete old URL nodes before registering new nodes
+			Blackprint.deleteModuleFromURL(old);
+
+			// Call all the register callback
+			info.pending._call.forEach(v => v());
+		}
+
+		onModuleConflict.async = null;
+		onModuleConflict.pending.clear();
+	})();
 }
 
 // For storing registered nodes
@@ -312,8 +363,8 @@ Blackprint.registerNode = function(namespace, func){
 
 	// Return for Decorator
 	if(func === void 0){
-		return function(claz){
-			Blackprint.registerNode(namespace, claz);
+		return claz => {
+			this.registerNode(namespace, claz);
 			return claz;
 		}
 	}
@@ -323,20 +374,8 @@ Blackprint.registerNode = function(namespace, func){
 	let isExist = deepProperty(Blackprint.nodes, namespace);
 	if(isExist){
 		if(this._scopeURL && isExist._scopeURL !== this._scopeURL){
-			let nm = namespace.join('/');
-
-			// Return true     = module conflict was solved from other script
-			// Return non-true = throw error as the node has conflict
-			let solved = onModuleConflict(nm, isExist._scopeURL, this._scopeURL);
-			let args = arguments;
-
-			solved.then(val => {
-				if(val)
-					return Blackprint.registerNode.apply(Blackprint, args);
-
-				throw `Conflicting nodes with similar name was found\nNamespace: ${nm}\nFirst register from: ${isExist._scopeURL}\nTrying to register again from: ${this._scopeURL}`;
-			});
-
+			let _call = ()=> this.registerNode.apply(this, arguments);
+			onModuleConflict(namespace.join('/'), isExist._scopeURL, this._scopeURL, _call);
 			return;
 		}
 
@@ -370,11 +409,18 @@ Blackprint.registerInterface = function(templatePath, options, func){
 
 	// Return for Decorator
 	if(func === void 0){
-		return function(claz){
-			Blackprint.registerInterface(templatePath, options, claz);
+		return claz => {
+			this.registerInterface(templatePath, options, claz);
 			return claz;
 		}
 	}
+
+	// Pause registration if have conflict
+	let info = onModuleConflict.pending.get(this._scopeURL);
+	if(info != null) return info.pending.push({
+		namespace: templatePath,
+		_call: ()=> this.registerInterface.apply(this, arguments),
+	});
 
 	if(isClass(func) && !(func.prototype instanceof Blackprint.Interface))
 		throw new Error(_classIfaceError);
