@@ -2,6 +2,8 @@ let fs = require('fs');
 
 let compiled = fs.readFileSync('../dist/engine.min.js', 'utf8');
 
+fs.mkdirSync('./dist');
+
 // Copy file to dist folder
 fs.writeFileSync('./dist/engine.min.js', compiled);
 fs.writeFileSync('./dist/engine.min.js.map', fs.readFileSync('../dist/engine.min.js.map', 'utf8'));
