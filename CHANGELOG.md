@@ -1,3 +1,18 @@
+# 0.6.3
+
+### Bug Fix
+- Fix field name
+- Fix node deletion
+- Fix undeleted root nodes when deleting module
+
+### Features
+- Add colors when downloading module
+- Put unresolved module conflict into pending list
+- Add `onModuleConflict` to handle conflict externally
+- Add support for remote engine
+- Add `Blackprint.Environment.loadFromURL = true` if the environment prefer to use module from URL
+- Improve ESM module loader
+
 # 0.6.2
 
 ### Bug Fix
