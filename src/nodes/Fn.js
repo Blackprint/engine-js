@@ -4,7 +4,7 @@ Blackprint.nodes.BP.fn = {
 		constructor(instance){
 			super(instance);
 
-			let iface = this.setInterface('BP/fn/input');
+			let iface = this.setInterface('BPIC/BP/Fn/Input');
 			iface.title = 'FnInput';
 			iface.type = 'bp-fn-input';
 		}
@@ -14,7 +14,7 @@ Blackprint.nodes.BP.fn = {
 		constructor(instance){
 			super(instance);
 
-			let iface = this.setInterface('BP/fn/output');
+			let iface = this.setInterface('BPIC/BP/Fn/Output');
 			iface.title = 'FnOutput';
 			iface.type = 'bp-fn-output';
 		}
@@ -75,14 +75,26 @@ class BPFunctionNode extends Blackprint.Node {
 
 
 // ==== Interface ====
-class BPFnInOut extends Blackprint.Interface {
-	imported(data){ this.changeVar(data.name, data.scope) }
+// Register when ready
+function BPFnInit(){
+	class BPFnInOut extends Blackprint.Interface {
+		imported(data){
+			data ??= {name: 'funcName'};
+			this.changeVar(data.name, data.scope);
+		}
+	}
+
+	Blackprint.registerInterface('BPIC/BP/Fn/Input',
+	class extends BPFnInOut {
+		// static output = {};
+	});
+
+	Blackprint.registerInterface('BPIC/BP/Fn/Output',
+	class extends BPFnInOut {
+		// static input = {};
+	});
 }
 
-Blackprint._iface['BP/fn/input'] = class extends BPFnInOut {
-	// static output = {};
-};
-
-Blackprint._iface['BP/fn/output'] = class extends BPFnInOut {
-	// static input = {};
-};
+if(globalThis.sf && globalThis.sf.$)
+	globalThis.sf.$(BPFnInit);
+else BPFnInit();
