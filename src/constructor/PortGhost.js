@@ -1,6 +1,6 @@
 let fakeIface = {
 	title: "Blackprint.PortGhost",
-	node: {},
+	node: {_instance:{emit(){}}},
 	emit(){},
 };
 
