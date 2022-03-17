@@ -104,8 +104,13 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 							cable.visualizeFlow();
 
 						port.iface._requesting = void 0;
-						if(port.feature === BP_Port.ArrayOf)
-							return port._cache = [output.value];
+						if(port.feature === BP_Port.ArrayOf){
+							port._cache = [];
+							if(output.value != null)
+								port._cache.push(output.value);
+
+							return port._cache;
+						}
 
 						return port._cache = output.value ?? port.default;
 					}
