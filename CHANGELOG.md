@@ -1,3 +1,11 @@
+# 0.6.4
+
+### Bug Fix
+- Disallow use of arrow function
+- Fix unit test that was using `Blackprint.OutputPort` and `Blackprint.InputPort`
+- Fix undefined value on array port
+- Fix and simplify version check
+
 # 0.6.3
 
 ### Bug Fix
