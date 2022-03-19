@@ -117,34 +117,21 @@ Blackprint.utils.renameTypeName = function(obj, minimumChar=0){
 }
 
 Blackprint.utils.packageIsNewer = function(old, now){
-	let oldVer = old.match(/@([0-9.-]+)/);
-	let nowVer = now.match(/@([0-9.-]+)/);
-
 	if(old === now) return false;
-	if(oldVer == null && nowVer == null) return false;
 
-	// Check if using latest
-	if(oldVer == null) return false;
-	old = old.slice(0, old.indexOf(oldVer[0]));
-
-	if(nowVer == null){
-		if(!now.includes(old))
-			return false;
-
-		return true;
-	}
-
-	now = now.slice(0, now.indexOf(nowVer[0]));
+	let oldVer = old.split(/@([^~>=<][0-9.-]+)/);
+	let nowVer = now.split(/@([^~>=<][0-9.-]+)/);
+	if(oldVer.length === 1 && nowVer.length === 1) return false;
+	if(oldVer.length === 1) return false; // If old is using latest
 
 	// Check if different packages/url
-	if(old !== now){
-		if(now.includes('://')) // URL
-			return false;
+	if(oldVer[0] !== nowVer[0]) // URL
+		return false;
 
-		if(!old.includes('/'+now)) // Package name
-			return false;
-	}
+	if(oldVer[2] !== nowVer[2]) // Package name
+		return false;
 
+	// Compare the version
 	oldVer = oldVer[1].replace(/-/g, '.').replace(/\.\.+/, '.');
 	nowVer = nowVer[1].replace(/-/g, '.').replace(/\.\.+/, '.');
 
