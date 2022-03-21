@@ -260,6 +260,12 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		// BPFunction = ./nodes/Fn.js
 		this.functions[id] = new BPFunction(id);
 	}
+
+	destroy(){
+		this.iface = {};
+		this.ifaceList.splice(0);
+		this.clearNodes();
+	}
 }
 
 Blackprint.Engine.CustomEvent = CustomEvent;
