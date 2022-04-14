@@ -3,8 +3,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		super();
 		this.ifaceList = []; // IFace
 
-		this.variables = {}; // { name => { value, type, title, category } }
-		this.functions = {}; // { name => { variables, input, output, used: [], node, title, category, description } }
+		this.variables = {}; // { category => { name, value, type, childs:{ category } } }
+		this.functions = {}; // { category => { name, variables, input, output, used: [], node, description, childs:{ category } } }
 
 		this.iface = {}; // { id => IFace }
 		this.ref = {}; // { id => Port references }
@@ -160,6 +160,9 @@ Blackprint.Engine = class Engine extends CustomEvent {
 			let temp = handlers[i];
 			temp.init && temp.init();
 		}
+
+		this.emit("json.imported", {appendMode: options.appendMode, nodes: inserted, raw: json});
+		return inserted;
 	}
 
 	getNode(id){
@@ -345,7 +348,7 @@ function onModuleConflict(namespace, old, now, _call){
 
 // For storing registered nodes
 Blackprint.nodes = {
-	BP: {hidden: true} // Internal nodes, ToDo
+	BP: {hidden: !true} // Internal nodes, ToDo
 };
 
 // This function will be replaced when using Blackprint Sketch
