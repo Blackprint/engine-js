@@ -13,7 +13,11 @@ class PortLink {
 		// Check if a browser
 		if(typeof sf !== 'undefined' && sf.Obj !== void 0 && sf.Obj.set !== void 0){
 			this._sf = true;
-			iPort._list = [];
+			Object.defineProperty(iPort, '_list', {
+				enumerable: false,
+				configurable: true,
+				value: []
+			});
 		}
 
 		// Create linker for all port
