@@ -1,5 +1,5 @@
-Blackprint.nodes.BP.var = {
-	set: class extends Blackprint.Node {
+Blackprint.nodes.BP.Var = {
+	Set: class extends Blackprint.Node {
 		static input = {};
 		static output = {};
 		constructor(instance){
@@ -11,7 +11,7 @@ Blackprint.nodes.BP.var = {
 			iface.type = 'bp-var-set';
 		}
 	},
-	get: class extends Blackprint.Node {
+	Get: class extends Blackprint.Node {
 		static output = {};
 		constructor(instance){
 			super(instance);
