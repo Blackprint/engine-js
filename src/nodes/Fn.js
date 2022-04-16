@@ -1,40 +1,53 @@
-Blackprint.nodes.BP.fn = {
-	input: class extends Blackprint.Node {
+Blackprint.nodes.BP.Fn = {
+	Main: class extends Blackprint.Node {
+		// static input = {};
+		// static output = {};
+		constructor(instance){
+			super(instance);
+
+			let iface = this.setInterface('BPIC/BP/Fn/Main');
+			iface.title = 'Unnamed';
+			iface.type = 'function';
+		}
+	},
+	Input: class extends Blackprint.Node {
 		// static output = {};
 		constructor(instance){
 			super(instance);
 
 			let iface = this.setInterface('BPIC/BP/Fn/Input');
-			iface.title = 'FnInput';
+			iface.title = 'Input';
 			iface.type = 'bp-fn-input';
 		}
 	},
-	output: class extends Blackprint.Node {
+	Output: class extends Blackprint.Node {
 		// static input = {};
 		constructor(instance){
 			super(instance);
 
 			let iface = this.setInterface('BPIC/BP/Fn/Output');
-			iface.title = 'FnOutput';
+			iface.title = 'Output';
 			iface.type = 'bp-fn-output';
 		}
 	},
 };
 
 // used for instance.createFunction
-class BPFunction {
-	constructor(){
-		this.id = this.title = id;
-		this.category = 'Uncategorized';
-		this.description = '';
+class BPFunction extends CustomEvent {
+	constructor(id, options, instance){
+		super();
 
-		this.variables = {}; // just like instance variable
+		this.instance = instance;
+		this.id = this.title = id;
+		this.description = options?.description ?? '';
+		this.variables = {}; // private variables
+
 		this.input = {};
 		this.output = {};
 
 		this.used = [];
-		let temp = this;
 
+		let temp = this;
 		this.node = class extends BPFunctionNode {
 			static input = this.output;
 			static output = this.input;
@@ -50,9 +63,6 @@ class BPFunction {
 	renamePort(){}
 	deletePort(){}
 }
-
-// Copy the function
-BPFunction.prototype.createVariable = Engine.prototype.createVariable;
 
 class BPFunctionNode extends Blackprint.Node {
 	imported(data){
@@ -82,16 +92,26 @@ function BPFnInit(){
 			data ??= {name: 'funcName'};
 			this.changeVar(data.name, data.scope);
 		}
+		changeVar(name){
+			this.name = name;
+			this.title = name;
+		}
 	}
+
+	Blackprint.registerInterface('BPIC/BP/Fn/Main',
+	class extends BPFnInOut {
+		static input = {};
+		static output = {};
+	});
 
 	Blackprint.registerInterface('BPIC/BP/Fn/Input',
 	class extends BPFnInOut {
-		// static output = {};
+		static output = {};
 	});
 
 	Blackprint.registerInterface('BPIC/BP/Fn/Output',
 	class extends BPFnInOut {
-		// static input = {};
+		static input = {};
 	});
 }
 
