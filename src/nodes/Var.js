@@ -1,20 +1,23 @@
 Blackprint.nodes.BP.var = {
 	set: class extends Blackprint.Node {
-		// static input = {};
+		static input = {};
+		static output = {};
 		constructor(instance){
 			super(instance);
 
 			let iface = this.setInterface('BPIC/BP/Var/Set');
+			iface.data = {};
 			iface.title = 'VarSet';
 			iface.type = 'bp-var-set';
 		}
 	},
 	get: class extends Blackprint.Node {
-		// static output = {};
+		static output = {};
 		constructor(instance){
 			super(instance);
 
 			let iface = this.setInterface('BPIC/BP/Var/Get');
+			iface.data = {};
 			iface.title = 'VarGet';
 			iface.type = 'bp-var-get';
 		}
@@ -23,12 +26,15 @@ Blackprint.nodes.BP.var = {
 
 // used for instance.createVariable
 class BPVariable extends CustomEvent {
-	constructor(id, type){
+	constructor(id, options, instance){
 		super();
+		this.instance = instance;
 
 		this.id = this.title = id;
-		this.type = type;
-		this.category = 'Uncategorized';
+		this.type = options.type;
+
+		this.totalSet = 0;
+		this.totalGet = 0;
 	}
 
 	_value = null;
@@ -39,25 +45,25 @@ class BPVariable extends CustomEvent {
 	}
 }
 
+let BPVarEventSlot = {slot: "bp-engine-var"};
 
 // ==== Interface ====
 // Register when ready
 function BPVarInit(){
 	class BPVarGetSet extends Blackprint.Interface {
 		imported(data){
-			data ??= {name: 'varName'};
-			this.changeVar(data.name, data.scope);
+			this.changeVar(data.name, data.scope || 'instance');
 		}
 		changeVar(name, scopeName){
-			this.name = name;
-			this.scope = scopeName;
+			this.data.name = name;
+			this.data.scope = scopeName;
 
 			let scope;
-			if(this.scope === 'public')
+			if(scopeName === 'instance')
 				scope = this.node._instance.variables;
 			else {
 				if(this.node._funcInstance == null)
-					throw new Error(`Can't access to private instance's variable`);
+					throw new Error(`Can't access to private variable`);
 
 				scope = this.node._funcInstance.variables;
 			}
@@ -82,18 +88,18 @@ function BPVarInit(){
 		changeVar(name, scopeName){
 			let scope = super.changeVar(name, scopeName);
 			let node = this.node;
+			this.title = 'Get '+name;
 
 			if(this.output.Val !== void 0)
 				node.deletePort('output', 'Val');
 
-			let temp = this._bpVarRef = scope[this.name];
+			let temp = this._bpVarRef = scope[this.data.name];
 			node.createPort('output', 'Val', temp.type);
 
-			let listener = temp.listener;
-			let i = listener.indexOf(iface);
-			if(i !== -1) listener.splice(i, 1)
-
-			listener.push(this);
+			let ref = this.node.output;
+			temp.on('value', BPVarEventSlot, () => {
+				ref.Val = temp._value;
+			});
 		}
 	});
 
@@ -102,15 +108,16 @@ function BPVarInit(){
 		changeVar(name, scopeName){
 			let scope = super.changeVar(name, scopeName);
 			let {input, node} = this;
+			this.title = 'Set '+name;
 
 			if(input.Val !== void 0)
 				node.deletePort('input', 'Val');
 
-			let temp = this._bpVarRef = scope[this.name];
-
+			let temp = this._bpVarRef = scope[this.data.name];
 			node.createPort('input', 'Val', temp.type);
-			input.Val.on('value', ev => {
-				temp.setValue(ev.cable.value);
+
+			input.Val.on('value', BPVarEventSlot, ev => {
+				temp.value = ev.cable.value;
 			});
 		}
 	});

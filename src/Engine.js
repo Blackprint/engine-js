@@ -248,20 +248,22 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		return iface;
 	}
 
-	createVariable(id, type){
+	createVariable(id, options){
 		if(id in this.variables)
 			throw new Error("Variable id already exist");
 
+		// deepProperty
+
 		// BPVariable = ./nodes/Var.js
-		this.variables[id] = new BPVariable(id, type);
+		return this.variables[id] = new BPVariable(id, options);
 	}
 
-	createFunction(id){
+	createFunction(id, options){
 		if(id in this.functions)
 			throw new Error("Function id already exist");
 
 		// BPFunction = ./nodes/Fn.js
-		this.functions[id] = new BPFunction(id);
+		return this.functions[id] = new BPFunction(id);
 	}
 
 	destroy(){
