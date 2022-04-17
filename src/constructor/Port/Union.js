@@ -18,5 +18,5 @@ BP_Port.Union = function(types){
 }
 
 BP_Port.Union.validate = function(types, target){
-	return types.includes(target);
+	return target.any || types.includes(target);
 }
