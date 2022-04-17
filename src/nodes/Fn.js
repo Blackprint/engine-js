@@ -1,7 +1,7 @@
 Blackprint.nodes.BP.Fn = {
 	Main: class extends Blackprint.Node {
-		// static input = {};
-		// static output = {};
+		static input = {};
+		static output = {};
 		constructor(instance){
 			super(instance);
 
@@ -11,7 +11,7 @@ Blackprint.nodes.BP.Fn = {
 		}
 	},
 	Input: class extends Blackprint.Node {
-		// static output = {};
+		static output = {};
 		constructor(instance){
 			super(instance);
 
@@ -21,7 +21,7 @@ Blackprint.nodes.BP.Fn = {
 		}
 	},
 	Output: class extends Blackprint.Node {
-		// static input = {};
+		static input = {};
 		constructor(instance){
 			super(instance);
 
@@ -42,8 +42,8 @@ class BPFunction extends CustomEvent {
 		this.description = options?.description ?? '';
 		this.variables = {}; // private variables
 
-		this.input = {};
-		this.output = {};
+		this.input = options.input ?? {};
+		this.output = options.output ?? {};
 
 		this.used = [];
 
@@ -65,6 +65,10 @@ class BPFunction extends CustomEvent {
 }
 
 class BPFunctionNode extends Blackprint.Node {
+	constructor(instance){
+		super(instance);
+
+	}
 	imported(data){
 		let instance = this._funcInstance;
 		instance.used.push(this);

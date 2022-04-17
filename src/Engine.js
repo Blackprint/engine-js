@@ -263,7 +263,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 			throw new Error("Function id already exist");
 
 		// BPFunction = ./nodes/Fn.js
-		return this.functions[id] = new BPFunction(id);
+		return this.functions[id] = new BPFunction(id, options);
 	}
 
 	destroy(){
