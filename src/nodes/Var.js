@@ -86,6 +86,9 @@ function BPVarInit(){
 	Blackprint.registerInterface('BPIC/BP/Var/Get',
 	class extends BPVarGetSet {
 		changeVar(name, scopeName){
+			if(this._onChanged != null)
+				scope[this.data.name]?.off('value', this._onChanged);
+
 			let scope = super.changeVar(name, scopeName);
 			let node = this.node;
 			this.title = 'Get '+name;
@@ -97,9 +100,11 @@ function BPVarInit(){
 			node.createPort('output', 'Val', temp.type);
 
 			let ref = this.node.output;
-			temp.on('value', BPVarEventSlot, () => {
+			this._onChanged = () => {
 				ref.Val = temp._value;
-			});
+			};
+
+			temp.on('value', this._onChanged);
 		}
 	});
 
