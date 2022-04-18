@@ -193,12 +193,15 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 	createNode(namespace, options, handlers){
 		var node, func;
-		if(!(namespace instanceof Blackprint.Node)){
+		if(!(namespace.prototype instanceof Blackprint.Node)){
 			func = deepProperty(Blackprint.nodes, namespace.split('/'));
 			if(func === void 0)
 				return console.error('Node handler for', namespace, "was not found, maybe .registerNode() haven't being called?") && void 0;
 		}
-		else func = namespace;
+		else{
+			func = namespace;
+			namespace = "BPInternal/" + func.namespace;
+		}
 
 		// Call the registered func (from this.registerNode)
 		if(isClass(func))
