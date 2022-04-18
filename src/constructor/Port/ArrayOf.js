@@ -13,7 +13,7 @@ BP_Port.ArrayOf = function(type){
 }
 
 BP_Port.ArrayOf.validate = function(type, target){
-	if(target.any || type === target)
+	if(type.any || target.any || type === target)
 		return true;
 
 	if(type.constructor === Array)
