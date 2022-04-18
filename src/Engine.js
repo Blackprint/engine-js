@@ -192,12 +192,15 @@ Blackprint.Engine = class Engine extends CustomEvent {
 	}
 
 	createNode(namespace, options, handlers){
-		var func = deepProperty(Blackprint.nodes, namespace.split('/'));
-		if(func === void 0)
-			return console.error('Node handler for', namespace, "was not found, maybe .registerNode() haven't being called?") && void 0;
+		var node, func;
+		if(!(namespace instanceof Blackprint.Node)){
+			func = deepProperty(Blackprint.nodes, namespace.split('/'));
+			if(func === void 0)
+				return console.error('Node handler for', namespace, "was not found, maybe .registerNode() haven't being called?") && void 0;
+		}
+		else func = namespace;
 
 		// Call the registered func (from this.registerNode)
-		var node;
 		if(isClass(func))
 			node = new func(this);
 		else func(node = new Blackprint.Node(this));
@@ -350,7 +353,7 @@ function onModuleConflict(namespace, old, now, _call){
 
 // For storing registered nodes
 Blackprint.nodes = {
-	BP: {hidden: !true} // Internal nodes, ToDo
+	BP: {hidden: true} // Internal nodes, ToDo
 };
 
 // This function will be replaced when using Blackprint Sketch
