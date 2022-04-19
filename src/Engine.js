@@ -191,6 +191,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		return got;
 	}
 
+	// ToDo: turn this into async and wait call to `iface.imported`
 	createNode(namespace, options, handlers){
 		var node, func;
 		if(!(namespace.prototype instanceof Blackprint.Node)){
