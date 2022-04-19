@@ -1,7 +1,7 @@
 Blackprint.nodes.BP.Var = {
 	Set: class extends Blackprint.Node {
 		static input = {};
-		static output = {};
+		// static output = {};
 		constructor(instance){
 			super(instance);
 
@@ -24,6 +24,8 @@ Blackprint.nodes.BP.Var = {
 	},
 };
 
+let typeNotSet = {typeNotSet: true}; // Flag that a port is not set
+
 // used for instance.createVariable
 class BPVariable extends CustomEvent {
 	constructor(id, options, instance){
@@ -31,7 +33,9 @@ class BPVariable extends CustomEvent {
 		this.instance = instance;
 
 		this.id = this.title = id;
-		this.type = options.type;
+
+		// The type need to be defined dynamically on first cable connect
+		this.type = typeNotSet;
 
 		this.totalSet = 0;
 		this.totalGet = 0;
@@ -73,6 +77,33 @@ function BPVarInit(){
 
 			return scope;
 		}
+		useType(port){
+			let temp = this._bpVarRef;
+			if(temp.type !== typeNotSet){
+				if(port === undefined) temp.type = typeNotSet;
+				return;
+			}
+
+			if(port === undefined) throw new Error("Can't set type with undefined");
+
+			let cable;
+			if(port === true){
+				cable = this.$space('cables').currentCable;
+				if(cable == null) return;
+			}
+
+			if(port instanceof Blackprint.Engine.Cable)
+				cable = port;
+
+			if(cable != null)
+				port = cable.owner;
+
+			temp.type = port.type;
+
+			let targetPort = this._reinitPort();
+			if(cable != null)
+				targetPort.connectCable(cable);
+		}
 		static destroy(iface){
 			if(iface._bpVarRef === void 0) return;
 
@@ -90,13 +121,20 @@ function BPVarInit(){
 				scope[this.data.name]?.off('value', this._onChanged);
 
 			let scope = super.changeVar(name, scopeName);
-			let node = this.node;
 			this.title = 'Get '+name;
 
+			let temp = this._bpVarRef = scope[this.data.name];
+			if(temp.type === typeNotSet) return;
+
+			this._reinitPort();
+		}
+
+		_reinitPort(){
+			let temp = this._bpVarRef;
+			let node = this.node;
 			if(this.output.Val !== void 0)
 				node.deletePort('output', 'Val');
 
-			let temp = this._bpVarRef = scope[this.data.name];
 			node.createPort('output', 'Val', temp.type);
 
 			let ref = this.node.output;
@@ -105,6 +143,7 @@ function BPVarInit(){
 			};
 
 			temp.on('value', this._onChanged);
+			return this.output.Val;
 		}
 	});
 
@@ -112,18 +151,27 @@ function BPVarInit(){
 	class extends BPVarGetSet {
 		changeVar(name, scopeName){
 			let scope = super.changeVar(name, scopeName);
-			let {input, node} = this;
 			this.title = 'Set '+name;
 
+			let temp = this._bpVarRef = scope[this.data.name];
+			if(temp.type === typeNotSet) return;
+
+			this._reinitPort();
+		}
+
+		_reinitPort(){
+			let {input, node} = this;
+			let temp = this._bpVarRef;
 			if(input.Val !== void 0)
 				node.deletePort('input', 'Val');
 
-			let temp = this._bpVarRef = scope[this.data.name];
 			node.createPort('input', 'Val', temp.type);
 
 			input.Val.on('value', BPVarEventSlot, ev => {
 				temp.value = ev.cable.value;
 			});
+
+			return this.input.Val;
 		}
 	});
 }
