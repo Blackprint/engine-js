@@ -1,33 +1,20 @@
 Blackprint.nodes.BP.Fn = {
-	Main: class extends Blackprint.Node {
-		static input = {};
-		static output = {};
-		constructor(instance){
-			super(instance);
-
-			let iface = this.setInterface('BPIC/BP/Fn/Main');
-			iface.title = 'Unnamed';
-			iface.type = 'function';
-		}
-	},
 	Input: class extends Blackprint.Node {
 		static output = {};
 		constructor(instance){
 			super(instance);
-
-			let iface = this.setInterface('BPIC/BP/Fn/Input');
-			iface.title = 'Input';
-			iface.type = 'bp-fn-input';
+			this.setInterface('BPIC/BP/Fn/Input');
 		}
 	},
 	Output: class extends Blackprint.Node {
 		static input = {};
 		constructor(instance){
 			super(instance);
+			this.setInterface('BPIC/BP/Fn/Output');
+		}
 
-			let iface = this.setInterface('BPIC/BP/Fn/Output');
-			iface.title = 'Output';
-			iface.type = 'bp-fn-output';
+		update(port, source, cable){
+			this.iface._funcMain.node.output[port.name] = cable.value;
 		}
 	},
 };
@@ -40,24 +27,46 @@ class BPFunction extends CustomEvent {
 		this.instance = instance;
 		this.id = this.title = id;
 		this.description = options?.description ?? '';
-		this.variables = {}; // private variables
+		this.variables = {}; // shared function variables
 
-		this.input = options.input ?? {};
-		this.output = options.output ?? {};
-
+		let input = this._input = {};
+		let output = this._output = {};
 		this.used = [];
 
+		// This will be updated if the function sketch was modified
+		this.structure = {
+			'BP/Fn/Input':[{x: 400, y: 100}],
+			'BP/Fn/Output':[{x: 600, y: 100}],
+		};
+
 		let temp = this;
+		let uniqId = 0;
 		this.node = class extends BPFunctionNode {
-			static input = this.output;
-			static output = this.input;
+			static input = input;
+			static output = output;
+			static namespace = id;
 
 			constructor(instance){
 				super(instance);
 				this._funcInstance = temp;
+
+				let iface = this.setInterface("BPIC/BP/Fn/Main");
+				iface.description = temp.description;
+				iface.title = temp.title;
+				iface.type = 'function';
+				iface.uniqId = uniqId++;
 			}
 		};
 	}
+
+	createNode(instance, options){
+		return instance.createNode(this.node, options);
+	}
+
+	get input(){return this._input}
+	get output(){return this._output}
+	set input(v){throw new Error("Can't modify port by assigning .input property")}
+	set output(v){throw new Error("Can't modify port by assigning .input property")}
 
 	createPort(){}
 	renamePort(){}
@@ -67,16 +76,16 @@ class BPFunction extends CustomEvent {
 class BPFunctionNode extends Blackprint.Node {
 	constructor(instance){
 		super(instance);
-
 	}
+
 	imported(data){
 		let instance = this._funcInstance;
 		instance.used.push(this);
 	}
 
-	update(source, port, cable){
+	update(port, source, cable){
 		// port => input port from current node
-		this.output[port.name] = cable.value;
+		this.iface._FnInput.node.output[port.name] = cable.value;
 	}
 
 	destroy(){
@@ -91,31 +100,101 @@ class BPFunctionNode extends Blackprint.Node {
 // ==== Interface ====
 // Register when ready
 function BPFnInit(){
-	class BPFnInOut extends Blackprint.Interface {
-		imported(data){
-			data ??= {name: 'funcName'};
-			this.changeVar(data.name, data.scope);
-		}
-		changeVar(name){
-			this.name = name;
-			this.title = name;
-		}
-	}
-
 	Blackprint.registerInterface('BPIC/BP/Fn/Main',
-	class extends BPFnInOut {
+	class extends Blackprint.Interface {
 		static input = {};
 		static output = {};
+
+		async imported(data){
+			if(this._importOnce)
+				throw new Error("Can't import function more than once");
+
+			this._importOnce = true;
+			let node = this.node;
+
+			if(node._instance.constructor === Blackprint.Engine)
+				this.bpInstance = new Blackprint.Engine();
+			else this.bpInstance = new Blackprint.Sketch();
+
+			let {input, output} = this.node._funcInstance;
+			for(let key in input)
+				node.createPort('input', key, input[key]);
+
+			for(let key in output)
+				node.createPort('output', key, output[key]);
+
+			await this.bpInstance.importJSON(this.node._funcInstance.structure);
+
+			let debounce;
+			this.bpInstance.on('cable.connect cable.disconnect node.created node.delete', ()=>{
+				clearTimeout(debounce);
+				debounce = setTimeout(() => {
+					let structure = this.bpInstance.exportJSON({toRawObject: true});
+					this.node._funcInstance.structure = structure;
+				}, 1000);
+			});
+
+			let In = this._FnInput = this.bpInstance.getNodes("BP/Fn/Input")[0].iface;
+			let Out = this._FnOutput = this.bpInstance.getNodes("BP/Fn/Output")[0].iface;
+			Out._funcMain = In._funcMain = this;
+		}
 	});
+
+	class BPFnInOut extends Blackprint.Interface {
+		useType(port){
+			if(port === undefined) throw new Error("Can't set type with undefined");
+
+			let cable;
+			if(port === true){
+				cable = this.$space('cables').currentCable;
+				if(cable == null) return;
+			}
+
+			if(port instanceof Blackprint.Engine.Cable)
+				cable = port;
+
+			if(cable != null)
+				port = cable.owner;
+
+			let targetPort;
+			let name = this._num ??= 0;
+			if(this.type === 'bp-fn-input'){
+				this.node.createPort('output', name, port.type);
+				targetPort = this.output[name];
+				
+				this._funcMain.node.createPort('input', name, port.type);
+			}
+			else {
+				this.node.createPort('input', name, port.type);
+				targetPort = this.input[name];
+
+				this._funcMain.node.createPort('output', name, port.type);
+			}
+			this._num++;
+
+			if(cable != null)
+				targetPort.connectCable(cable);
+		}
+	}
 
 	Blackprint.registerInterface('BPIC/BP/Fn/Input',
 	class extends BPFnInOut {
 		static output = {};
+		constructor(node){
+			super(node);
+			this.title = 'Input';
+			this.type = 'bp-fn-input';
+		}
 	});
 
 	Blackprint.registerInterface('BPIC/BP/Fn/Output',
 	class extends BPFnInOut {
 		static input = {};
+		constructor(node){
+			super(node);
+			this.title = 'Output';
+			this.type = 'bp-fn-output';
+		}
 	});
 }
 
