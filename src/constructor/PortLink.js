@@ -23,7 +23,10 @@ class PortLink {
 		// Create linker for all port
 		for(var portName in portMeta){
 			if(portName.slice(0, 1) === '_') continue;
-			this._add(portName, portMeta[portName]);
+			let meta = portMeta[portName];
+			if(meta === undefined) continue; // Skip undefined, but allow null to pass
+
+			this._add(portName, meta);
 		}
 	}
 
