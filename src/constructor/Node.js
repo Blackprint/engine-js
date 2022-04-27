@@ -67,6 +67,7 @@ Blackprint.Node = class Node extends Blackprint.Engine.CustomEvent {
 			return this[which]._add(name, type);
 		}
 
+		console.error("Error:", type);
 		throw new Error("Type must be a class object or from Blackprint.Port.{feature}");
 	}
 
