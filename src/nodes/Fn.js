@@ -159,16 +159,18 @@ function BPFnInit(){
 			let targetPort;
 			let name = this._num ??= 0;
 			if(this.type === 'bp-fn-input'){
-				this.node.createPort('output', name, port.type);
+				let portType = port.feature != null ? port.feature(port.type) : port.type;
+				this.node.createPort('output', name, portType);
+
 				targetPort = this.output[name];
-				
-				this._funcMain.node.createPort('input', name, port.type);
+				this._funcMain.node.createPort('input', name, portType);
 			}
 			else {
-				this.node.createPort('input', name, port.type);
-				targetPort = this.input[name];
+				let portType = port.feature != null ? port.feature(port.type) : port.type;
+				this.node.createPort('input', name, portType);
 
-				this._funcMain.node.createPort('output', name, port.type);
+				targetPort = this.input[name];
+				this._funcMain.node.createPort('output', name, portType);
 			}
 			this._num++;
 
