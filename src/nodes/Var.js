@@ -104,12 +104,13 @@ function BPVarInit(){
 			if(cable != null)
 				targetPort.connectCable(cable);
 		}
-		static destroy(iface){
-			if(iface._bpVarRef === void 0) return;
+		destroy(){
+			if(this._bpVarRef === void 0) return;
 
-			let listener = iface._bpVarRef.listener;
-			let i = listener.indexOf(iface);
+			let listener = this._bpVarRef.listener;
+			if(listener == null) return;
 
+			let i = listener.indexOf(this);
 			if(i !== -1) listener.splice(i, 1)
 		}
 	}
@@ -135,15 +136,32 @@ function BPVarInit(){
 			if(this.output.Val !== void 0)
 				node.deletePort('output', 'Val');
 
-			node.createPort('output', 'Val', temp.type);
-
 			let ref = this.node.output;
-			this._onChanged = () => {
-				ref.Val = temp._value;
-			};
+			if(temp.type === Function || temp.type.prototype instanceof Function){
+				node.createPort('output', 'Val', temp.type);
 
-			temp.on('value', this._onChanged);
+				this._eventListen = 'call';
+				this._onChanged = () => {
+					ref.Val();
+				}
+			}
+			else{
+				node.createPort('output', 'Val', temp.type);
+
+				this._eventListen = 'value';
+				this._onChanged = () => {
+					ref.Val = temp._value;
+				}
+			}
+
+			temp.on(this._eventListen, this._onChanged);
 			return this.output.Val;
+		}
+		destroy(){
+			if(this._eventListen != null)
+				this._bpVarRef.off(this._eventListen, this._onChanged);
+
+			super.destroy();
 		}
 	});
 
@@ -165,13 +183,28 @@ function BPVarInit(){
 			if(input.Val !== void 0)
 				node.deletePort('input', 'Val');
 
-			node.createPort('input', 'Val', temp.type);
+			if(temp.type === Function || temp.type.prototype instanceof Function){
+				node.createPort('input', 'Val', Blackprint.Port.Trigger(function(){
+					temp.emit('call');
+				}));
+			}
+			else{
+				node.createPort('input', 'Val', temp.type);
 
-			input.Val.on('value', BPVarEventSlot, ev => {
-				temp.value = ev.cable.value;
-			});
+				this._onChanged = ev => {
+					temp.value = ev.cable.value;
+				};
+
+				input.Val.on('value', this._onChanged);
+			}
 
 			return this.input.Val;
+		}
+		destroy(){
+			if(this._eventListen != null)
+				this.input.Val?.off('value', this._onChanged);
+
+			super.destroy();
 		}
 	});
 }
