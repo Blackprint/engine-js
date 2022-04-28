@@ -164,14 +164,26 @@ function BPFnInit(){
 			let name = this._num ??= 0;
 			if(this.type === 'bp-fn-input'){
 				let portType = port.feature != null ? port.feature(port.type) : port.type;
-				this.node.createPort('output', name, portType);
+				targetPort = this.node.createPort('output', name, portType);
 
-				targetPort = this.output[name];
-				this._funcMain.node.createPort('input', name, portType);
+				if(portType === Function || portType.prototype instanceof Function){
+					let callablePort = this.node.output;
+					this._funcMain.node.createPort('input', name, Blackprint.Port.Trigger(function(){
+						callablePort[name](); // ToDo: change dynamic property call to static
+					}));
+				}
+				else this._funcMain.node.createPort('input', name, portType);
 			}
 			else {
 				let portType = port.feature != null ? port.feature(port.type) : port.type;
-				this.node.createPort('input', name, portType);
+
+				if(portType === Function || portType.prototype instanceof Function){
+					let callablePort = this._funcMain.node.output;
+					this.node.createPort('input', name, Blackprint.Port.Trigger(function(){
+						callablePort[name](); // ToDo: change dynamic property call to static
+					}));
+				}
+				else this.node.createPort('input', name, portType);
 
 				targetPort = this.input[name];
 				this._funcMain.node.createPort('output', name, portType);
