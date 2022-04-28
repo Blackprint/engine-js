@@ -116,6 +116,10 @@ function BPFnInit(){
 				this.bpInstance = new Blackprint.Engine();
 			else this.bpInstance = new Blackprint.Sketch();
 
+			let newInstance = this.bpInstance;
+			newInstance.variables = node._instance.variables;
+			newInstance.functions = node._instance.functions;
+
 			let {input, output} = this.node._funcInstance;
 			for(let key in input)
 				node.createPort('input', key, input[key]);
