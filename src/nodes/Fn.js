@@ -5,12 +5,27 @@ Blackprint.nodes.BP.Fn = {
 			super(instance);
 			this.setInterface('BPIC/BP/Fn/Input');
 		}
+		imported(){
+			let funcMain = this.iface._funcMain = this._instance._funcMain;
+			let { input } = funcMain.node._funcInstance;
+
+			for(let key in input)
+				this.createPort('output', key, input[key]);
+		}
 	},
 	Output: class extends Blackprint.Node {
 		static input = {};
 		constructor(instance){
 			super(instance);
 			this.setInterface('BPIC/BP/Fn/Output');
+		}
+
+		imported(){
+			let funcMain = this.iface._funcMain = this._instance._funcMain;
+			let { output } = funcMain.node._funcInstance;
+
+			for(let key in output)
+				this.createPort('input', key, output[key]);
 		}
 
 		update(port, source, cable){
@@ -20,7 +35,7 @@ Blackprint.nodes.BP.Fn = {
 };
 
 // used for instance.createFunction
-class BPFunction extends CustomEvent {
+class BPFunction extends CustomEvent { // <= _funcInstance
 	constructor(id, options, instance){
 		super();
 
@@ -45,10 +60,11 @@ class BPFunction extends CustomEvent {
 			static input = input;
 			static output = output;
 			static namespace = id;
+			static type = 'function';
 
 			constructor(instance){
 				super(instance);
-				this._funcInstance = temp;
+				instance._funcInstance = this._funcInstance = temp;
 
 				let iface = this.setInterface("BPIC/BP/Fn/Main");
 				iface.description = temp.description;
@@ -67,10 +83,6 @@ class BPFunction extends CustomEvent {
 	get output(){return this._output}
 	set input(v){throw new Error("Can't modify port by assigning .input property")}
 	set output(v){throw new Error("Can't modify port by assigning .input property")}
-
-	createPort(){}
-	renamePort(){}
-	deletePort(){}
 }
 
 class BPFunctionNode extends Blackprint.Node {
@@ -102,9 +114,6 @@ class BPFunctionNode extends Blackprint.Node {
 function BPFnInit(){
 	Blackprint.registerInterface('BPIC/BP/Fn/Main',
 	class extends Blackprint.Interface {
-		static input = {};
-		static output = {};
-
 		async imported(data){
 			if(this._importOnce)
 				throw new Error("Can't import function more than once");
@@ -119,15 +128,9 @@ function BPFnInit(){
 			let newInstance = this.bpInstance;
 			newInstance.variables = node._instance.variables;
 			newInstance.functions = node._instance.functions;
+			newInstance._funcMain = this;
 
-			let {input, output} = this.node._funcInstance;
-			for(let key in input)
-				node.createPort('input', key, input[key]);
-
-			for(let key in output)
-				node.createPort('output', key, output[key]);
-
-			await this.bpInstance.importJSON(this.node._funcInstance.structure);
+			await this.bpInstance.importJSON(this.node._funcInstance.structure, {pendingRender: true});
 
 			let debounce;
 			this.bpInstance.on('cable.connect cable.disconnect node.created node.delete', ()=>{
@@ -137,10 +140,6 @@ function BPFnInit(){
 					this.node._funcInstance.structure = structure;
 				}, 1000);
 			});
-
-			let In = this._FnInput = this.bpInstance.getNodes("BP/Fn/Input")[0].iface;
-			let Out = this._FnOutput = this.bpInstance.getNodes("BP/Fn/Output")[0].iface;
-			Out._funcMain = In._funcMain = this;
 		}
 	});
 
@@ -177,6 +176,7 @@ function BPFnInit(){
 
 				nodeA = this._funcMain.node;
 				nodeB = this.node;
+				nodeA._funcInstance.input[name] = portType;
 			}
 			else { // Output (input) -> Main (output)
 				let inc = 1;
@@ -190,6 +190,7 @@ function BPFnInit(){
 
 				nodeA = this.node;
 				nodeB = this._funcMain.node;
+				nodeB._funcInstance.output[name] = portType;
 			}
 
 			outputPort = nodeB.createPort('output', name, portType);
@@ -206,25 +207,41 @@ function BPFnInit(){
 			}
 		}
 		renamePort(fromName, toName){
+			let funcMainNode = this._funcMain.node;
+
 			if(this.type === 'bp-fn-input'){ // Main (input) -> Input (output)
-				this._funcMain.node.renamePort('input', fromName, toName);
+				funcMainNode.renamePort('input', fromName, toName);
 				this.node.renamePort('output', fromName, toName);
+
+				let main = funcMainNode._funcInstance.input;
+				main[toName] = main[fromName];
+				delete main[fromName];
 			}
 			else { // Output (input) -> Main (output)
-				this._funcMain.node.renamePort('output', fromName, toName);
+				funcMainNode.renamePort('output', fromName, toName);
 				this.node.renamePort('input', fromName, toName);
+
+				let main = funcMainNode._funcInstance.output;
+				main[toName] = main[fromName];
+				delete main[fromName];
 			}
 		}
 		deletePort(name){
+			let funcMainNode = this._funcMain.node;
 			if(this.type === 'bp-fn-input'){ // Main (input) -> Input (output)
-				this._funcMain.node.deletePort('input', name);
+				funcMainNode.deletePort('input', name);
 				this.node.deletePort('output', name);
+
+				delete funcMainNode._funcInstance.input[fromName];
 			}
 			else { // Output (input) -> Main (output)
-				this._funcMain.node.deletePort('output', name);
+				funcMainNode.deletePort('output', name);
 				this.node.deletePort('input', name);
+
+				delete funcMainNode._funcInstance.output[fromName];
 			}
 		}
+		
 	}
 
 	Blackprint.registerInterface('BPIC/BP/Fn/Input',
