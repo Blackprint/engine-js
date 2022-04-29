@@ -145,7 +145,7 @@ function BPFnInit(){
 	});
 
 	class BPFnInOut extends Blackprint.Interface {
-		useType(port){
+		addPort(port){
 			if(port === undefined) throw new Error("Can't set type with undefined");
 
 			let cable;
@@ -203,6 +203,26 @@ function BPFnInit(){
 				if(this.type === 'bp-fn-input')
 					outputPort.connectCable(cable);
 				else inputPort.connectCable(cable);
+			}
+		}
+		renamePort(fromName, toName){
+			if(this.type === 'bp-fn-input'){ // Main (input) -> Input (output)
+				this._funcMain.node.renamePort('input', fromName, toName);
+				this.node.renamePort('output', fromName, toName);
+			}
+			else { // Output (input) -> Main (output)
+				this._funcMain.node.renamePort('output', fromName, toName);
+				this.node.renamePort('input', fromName, toName);
+			}
+		}
+		deletePort(name){
+			if(this.type === 'bp-fn-input'){ // Main (input) -> Input (output)
+				this._funcMain.node.deletePort('input', name);
+				this.node.deletePort('output', name);
+			}
+			else { // Output (input) -> Main (output)
+				this._funcMain.node.deletePort('output', name);
+				this.node.deletePort('input', name);
 			}
 		}
 	}
