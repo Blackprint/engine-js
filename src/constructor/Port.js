@@ -39,35 +39,14 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 	// Set for the linked port (Handle for ScarletsFrame)
 	// ex: linkedPort = node.output.portName
 	createLinker(){
-		var port = this;
-
 		// Only for output (type: trigger/function)
 		if(this.source === 'output' && this.type === Function){
 			// Disable sync
-			port.sync = false;
-
-			return function(obj){
-				if(!port.iface.node.disablePorts){
-					var cables = port.cables;
-					for (var i = 0; i < cables.length; i++) {
-						var cable = cables[i];
-
-						var target = cable.input;
-						if(target === void 0)
-							continue;
-
-						if(Blackprint.settings.visualizeFlow)
-							cable.visualizeFlow();
-
-						target.iface.input[target.name].default();
-					}
-				}
-
-				port.emit('call', obj);
-				// port.iface.node._instance.emit('port.output.call', temp);
-			};
+			this.sync = false;
+			return this._callAll = createCallablePort(this);
 		}
 
+		var port = this;
 		var prepare = {
 			configurable:true,
 			enumerable:true,
@@ -371,4 +350,27 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 function getDataType(which){
 	return which.constructor.name;
+}
+
+function createCallablePort(port){
+	return function(obj){
+		if(!port.iface.node.disablePorts){
+			var cables = port.cables;
+			for (var i = 0; i < cables.length; i++) {
+				var cable = cables[i];
+
+				var target = cable.input;
+				if(target === void 0)
+					continue;
+
+				if(Blackprint.settings.visualizeFlow)
+					cable.visualizeFlow();
+
+				target.iface.input[target.name].default();
+			}
+		}
+
+		port.emit('call', obj);
+		// port.iface.node._instance.emit('port.output.call', temp);
+	};
 }
