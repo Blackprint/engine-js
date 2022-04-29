@@ -161,8 +161,11 @@ function BPFnInit(){
 				port = cable.owner;
 
 			let name = port.name;
-			let targetPort;
-			if(this.type === 'bp-fn-input'){
+			let outputPort;
+			let portType = port.feature != null ? port.feature(port.type) : port.type;
+
+			let nodeA, nodeB; // Main (input) -> Input (output), Output (input) -> Main (output)
+			if(this.type === 'bp-fn-input'){ // Main (input) -> Input (output)
 				let inc = 1;
 				while(name in this.output){
 					if(name + inc in this.output) inc++;
@@ -172,18 +175,10 @@ function BPFnInit(){
 					}
 				}
 
-				let portType = port.feature != null ? port.feature(port.type) : port.type;
-				targetPort = this.node.createPort('output', name, portType);
-
-				if(portType === Function || portType.prototype instanceof Function){
-					let callablePort = this.node.output;
-					this._funcMain.node.createPort('input', name, Blackprint.Port.Trigger(function(){
-						callablePort[name](); // ToDo: change dynamic property call to static
-					}));
-				}
-				else this._funcMain.node.createPort('input', name, portType);
+				nodeA = this._funcMain.node;
+				nodeB = this.node;
 			}
-			else {
+			else { // Output (input) -> Main (output)
 				let inc = 1;
 				while(name in this.input){
 					if(name + inc in this.input) inc++;
@@ -193,22 +188,22 @@ function BPFnInit(){
 					}
 				}
 
-				let portType = port.feature != null ? port.feature(port.type) : port.type;
-
-				if(portType === Function || portType.prototype instanceof Function){
-					let callablePort = this._funcMain.node.output;
-					this.node.createPort('input', name, Blackprint.Port.Trigger(function(){
-						callablePort[name](); // ToDo: change dynamic property call to static
-					}));
-				}
-				else this.node.createPort('input', name, portType);
-
-				targetPort = this.input[name];
-				this._funcMain.node.createPort('output', name, portType);
+				nodeA = this.node;
+				nodeB = this._funcMain.node;
 			}
 
-			if(cable != null)
-				targetPort.connectCable(cable);
+			outputPort = nodeB.createPort('output', name, portType);
+
+			let inputPort;
+			if(portType === Function || portType.prototype instanceof Function)
+				inputPort = nodeA.createPort('input', name, Blackprint.Port.Trigger(outputPort._callAll));
+			else inputPort = nodeA.createPort('input', name, portType);
+
+			if(cable != null){
+				if(this.type === 'bp-fn-input')
+					outputPort.connectCable(cable);
+				else inputPort.connectCable(cable);
+			}
 		}
 	}
 
