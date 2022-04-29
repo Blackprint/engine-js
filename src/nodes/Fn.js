@@ -160,9 +160,18 @@ function BPFnInit(){
 			if(cable != null)
 				port = cable.owner;
 
+			let name = port.name;
 			let targetPort;
-			let name = this._num ??= 0;
 			if(this.type === 'bp-fn-input'){
+				let inc = 1;
+				while(name in this.output){
+					if(name + inc in this.output) inc++;
+					else {
+						name += inc;
+						break;
+					}
+				}
+
 				let portType = port.feature != null ? port.feature(port.type) : port.type;
 				targetPort = this.node.createPort('output', name, portType);
 
@@ -175,6 +184,15 @@ function BPFnInit(){
 				else this._funcMain.node.createPort('input', name, portType);
 			}
 			else {
+				let inc = 1;
+				while(name in this.input){
+					if(name + inc in this.input) inc++;
+					else {
+						name += inc;
+						break;
+					}
+				}
+
 				let portType = port.feature != null ? port.feature(port.type) : port.type;
 
 				if(portType === Function || portType.prototype instanceof Function){
@@ -188,7 +206,6 @@ function BPFnInit(){
 				targetPort = this.input[name];
 				this._funcMain.node.createPort('output', name, portType);
 			}
-			this._num++;
 
 			if(cable != null)
 				targetPort.connectCable(cable);
