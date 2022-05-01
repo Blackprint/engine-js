@@ -49,6 +49,8 @@ class BPVariable extends CustomEvent {
 	}
 }
 
+Blackprint._utils.BPVariable = BPVariable;
+
 let BPVarEventSlot = {slot: "bp-engine-var"};
 
 // ==== Interface ====

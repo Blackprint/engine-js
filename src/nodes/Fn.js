@@ -49,7 +49,7 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 		this.used = [];
 
 		// This will be updated if the function sketch was modified
-		this.structure = {
+		this.structure = options.structure || {
 			'BP/Fn/Input':[{x: 400, y: 100}],
 			'BP/Fn/Output':[{x: 600, y: 100}],
 		};
@@ -85,6 +85,8 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 	set output(v){throw new Error("Can't modify port by assigning .input property")}
 }
 
+Blackprint._utils.BPFunction = BPFunction;
+
 class BPFunctionNode extends Blackprint.Node {
 	constructor(instance){
 		super(instance);
@@ -114,7 +116,7 @@ class BPFunctionNode extends Blackprint.Node {
 function BPFnInit(){
 	Blackprint.registerInterface('BPIC/BP/Fn/Main',
 	class extends Blackprint.Interface {
-		async imported(data){
+		async _BpFnInit(){
 			if(this._importOnce)
 				throw new Error("Can't import function more than once");
 
@@ -136,7 +138,11 @@ function BPFnInit(){
 			this.bpInstance.on('cable.connect cable.disconnect node.created node.delete', ()=>{
 				clearTimeout(debounce);
 				debounce = setTimeout(() => {
-					let structure = this.bpInstance.exportJSON({toRawObject: true});
+					let structure = this.bpInstance.exportJSON({
+						toRawObject: true,
+						exportFunctions: false,
+						exportVariables: false,
+					});
 					this.node._funcInstance.structure = structure;
 				}, 1000);
 			});
@@ -144,7 +150,7 @@ function BPFnInit(){
 	});
 
 	class BPFnInOut extends Blackprint.Interface {
-		addPort(port){
+		addPort(port, customName){
 			if(port === undefined) throw new Error("Can't set type with undefined");
 
 			let cable;
@@ -159,7 +165,10 @@ function BPFnInit(){
 			if(cable != null)
 				port = cable.owner;
 
-			let name = port.name;
+			if(port.iface.namespace.startsWith("BP/Fn"))
+				throw new Error("Function Input can't be connected directly to Output");
+
+			let name = customName || port.name;
 			let outputPort;
 			let portType = port.feature != null ? port.feature(port.type) : port.type;
 
@@ -205,6 +214,9 @@ function BPFnInit(){
 					outputPort.connectCable(cable);
 				else inputPort.connectCable(cable);
 			}
+
+			if(this.type === 'bp-fn-input') return outputPort;
+			return inputPort;
 		}
 		renamePort(fromName, toName){
 			let funcMainNode = this._funcMain.node;
@@ -241,7 +253,6 @@ function BPFnInit(){
 				delete funcMainNode._funcInstance.output[fromName];
 			}
 		}
-		
 	}
 
 	Blackprint.registerInterface('BPIC/BP/Fn/Input',

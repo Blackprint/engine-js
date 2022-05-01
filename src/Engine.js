@@ -100,12 +100,15 @@ Blackprint.Engine = class Engine extends CustomEvent {
 			// Every nodes that using this namespace name
 			for (var a = 0; a < nodes.length; a++){
 				let temp = nodes[a];
-				this.createNode(namespace, {
+				let iface = this.createNode(namespace, {
 					id: temp.id, // Named ID (if exist)
 					i: temp.i, // List Index
 					data: temp.data, // if exist
 					oldIface: oldIfaces[temp.id],
 				}, handlers);
+
+				// For custom function node
+				await iface._BpFnInit?.();
 			}
 		}
 
@@ -124,13 +127,27 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 					// Every output port that have connection
 					for(var portName in out){
+						var port = out[portName];
+
 						var linkPortA = iface.output[portName];
 						if(linkPortA === void 0){
-							console.error("Node port not found for", iface, "with name:", portName);
-							continue;
-						}
+							if(iface.namespace === "BP/Fn/Input"){
+								let target = this._getTargetPortType(iface.node._instance, 'input', port);
+								linkPortA = iface.addPort(target, portName);
 
-						var port = out[portName];
+								if(linkPortA === void 0)
+									throw new Error(`Can't create output port (${portName}) for function (${iface._funcMain.node._funcInstance.id})`);
+							}
+							else if(iface.namespace === "BPIC/BP/Var/Get"){
+								let target = this._getTargetPortType(this, 'input', port);
+								iface.useType(target);
+							}
+							else{
+								console.error("Node port not found for", iface, "with name:", portName);
+								continue;
+							}
+							console.log(2, iface.namespace);
+						}
 
 						// Current output's available targets
 						for (var k = 0; k < port.length; k++) {
@@ -140,8 +157,20 @@ Blackprint.Engine = class Engine extends CustomEvent {
 							// output can only meet input port
 							var linkPortB = targetNode.input[target.name];
 							if(linkPortB === void 0){
-								console.error("Node port not found for", targetNode, "with name:", target.name);
-								continue;
+								if(targetNode.namespace === "BP/Fn/Output"){
+									linkPortB = targetNode.addPort(linkPortA, target.name);
+
+									if(linkPortB === void 0)
+										throw new Error(`Can't create output port (${target.name}) for function (${targetNode._funcMain.node._funcInstance.id})`);
+								}
+								else if(iface.namespace === "BPIC/BP/Var/Set"){
+									let target = this._getTargetPortType(this, 'output', port);
+									iface.useType(target);
+								}
+								else{
+									console.error("Node port not found for", targetNode, "with name:", target.name);
+									continue;
+								}
 							}
 
 							var cable = new Engine.Cable(linkPortA, linkPortB);
@@ -163,6 +192,12 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 		this.emit("json.imported", {appendMode: options.appendMode, nodes: inserted, raw: json});
 		return inserted;
+	}
+
+	_getTargetPortType(instance, whichPort, targetNodes){
+		let target = targetNodes[0]; // ToDo: check all target in case if it's supporting Union type
+		let targetIface = instance.ifaceList[target.i];
+		return targetIface[whichPort][target.name];
 	}
 
 	getNode(id){
@@ -269,7 +304,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 	createVariable(id, options){
 		if(id in this.variables)
-			throw new Error("Variable id already exist");
+			throw new Error("Variable id already exist: "+id);
 
 		// deepProperty
 
@@ -279,7 +314,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 	createFunction(id, options){
 		if(id in this.functions)
-			throw new Error("Function id already exist");
+			throw new Error("Function id already exist: "+id);
 
 		// BPFunction = ./nodes/Fn.js
 		return this.functions[id] = new BPFunction(id, options);
