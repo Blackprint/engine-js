@@ -36,6 +36,7 @@ class BPVariable extends CustomEvent {
 
 		// The type need to be defined dynamically on first cable connect
 		this.type = typeNotSet;
+		this.used = new Set();
 
 		this.totalSet = 0;
 		this.totalGet = 0;
@@ -59,6 +60,8 @@ function BPVarInit(){
 	class BPVarGetSet extends Blackprint.Interface {
 		imported(data){
 			this.changeVar(data.name, data.scope || 'instance');
+			let temp = this._bpVarRef;
+			temp.used.add(this);
 		}
 		changeVar(name, scopeName){
 			this.data.name = name;
@@ -105,9 +108,16 @@ function BPVarInit(){
 			let targetPort = this._reinitPort();
 			if(cable != null)
 				targetPort.connectCable(cable);
+
+			// Also create port for other node that using this variable
+			for (let item of temp.used)
+				item._reinitPort();
 		}
 		destroy(){
-			if(this._bpVarRef === void 0) return;
+			let temp = this._bpVarRef;
+			if(temp === void 0) return;
+
+			temp.used.delete(this);
 
 			let listener = this._bpVarRef.listener;
 			if(listener == null) return;
@@ -116,6 +126,7 @@ function BPVarInit(){
 			if(i !== -1) listener.splice(i, 1)
 		}
 	}
+	Blackprint._utils.BPVarGetSet = BPVarGetSet;
 
 	Blackprint.registerInterface('BPIC/BP/Var/Get',
 	class extends BPVarGetSet {
