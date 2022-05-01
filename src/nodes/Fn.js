@@ -132,7 +132,8 @@ function BPFnInit(){
 			newInstance.functions = node._instance.functions;
 			newInstance._funcMain = this;
 
-			await this.bpInstance.importJSON(this.node._funcInstance.structure, {pendingRender: true});
+			let swallowCopy = Object.assign({}, this.node._funcInstance.structure);
+			await this.bpInstance.importJSON(swallowCopy, {pendingRender: true});
 
 			let debounce;
 			this.bpInstance.on('cable.connect cable.disconnect node.created node.delete', ()=>{

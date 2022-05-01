@@ -97,6 +97,7 @@ Blackprint.allowModuleOrigin = function(list){
 Blackprint.loadBrowserInterface = true;
 Blackprint.loadModuleFromURL = async function(url, options){
 	if(url.constructor !== Array) url = [url];
+	else url = url.slice(0);
 
 	if(!allowModuleOrigin)
 		throw new Error("Load from URL is not allowed for any origin");
