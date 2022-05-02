@@ -1,3 +1,28 @@
+# 0.6.5
+
+### Features
+- Add used variable nodes's reference list
+- Add support for exporting custom function and variable
+- Add feature to rename/delete port for custom function node
+- Add support to use port feature for custom function node
+- Add to do list to prepare for breaking changes
+- Add destroy function
+- Emit event when JSON was imported
+- Finishing custom variable and function node
+
+### Bug Fix
+- Fix for copying custom function node
+- Fix callable port for function node
+- Fix variable node for callable port
+- Fix port type checker for ArrayOf
+- Fix type validation
+- `_list` must be not enumerable
+- Allow connect to union port with similar types
+- Improve `value` event listener
+- Skip module loader if no URL input
+- Skip check for `undefined` port but allow `null` port
+- Make some internal properties configurable
+
 # 0.6.4
 
 ### Bug Fix
