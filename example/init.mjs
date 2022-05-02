@@ -1,10 +1,10 @@
 // For Deno
 // import Blackprint from 'https://cdn.skypack.dev/@blackprint/engine@0.6';
-// import Blackprint from '../dist/engine.es6.js';
+// import Blackprint from '../../dist/engine.es6.js';
 
 // For Node.js
 import Blackprint from '@blackprint/engine';
-// import Blackprint from '../dist/engine.min.js';
+// import Blackprint from '../../dist/engine.min.js';
 
 // Run from your CLI
 // deno run --allow-net init.mjs
