@@ -1,3 +1,8 @@
+# 0.6.6
+
+### Bug Fix
+- Fix data type validation for any type
+
 # 0.6.5
 
 ### Features
