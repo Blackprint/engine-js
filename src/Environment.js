@@ -2,96 +2,93 @@
 // Environment map can be accessed with 'iface.env' on Sketch or Engine
 
 Blackprint.Environment = {
-	list: [], // This shouldn't being used
+	list: [], // This shouldn't being used (ToDo: change this to private)
 	map: {}, // Use this instead
+	_map: {}, // Use this instead
 
 	loadFromURL: false,
 	isBrowser: false,
 	isNode: false,
 	isDeno: false,
 
-	import(arr){
+	_noEvent: false,
+
+	// obj = {KEY: "value"}
+	import(obj){
 		var map = this.map;
-		if(arr.constructor !== Array)
-			return this.map = Object.assign(arr, map);
+		this._noEvent = true;
+	
+		for(let key in obj)
+			this.set(key, obj[key]);
 
-		let temp = new Set();
-
-		// Reassign the value to the map
-		for (var i = 0; i < arr.length; i++) {
-			let item = arr[i];
-
-			if(/[^A-Z_][^A-Z0-9_]/.test(item.key)){
-				console.log("Environment to be imported:", item);
-				throw new Error("Environment must be uppercase and not contain any symbol except underscore, and not started by a number. But got: "+item.key);
-			}
-
-			map[item.key] = item.value;
-			temp.add(item.key);
-		}
-
-		// Delete everything in the array but don't remake the Array object
-		this.list.splice(0);
-		this.list.push(...arr);
-
-		// Delete key in the map that was not exist on the imported list
-		for(var key in map){
-			if(temp.has(key)) continue;
-			this.delete(key, true);
-		}
+		this._noEvent = false;
+		Blackprint.emit('environment-imported');
 	},
 
-	set(key, value, refObject){
+	set(key, value){
 		if(/[^A-Z_][^A-Z0-9_]/.test(key))
 			throw new Error("Environment must be uppercase and not contain any symbol except underscore, and not started by a number. But got: "+key);
 
+		if(value?.constructor !== String)
+			throw new Error(`Environment value must be a string (found "${value}" in ${key})`);
+
+		let list = this.list;
+		let temp = list[key];
+
+		if(temp == null){
+			temp = {key, value};
+			list.push(temp);
+			this._map[key] = temp;
+		}
+
+		// Add reactivity for Sketch only
+		if(Blackprint.Sketch != null){
+			if(!(key in this.map)){
+				let val;
+				Object.defineProperty(this.map, key, {
+					configurable: true,
+					enumerable: true,
+					get(){return val},
+					set(v){
+						val = v;
+						temp.value = v;
+						Blackprint.emit('environment-changed', temp);
+					},
+				});
+			}
+		}
+
 		this.map[key] = value;
 
-		if(refObject === void 0){
-			let list = this.list;
-			for (var i = 0; i < list.length; i++) {
-				if(list[i].key === key){
-					list[i].value = value;
-					break;
-				}
-			}
-
-			if(i === list.length)
-				this.list.push({key, value});
-		}
-		else if(refObject !== false)
-			refObject.value = value;
+		if(!this._noEvent)
+			Blackprint.emit('environment-added', temp);
 	},
 
-	delete(key, withoutList){
-		let { list, map } = this;
+	_rename(keyA, keyB){
+		let { _map, map } = this;
+		let temp = _map[keyA];
+		if(temp == null) throw new Error(`${keyA} was not defined in the environment`);
 
-		if(withoutList === void 0){
-			if(key.constructor === String){
-				for (var i = 0; i < list.length; i++) {
-					if(list[i].key === key){
-						list.splice(i, 1);
-						break;
-					}
-				}
-			}
-			else{
-				let i = list.indexOf(key);
-				key = key.key;
+		_map[keyB] = temp;
+		delete _map[keyA];
 
-				if(i !== -1)
-					list.splice(i, 1);
-			}
-		}
+		temp.key = keyB;
+		Object.defineProperty(map, keyB, Object.getOwnPropertyDescriptor(map, keyA));
+		delete map[keyA];
+	},
 
-		// Don't delete field that has getter/setter
-		let desc = Object.getOwnPropertyDescriptor(map, key);
-		if(desc && desc.set !== void 0){
-			map[key] = void 0;
-			return;
-		}
+	delete(key){
+		let { list, _map, map } = this;
 
+		let i = list.indexOf(_map[key]);
+		key = key.key;
+
+		if(i !== -1)
+			list.splice(i, 1);
+
+		delete _map[key];
 		delete map[key];
+		Blackprint.emit('environment-deleted', {key});
 	}
 };
 
