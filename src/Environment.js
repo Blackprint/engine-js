@@ -17,7 +17,7 @@ Blackprint.Environment = {
 	import(obj){
 		var map = this.map;
 		this._noEvent = true;
-	
+
 		for(let key in obj)
 			this.set(key, obj[key]);
 
@@ -32,12 +32,10 @@ Blackprint.Environment = {
 		if(value?.constructor !== String)
 			throw new Error(`Environment value must be a string (found "${value}" in ${key})`);
 
-		let list = this.list;
-		let temp = list[key];
-
+		let temp = this._map[key];
 		if(temp == null){
 			temp = {key, value};
-			list.push(temp);
+			this.list.push(temp);
 			this._map[key] = temp;
 		}
 
@@ -65,6 +63,8 @@ Blackprint.Environment = {
 	},
 
 	_rename(keyA, keyB){
+		if(!keyB) return;
+
 		let { _map, map } = this;
 		let temp = _map[keyA];
 		if(temp == null) throw new Error(`${keyA} was not defined in the environment`);
@@ -81,8 +81,6 @@ Blackprint.Environment = {
 		let { list, _map, map } = this;
 
 		let i = list.indexOf(_map[key]);
-		key = key.key;
-
 		if(i !== -1)
 			list.splice(i, 1);
 
