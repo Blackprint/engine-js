@@ -2,9 +2,9 @@
 // Environment map can be accessed with 'iface.env' on Sketch or Engine
 
 Blackprint.Environment = {
-	list: [], // This shouldn't being used (ToDo: change this to private)
 	map: {}, // Use this instead
-	_map: {}, // Use this instead
+	_map: {},
+	list: [], // This shouldn't being used (ToDo: change this to private)
 
 	loadFromURL: false,
 	isBrowser: false,
@@ -15,7 +15,6 @@ Blackprint.Environment = {
 
 	// obj = {KEY: "value"}
 	import(obj){
-		var map = this.map;
 		this._noEvent = true;
 
 		for(let key in obj)
@@ -34,21 +33,18 @@ Blackprint.Environment = {
 
 		let temp = this._map[key];
 		if(temp == null){
-			temp = {key, value};
+			temp = this._map[key] = { key, value };
 			this.list.push(temp);
-			this._map[key] = temp;
 		}
 
 		// Add reactivity for Sketch only
 		if(Blackprint.Sketch != null){
 			if(!(key in this.map)){
-				let val;
 				Object.defineProperty(this.map, key, {
 					configurable: true,
 					enumerable: true,
-					get(){return val},
+					get(){return temp.value},
 					set(v){
-						val = v;
 						temp.value = v;
 						Blackprint.emit('environment-changed', temp);
 					},
@@ -75,6 +71,8 @@ Blackprint.Environment = {
 		temp.key = keyB;
 		Object.defineProperty(map, keyB, Object.getOwnPropertyDescriptor(map, keyA));
 		delete map[keyA];
+
+		Blackprint.emit('environment-renamed', {old: keyA, now: keyB});
 	},
 
 	delete(key){
