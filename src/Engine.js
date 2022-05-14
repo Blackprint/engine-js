@@ -70,9 +70,12 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 		if(metadata !== void 0){
 			if(metadata.env !== void 0 && !options.noEnv){
-				let temp = Blackprint.Environment;
-				Object.assign(temp.map, metadata.env);
-				temp.list = Object.entries(temp.map).map(([k, v]) => ({key: k, value: v}));
+				let Env = Blackprint.Environment;
+				let temp = metadata.env;
+				
+				for (let key in temp) {
+					Env.set(key, temp[key]);
+				}
 			}
 
 			if(metadata.moduleJS !== void 0 && !options.noModuleJS){
