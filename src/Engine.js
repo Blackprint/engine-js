@@ -312,7 +312,10 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		// deepProperty
 
 		// BPVariable = ./nodes/Var.js
-		return this.variables[id] = new BPVariable(id, options);
+		let temp = this.variables[id] = new BPVariable(id, options);
+		this.emit('variable.new', temp);
+
+		return temp;
 	}
 
 	createFunction(id, options){
@@ -320,7 +323,10 @@ Blackprint.Engine = class Engine extends CustomEvent {
 			throw new Error("Function id already exist: "+id);
 
 		// BPFunction = ./nodes/Fn.js
-		return this.functions[id] = new BPFunction(id, options);
+		let temp = this.functions[id] = new BPFunction(id, options);
+		this.emit('function.new', temp);
+
+		return temp;
 	}
 
 	destroy(){
