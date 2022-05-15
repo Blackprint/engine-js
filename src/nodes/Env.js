@@ -6,7 +6,9 @@ Blackprint.nodes.BP.Env = {
 			super(instance);
 
 			let iface = this.setInterface('BPIC/BP/Env/Get');
-			iface.data = {};
+
+			// Specify data field from here to make it enumerable and exportable
+			iface.data = {name: ''};
 			iface.title = 'EnvGet';
 			iface.type = 'bp-env-get';
 		}
@@ -17,7 +19,9 @@ Blackprint.nodes.BP.Env = {
 			super(instance);
 
 			let iface = this.setInterface('BPIC/BP/Env/Set');
-			iface.data = {};
+			
+			// Specify data field from here to make it enumerable and exportable
+			iface.data = {name: ''};
 			iface.title = 'EnvSet';
 			iface.type = 'bp-env-set';
 		}

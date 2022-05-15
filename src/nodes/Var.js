@@ -6,7 +6,13 @@ Blackprint.nodes.BP.Var = {
 			super(instance);
 
 			let iface = this.setInterface('BPIC/BP/Var/Set');
-			iface.data = {};
+
+			// Specify data field from here to make it enumerable and exportable
+			iface.data = {
+				name: '',
+				scope: 'instance'
+			};
+
 			iface.title = 'VarSet';
 			iface.type = 'bp-var-set';
 		}
@@ -17,7 +23,13 @@ Blackprint.nodes.BP.Var = {
 			super(instance);
 
 			let iface = this.setInterface('BPIC/BP/Var/Get');
-			iface.data = {};
+
+			// Specify data field from here to make it enumerable and exportable
+			iface.data = {
+				name: '',
+				scope: 'instance'
+			};
+
 			iface.title = 'VarGet';
 			iface.type = 'bp-var-get';
 		}
