@@ -39,10 +39,10 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 	constructor(id, options, instance){
 		super();
 
-		this.instance = instance;
+		this.rootInstance = instance; // root instance
 		this.id = this.title = id;
 		this.description = options?.description ?? '';
-		this.variables = {}; // shared function variables
+		this.variables = {}; // shared between function
 
 		let input = this._input = {};
 		let output = this._output = {};
@@ -71,6 +71,10 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 				iface.title = temp.title;
 				iface.type = 'function';
 				iface.uniqId = uniqId++;
+			}
+
+			async init(){
+				if(!this.iface._importOnce) await this.iface._BpFnInit();
 			}
 		};
 	}
@@ -128,7 +132,8 @@ function BPFnInit(){
 			else this.bpInstance = new Blackprint.Sketch();
 
 			let newInstance = this.bpInstance;
-			newInstance.variables = node._instance.variables;
+			newInstance.variables = {}; // private for one function
+			newInstance.sharedVariables = node._funcInstance.variables; // shared between function
 			newInstance.functions = node._instance.functions;
 			newInstance._funcMain = this;
 
