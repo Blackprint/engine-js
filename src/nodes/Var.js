@@ -10,7 +10,7 @@ Blackprint.nodes.BP.Var = {
 			// Specify data field from here to make it enumerable and exportable
 			iface.data = {
 				name: '',
-				scope: 'instance'
+				scope: 'public'
 			};
 
 			iface.title = 'VarSet';
@@ -27,7 +27,7 @@ Blackprint.nodes.BP.Var = {
 			// Specify data field from here to make it enumerable and exportable
 			iface.data = {
 				name: '',
-				scope: 'instance'
+				scope: 'public'
 			};
 
 			iface.title = 'VarGet';
@@ -42,7 +42,7 @@ let typeNotSet = {typeNotSet: true}; // Flag that a port is not set
 class BPVariable extends CustomEvent {
 	constructor(id, options, instance){
 		super();
-		this.instance = instance;
+		// this.rootInstance = instance;
 
 		this.id = this.title = id;
 
@@ -71,7 +71,10 @@ let BPVarEventSlot = {slot: "bp-engine-var"};
 function BPVarInit(){
 	class BPVarGetSet extends Blackprint.Interface {
 		imported(data){
-			this.changeVar(data.name, data.scope || 'instance');
+			if(data.scope == null || data.name == null)
+				throw new Error("'scope' and 'name' options is required for creating variable node");
+
+			this.changeVar(data.name, data.scope);
 			let temp = this._bpVarRef;
 			temp.used.add(this);
 		}
@@ -79,15 +82,15 @@ function BPVarInit(){
 			this.data.name = name;
 			this.data.scope = scopeName;
 
-			let scope;
-			if(scopeName === 'instance')
-				scope = this.node._instance.variables;
-			else {
-				if(this.node._funcInstance == null)
-					throw new Error(`Can't access to private variable`);
+			let _funcInstance = this.node._instance._funcMain?.node._funcInstance;
 
-				scope = this.node._funcInstance.variables;
-			}
+			let scope;
+			if(scopeName === 'public')
+				scope = (_funcInstance?.rootInstance ?? this.node._instance).variables;
+			else if(scopeName === 'shared')
+				scope = _funcInstance.variables;
+			else // private
+				scope = this.node._instance.variables;
 
 			if(!(name in scope))
 				throw new Error(`'${name}' variable was not defined on the '${scopeName}' instance`);
