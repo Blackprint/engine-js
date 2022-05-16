@@ -325,7 +325,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		let cable;
 
 		if(port._scope != null){
-			let list = port.iface[port.source]._list;
+			let list = port.iface[port.source]._portList;
 			let rect;
 
 			if(list.getElement == null || DOMRect.fromRect == null){

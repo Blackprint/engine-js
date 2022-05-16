@@ -13,7 +13,7 @@ class PortLink {
 		// Check if a browser
 		if(typeof sf !== 'undefined' && sf.Obj !== void 0 && sf.Obj.set !== void 0){
 			this._sf = true;
-			Object.defineProperty(iPort, '_list', {
+			Object.defineProperty(iPort, '_portList', {
 				enumerable: false,
 				configurable: true,
 				value: []
@@ -44,7 +44,7 @@ class PortLink {
 		iPort[portName] = linkedPort;
 
 		if(this._sf === true)
-			iPort._list.push(linkedPort);
+			iPort._portList.push(linkedPort);
 
 		var linkValue = linkedPort.createLinker();
 
@@ -71,10 +71,10 @@ class PortLink {
 
 		// Check if a browser or not
 		if(this._sf === true){
-			let i = iPort._list.indexOf(port);
+			let i = iPort._portList.indexOf(port);
 
 			if(i !== -1)
-				iPort._list.splice(i, 1);
+				iPort._portList.splice(i, 1);
 		}
 
 		delete iPort[portName];
