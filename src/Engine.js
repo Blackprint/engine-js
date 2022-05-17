@@ -134,14 +134,14 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 						var linkPortA = iface.output[portName];
 						if(linkPortA === void 0){
-							if(iface.namespace === "BP/Fn/Input"){
+							if(iface.enum === _InternalNodeEnum.BPFnInput){
 								let target = this._getTargetPortType(iface.node._instance, 'input', port);
 								linkPortA = iface.addPort(target, portName);
 
 								if(linkPortA === void 0)
 									throw new Error(`Can't create output port (${portName}) for function (${iface._funcMain.node._funcInstance.id})`);
 							}
-							else if(iface.namespace === "BPIC/BP/Var/Get"){
+							else if(iface.enum === _InternalNodeEnum.BPVarGet){
 								let target = this._getTargetPortType(this, 'input', port);
 								iface.useType(target);
 							}
@@ -149,7 +149,6 @@ Blackprint.Engine = class Engine extends CustomEvent {
 								console.error("Node port not found for", iface, "with name:", portName);
 								continue;
 							}
-							console.log(2, iface.namespace);
 						}
 
 						// Current output's available targets
@@ -160,13 +159,13 @@ Blackprint.Engine = class Engine extends CustomEvent {
 							// output can only meet input port
 							var linkPortB = targetNode.input[target.name];
 							if(linkPortB === void 0){
-								if(targetNode.namespace === "BP/Fn/Output"){
+								if(targetNode.enum === _InternalNodeEnum.BPFnOutput){
 									linkPortB = targetNode.addPort(linkPortA, target.name);
 
 									if(linkPortB === void 0)
 										throw new Error(`Can't create output port (${target.name}) for function (${targetNode._funcMain.node._funcInstance.id})`);
 								}
-								else if(iface.namespace === "BPIC/BP/Var/Set"){
+								else if(iface.enum === _InternalNodeEnum.BPVarSet){
 									let target = this._getTargetPortType(this, 'output', port);
 									iface.useType(target);
 								}
@@ -306,8 +305,10 @@ Blackprint.Engine = class Engine extends CustomEvent {
 	}
 
 	createVariable(id, options){
-		if(id in this.variables)
-			throw new Error("Variable id already exist: "+id);
+		if(id in this.variables){
+			this.variables[id].destroy();
+			delete this.variables[id];
+		}
 
 		// deepProperty
 
@@ -319,8 +320,10 @@ Blackprint.Engine = class Engine extends CustomEvent {
 	}
 
 	createFunction(id, options){
-		if(id in this.functions)
-			throw new Error("Function id already exist: "+id);
+		if(id in this.functions){
+			this.functions[id].destroy();
+			delete this.functions[id];
+		}
 
 		// BPFunction = ./nodes/Fn.js
 		let temp = this.functions[id] = new BPFunction(id, options, this);

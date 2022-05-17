@@ -15,6 +15,8 @@ Blackprint.nodes.BP.Var = {
 
 			iface.title = 'VarSet';
 			iface.type = 'bp-var-set';
+
+			iface.enum = _InternalNodeEnum.BPVarSet;
 		}
 	},
 	Get: class extends Blackprint.Node {
@@ -32,6 +34,8 @@ Blackprint.nodes.BP.Var = {
 
 			iface.title = 'VarGet';
 			iface.type = 'bp-var-get';
+
+			iface.enum = _InternalNodeEnum.BPVarGet;
 		}
 	},
 };
@@ -60,6 +64,13 @@ class BPVariable extends CustomEvent {
 		this._value = val;
 		this.emit('value');
 	}
+
+	destroy(){
+		let map = this.used;
+		for (let iface of map) {
+			iface.node._instance.deleteNode(iface);
+		}
+	}
 }
 
 Blackprint._utils.BPVariable = BPVariable;
@@ -79,6 +90,9 @@ function BPVarInit(){
 			temp.used.add(this);
 		}
 		changeVar(name, scopeName){
+			if(this.data.name !== '')
+				throw new Error(`Can't change variable node that already be initialized`);
+				
 			this.data.name = name;
 			this.data.scope = scopeName;
 
@@ -146,6 +160,9 @@ function BPVarInit(){
 	Blackprint.registerInterface('BPIC/BP/Var/Get',
 	class extends BPVarGetSet {
 		changeVar(name, scopeName){
+			if(this.data.name !== '')
+				throw new Error(`Can't change variable node that already be initialized`);
+
 			if(this._onChanged != null)
 				scope[this.data.name]?.off('value', this._onChanged);
 

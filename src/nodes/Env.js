@@ -11,6 +11,8 @@ Blackprint.nodes.BP.Env = {
 			iface.data = {name: ''};
 			iface.title = 'EnvGet';
 			iface.type = 'bp-env-get';
+
+			iface.enum = _InternalNodeEnum.BPEnvGet;
 		}
 	},
 	Set: class extends Blackprint.Node {
@@ -24,6 +26,8 @@ Blackprint.nodes.BP.Env = {
 			iface.data = {name: ''};
 			iface.title = 'EnvSet';
 			iface.type = 'bp-env-set';
+
+			iface.enum = _InternalNodeEnum.BPEnvSet;
 		}
 		update(){
 			Blackprint.Environment.set(this.iface.data.name, this.input.Val);

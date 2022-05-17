@@ -3,7 +3,9 @@ Blackprint.nodes.BP.Fn = {
 		static output = {};
 		constructor(instance){
 			super(instance);
-			this.setInterface('BPIC/BP/Fn/Input');
+
+			let iface = this.setInterface('BPIC/BP/Fn/Input');
+			iface.enum = _InternalNodeEnum.BPFnInput;
 		}
 		imported(){
 			let funcMain = this.iface._funcMain = this._instance._funcMain;
@@ -17,7 +19,9 @@ Blackprint.nodes.BP.Fn = {
 		static input = {};
 		constructor(instance){
 			super(instance);
-			this.setInterface('BPIC/BP/Fn/Output');
+
+			let iface = this.setInterface('BPIC/BP/Fn/Output');
+			iface.enum = _InternalNodeEnum.BPFnOutput;
 		}
 
 		imported(){
@@ -42,11 +46,16 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 		this.rootInstance = instance; // root instance
 		this.id = this.title = id;
 		this.description = options?.description ?? '';
+
+		// {name: BPVariable}
 		this.variables = {}; // shared between function
+
+		// ['id', ...]
+		this.privateVariables = []; // private variable (different from other function)
 
 		let input = this._input = {};
 		let output = this._output = {};
-		this.used = [];
+		this.used = []; // [Blackprint.Node, ...]
 
 		// This will be updated if the function sketch was modified
 		this.structure = options.structure || {
@@ -71,6 +80,8 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 				iface.title = temp.title;
 				iface.type = 'function';
 				iface.uniqId = uniqId++;
+
+				iface.enum = _InternalNodeEnum.BPFnMain;
 			}
 
 			async init(){
@@ -83,10 +94,73 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 		return instance.createNode(this.node, options);
 	}
 
+	createVariable(id, options){
+		if(id in this.variables)
+			throw new Error("Variable id already exist: "+id);
+
+		// deepProperty
+
+		// BPVariable = ./Var.js
+		let temp = new BPVariable(id, options);
+		temp.funcInstance = this;
+
+		if(options.scope === 'shared'){
+			if(Blackprint.Sketch != null)
+				sf.Obj.set(this.variables, id, temp);
+			else this.variables[id] = temp;
+		}
+		else return this.addPrivateVariables(id);
+
+		this.emit('variable.new', temp);
+		this.rootInstance.emit('variable.new', temp);
+		return temp;
+	}
+
+	addPrivateVariables(id){
+		if(!this.privateVariables.includes(id)){
+			this.privateVariables.push(id);
+			this.emit('variable.new', {scope: 'private', id});
+			this.rootInstance.emit('variable.new', {scope: 'private', id});
+		}
+		else return;
+
+		let hasSketch = Blackprint.Sketch != null;
+		
+		let list = this.used;
+		for (let i=0; i < list.length; i++) {
+			let vars = list[i].iface.bpInstance.variables;
+
+			if(hasSketch)
+				sf.Obj.set(vars, id, new BPVariable(id));
+			else vars[id] = new BPVariable(id);
+		}
+	}
+
+	refreshPrivateVariables(instance){
+		let vars = instance.variables;
+		let hasSketch = Blackprint.Sketch != null;
+
+		let list = this.privateVariables;
+		for (let i=0; i < list.length; i++) {
+			let id = list[i];
+
+			if(hasSketch)
+				sf.Obj.set(vars, id, new BPVariable(id));
+			else vars[id] = new BPVariable(id);
+		}
+	}
+
 	get input(){return this._input}
 	get output(){return this._output}
 	set input(v){throw new Error("Can't modify port by assigning .input property")}
 	set output(v){throw new Error("Can't modify port by assigning .input property")}
+
+	destroy(){
+		let map = this.used;
+		for (let iface of map) {
+			iface.node._instance.deleteNode(iface);
+		}
+	}
 }
 
 Blackprint._utils.BPFunction = BPFunction;
@@ -137,7 +211,9 @@ function BPFnInit(){
 			newInstance.functions = node._instance.functions;
 			newInstance._funcMain = this;
 
-			let swallowCopy = Object.assign({}, this.node._funcInstance.structure);
+			node._funcInstance.refreshPrivateVariables(newInstance);
+
+			let swallowCopy = Object.assign({}, node._funcInstance.structure);
 			await this.bpInstance.importJSON(swallowCopy, {pendingRender: true});
 
 			let debounce;
