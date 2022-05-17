@@ -270,6 +270,15 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			return;
 		}
 
+		// Restrict connection between function input/output node with variable node
+		// Connection to similar node function IO or variable node also restricted
+		// These port is created on runtime dynamically
+		if(this.iface._dynamicPort && cable.owner.iface._dynamicPort){
+			this._cableConnectError('cable.unsupported_dynamic_port', {cable, port: this, target: cable.owner});
+			cable.disconnect();
+			return;
+		}
+
 		var sourceCables = cable.owner.cables;
 
 		// Remove cable if there are similar connection for the ports
@@ -280,6 +289,9 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 				return;
 			}
 		}
+
+		if(this.onConnect?.(cable, cable.owner) || cable.owner.onConnect?.(cable, this))
+			return;
 
 		// Put port reference to the cable
 		cable.target = this;

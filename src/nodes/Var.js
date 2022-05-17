@@ -17,6 +17,7 @@ Blackprint.nodes.BP.Var = {
 			iface.type = 'bp-var-set';
 
 			iface.enum = _InternalNodeEnum.BPVarSet;
+			iface._dynamicPort = true; // Port is initialized dynamically
 		}
 	},
 	Get: class extends Blackprint.Node {
@@ -36,6 +37,7 @@ Blackprint.nodes.BP.Var = {
 			iface.type = 'bp-var-get';
 
 			iface.enum = _InternalNodeEnum.BPVarGet;
+			iface._dynamicPort = true; // Port is initialized dynamically
 		}
 	},
 };
