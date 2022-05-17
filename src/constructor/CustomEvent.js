@@ -4,9 +4,16 @@ class CustomEvent {
 	on(eventName, func, options){
 		if(this._event === void 0){
 			Object.defineProperty(this, '_event', {
+				enumerable: false,
 				configurable: true,
 				writable: true,
 				value:{ $_fallback: {} }
+			});
+			Object.defineProperty(this, '_eventLen', {
+				enumerable: false,
+				configurable: true,
+				writable: true,
+				value: 0
 			});
 		}
 
@@ -30,8 +37,10 @@ class CustomEvent {
 		}
 
 		let eventList = this._event[eventName];
-		if(eventList === void 0)
+		if(eventList === void 0){
 			eventList = this._event[eventName] = [];
+			this._eventLen++;
+		}
 
 		if(options && options.slot !== void 0){
 			for (var i = 0; i < eventList.length; i++) {
@@ -95,8 +104,13 @@ class CustomEvent {
 			this._event[eventName].splice(i, 1);
 		}
 
-		if(this._event[eventName].length === 0)
+		if(this._event[eventName].length === 0){
 			delete this._event[eventName];
+
+			// Small performance improvement by removing `_event`
+			if(--this._eventLen <= 0 && this._event.$_fallback == null)
+				delete this._event;
+		}
 		return this;
 	}
 
