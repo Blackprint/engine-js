@@ -78,6 +78,9 @@ Blackprint.Engine = class Engine extends CustomEvent {
 				}
 			}
 
+			let mjs;
+			if(metadata.functions != null) mjs = metadata.moduleJS.slice(0) || [];
+
 			if(metadata.moduleJS !== void 0 && !options.noModuleJS){
 				// wait for .min.mjs
 				await Blackprint.loadModuleFromURL(metadata.moduleJS, {
@@ -89,6 +92,26 @@ Blackprint.Engine = class Engine extends CustomEvent {
 					await sf.loader.task;
 					await Promise.resolve();
 				}
+			}
+
+			if(metadata.functions != null){
+				let functions = metadata.functions;
+
+				for (let key in functions){
+					let temp = this.createFunction(key, functions[key]);
+
+					// Required to be included on JSON export if this function isn't modified
+					// ToDo: use better mapping for moduleJS
+					let other = temp.structure._ = {};
+					other.moduleJS = mjs;
+				}
+			}
+
+			if(metadata.variables != null){
+				let variables = metadata.variables;
+
+				for (let key in variables)
+					this.createVariable(key, variables[key]);
 			}
 		}
 
@@ -122,11 +145,12 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 			// Every nodes that using this namespace name
 			for (var a = 0; a < nodes.length; a++){
-				var iface = inserted[nodes[a].i];
+				let node = nodes[a];
+				var iface = inserted[node.i];
 
 				// If have output connection
-				if(nodes[a].output !== void 0){
-					var out = nodes[a].output;
+				if(node.output !== void 0){
+					var out = node.output;
 
 					// Every output port that have connection
 					for(var portName in out){
@@ -144,6 +168,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 							else if(iface.enum === _InternalNodeEnum.BPVarGet){
 								let target = this._getTargetPortType(this, 'input', port);
 								iface.useType(target);
+								linkPortA = iface.output[portName];
 							}
 							else{
 								console.error("Node port not found for", iface, "with name:", portName);
@@ -165,9 +190,9 @@ Blackprint.Engine = class Engine extends CustomEvent {
 									if(linkPortB === void 0)
 										throw new Error(`Can't create output port (${target.name}) for function (${targetNode._funcMain.node._funcInstance.id})`);
 								}
-								else if(iface.enum === _InternalNodeEnum.BPVarSet){
-									let target = this._getTargetPortType(this, 'output', port);
-									iface.useType(target);
+								else if(targetNode.enum === _InternalNodeEnum.BPVarSet){
+									targetNode.useType(linkPortA);
+									linkPortB = targetNode.input[target.name];
 								}
 								else{
 									console.error("Node port not found for", targetNode, "with name:", target.name);
@@ -327,8 +352,22 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 		// BPFunction = ./nodes/Fn.js
 		let temp = this.functions[id] = new BPFunction(id, options, this);
-		this.emit('function.new', temp);
 
+		if(options.vars != null){
+			let vars = options.vars;
+			for (let i=0; i < vars.length; i++) {
+				temp.createVariable(vars[i], {scope: 'shared'});
+			}
+		}
+
+		if(options.privateVars != null){
+			let privateVars = options.privateVars;
+			for (let i=0; i < privateVars.length; i++) {
+				temp.addPrivateVars(privateVars[i]);
+			}
+		}
+
+		this.emit('function.new', temp);
 		return temp;
 	}
 
