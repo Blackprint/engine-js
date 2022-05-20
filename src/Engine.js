@@ -21,6 +21,11 @@ Blackprint.Engine = class Engine extends CustomEvent {
 			data: {iface}
 		});
 
+		iface._bpDestroy = true;
+
+		let eventData = { iface };
+		this.emit('node.delete', eventData);
+
 		iface.node.destroy && iface.node.destroy();
 		iface.destroy && iface.destroy();
 
@@ -37,6 +42,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		// Delete reference
 		delete this.iface[iface.id];
 		delete this.ref[iface.id];
+
+		this.emit('node.deleted', eventData);
 	}
 
 	clearNodes(){
@@ -455,7 +462,7 @@ function onModuleConflict(namespace, old, now, _call){
 
 // For storing registered nodes
 Blackprint.nodes = {
-	BP: {hidden: true} // Internal nodes, ToDo
+	BP: {hidden: true} // Internal nodes
 };
 
 // This function will be replaced when using Blackprint Sketch
