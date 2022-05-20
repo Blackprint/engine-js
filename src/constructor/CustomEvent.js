@@ -7,7 +7,7 @@ class CustomEvent {
 				enumerable: false,
 				configurable: true,
 				writable: true,
-				value:{ $_fallback: {} }
+				value:{ }
 			});
 			Object.defineProperty(this, '_eventLen', {
 				enumerable: false,
@@ -32,7 +32,11 @@ class CustomEvent {
 		}
 
 		if(options && options.asFallback){
-			this._event.$_fallback[eventName] = func;
+			let fallback = this._event.$_fallback;
+			if(fallback == null)
+				fallback = this._event.$_fallback = {};
+
+			fallback[eventName] = func;
 			return this;
 		}
 
@@ -125,7 +129,7 @@ class CustomEvent {
 		if(events === void 0 || events.length === 0){
 			events = this._event;
 
-			let hasFallback = events.$_fallback[eventName];
+			let hasFallback = events.$_fallback?.[eventName];
 			if(hasFallback){
 				hasFallback(obj);
 
