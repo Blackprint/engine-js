@@ -143,7 +143,7 @@ class CustomEvent {
 
 		for (var i = 0; i < events.length; i++){
 			var ev = events[i];
-			ev.call(this, obj);
+			ev(obj, eventName);
 
 			if(ev.once){
 				delete ev.once;
