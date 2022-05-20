@@ -133,6 +133,7 @@ class Cable{
 		let {owner, target} = this;
 		let hasOwner = false;
 		let hasTarget = false;
+		let alreadyEmitToInstance = false;
 
 		if(this.input !== void 0)
 			this.input._cache = void 0;
@@ -153,6 +154,8 @@ class Cable{
 				owner.emit('disconnect', temp);
 				owner.iface.emit('cable.disconnect', temp);
 				owner.iface.node._instance.emit('cable.disconnect', temp);
+
+				alreadyEmitToInstance = true;
 			}
 			else{
 				let temp = {port: owner, cable: this};
@@ -176,25 +179,15 @@ class Cable{
 			};
 
 			target.emit('disconnect', temp);
-			target.iface.emit('cable.disconnect', temp);
-			target.iface.node._instance.emit('cable.disconnect', temp);
+			if(!alreadyEmitToInstance){
+				target.iface.emit('cable.disconnect', temp);
+				target.iface.node._instance.emit('cable.disconnect', temp);
+			}
 
 			hasTarget = true;
 		}
 
 		if(hasOwner || hasTarget) this.connected = false;
-
-		// Remove references after the event was triggered
-		/*if(hasOwner){
-			if(owner === this.input) this.input = void 0;
-			if(owner === this.output) this.output = void 0;
-			this.owner = void 0;
-		}
-		if(hasTarget){
-			if(target === this.input) this.input = void 0;
-			if(target === this.output) this.output = void 0;
-			this.target = void 0;
-		}*/
 	}
 }
 
