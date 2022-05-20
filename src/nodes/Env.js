@@ -43,6 +43,11 @@ function BPEnvInit(){
 			if(!data.name) throw new Error("Parameter 'name' is required");
 			this.data.name = data.name;
 
+			// Create new environment if not exist
+			if(!(data.name in Blackprint.Environment._map)){
+				Blackprint.Environment.import({ [data.name]: '' });
+			}
+
 			// Listen for name change, only if Blackprint.Sketch was exist
 			if(Blackprint.Sketch != null){
 				this._nameListener = ({ old, now }) => {
