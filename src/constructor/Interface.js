@@ -83,9 +83,6 @@ Blackprint.Interface = class Interface extends Blackprint.Engine.CustomEvent{
 		// this.title = 'No Title';
 		this.importing = true;
 		this.node = node;
-
-		// ToDo: remove this
-		this.env = Blackprint.Environment.map;
 	}
 
 	_newPort(portName, type, def, which, haveFeature){
