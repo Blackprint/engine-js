@@ -60,20 +60,40 @@ function BPFnVarInit(){
 			// Create temporary port if the main function doesn't have the port
 			let name = data.name;
 			if(!(name in ports)){
-				let iPort = node.createPort('output', name, null); // null = any type
+				let iPort = node.createPort('output', 'Val', null); // null = any type
+				let proxyIface = this._parentFunc._proxyInput.iface;
+
+				// Run when this node is being connected with other node
 				iPort.onConnect = (cable, port) => {
 					delete iPort.onConnect;
+					proxyIface.off(`_add.${name}`, this._waitPortInit);
 
 					cable.disconnect();
 					node.deletePort('output', 'Val');
 
 					let portType = port.feature != null ? port.feature(port.type) : port.type;
 					let newPort = node.createPort('output', 'Val', portType);
-					newPort.connectCable(cable);
+					newPort.connectPort(port);
 
-					this._parentFunc.addPort(port, name);
+					proxyIface.addPort(port, name);
 					this._addListener();
+					return true;
 				};
+
+				// Run when main node is the missing port
+				this._waitPortInit = port => {
+					delete iPort.onConnect;
+					let backup = this.output.Val.cables.map(cable => cable.output);
+
+					node.deletePort('output', 'Val');
+
+					let portType = port.feature != null ? port.feature(port.type) : port.type;
+					let newPort = node.createPort('output', 'Val', portType);
+
+					for (let i=0; i < backup.length; i++)
+						newPort.connectPort(backup[i]);
+				}
+				proxyIface.once(`_add.${name}`, this._waitPortInit);
 			}
 			else{
 				let port = ports[name];
@@ -116,19 +136,39 @@ function BPFnVarInit(){
 			// Create temporary port if the main function doesn't have the port
 			let name = data.name;
 			if(!(name in ports)){
-				let iPort = node.createPort('input', name, null); // null = any type
+				let iPort = node.createPort('input', 'Val', null); // null = any type
+				let proxyIface = this._parentFunc._proxyOutput.iface;
+
+				// Run when this node is being connected with other node
 				iPort.onConnect = (cable, port) => {
 					delete iPort.onConnect;
+					proxyIface.off(`_add.${name}`, this._waitPortInit);
 
 					cable.disconnect();
 					node.deletePort('input', 'Val');
 
 					let portType = port.feature != null ? port.feature(port.type) : port.type;
 					let newPort = node.createPort('input', 'Val', portType);
-					newPort.connectCable(cable);
+					newPort.connectPort(port);
 
-					this._parentFunc.addPort(port, name);
+					proxyIface.addPort(port, name);
+					return true;
 				};
+
+				// Run when main node is the missing port
+				this._waitPortInit = port => {
+					delete iPort.onConnect;
+					let backup = this.input.Val.cables.map(cable => cable.output);
+
+					node.deletePort('input', 'Val');
+
+					let portType = port.feature != null ? port.feature(port.type) : port.type;
+					let newPort = node.createPort('input', 'Val', portType);
+
+					for (let i=0; i < backup.length; i++)
+						newPort.connectPort(backup[i]);
+				}
+				proxyIface.once(`_add.${name}`, this._waitPortInit);
 			}
 			else {
 				let port = ports[name];
