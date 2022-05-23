@@ -4,7 +4,7 @@
 Blackprint.Environment = {
 	map: {}, // Use this instead
 	_map: {},
-	list: [], // This shouldn't being used (ToDo: change this to private)
+	_list: [],
 
 	loadFromURL: false,
 	isBrowser: false,
@@ -34,7 +34,7 @@ Blackprint.Environment = {
 		let temp = this._map[key];
 		if(temp == null){
 			temp = this._map[key] = { key, value };
-			this.list.push(temp);
+			this._list.push(temp);
 		}
 
 		// Add reactivity for Sketch only
@@ -76,11 +76,11 @@ Blackprint.Environment = {
 	},
 
 	delete(key){
-		let { list, _map, map } = this;
+		let { _list, _map, map } = this;
 
-		let i = list.indexOf(_map[key]);
+		let i = _list.indexOf(_map[key]);
 		if(i !== -1)
-			list.splice(i, 1);
+			_list.splice(i, 1);
 
 		delete _map[key];
 		delete map[key];
