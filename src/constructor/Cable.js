@@ -179,10 +179,10 @@ class Cable{
 			};
 
 			target.emit('disconnect', temp);
-			if(!alreadyEmitToInstance){
-				target.iface.emit('cable.disconnect', temp);
+			target.iface.emit('cable.disconnect', temp);
+
+			if(!alreadyEmitToInstance)
 				target.iface.node._instance.emit('cable.disconnect', temp);
-			}
 
 			hasTarget = true;
 		}
