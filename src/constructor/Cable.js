@@ -130,6 +130,26 @@ class Cable{
 	}
 
 	disconnect(which){ // which = port
+		if(this.isRoute){ // ToDo: simplify, use 'which' instead of check all
+			let { input, output } = this;
+
+			if(output.out === this) output.out = null;
+			else if(input?.out === this) input.out = null;
+
+			let i = this.output.in.indexOf(this);
+			if(i !== -1){
+				this.output.in.splice(i, 1);
+			}
+			else if(this.input != null) {
+				let i = this.input.in.indexOf(this);
+				if(i !== -1)
+					this.input.in.splice(i, 1);
+			}
+
+			this.connected = false;
+			return;
+		}
+
 		let {owner, target} = this;
 		let hasOwner = false;
 		let hasTarget = false;

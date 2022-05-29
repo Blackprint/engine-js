@@ -1,10 +1,13 @@
 Blackprint.Interface = class Interface extends Blackprint.Engine.CustomEvent{
 	static _ports = ['input', 'output'];
+
+	// use _prepare as alternative of 'constructor(){}'
 	static _prepare(node, iface){
 		// Type extract for port data type
 		// Create reactiveness of node and iface's ports
 
 		let clazz = node.constructor;
+		node.routes = new Blackprint.RoutePort(iface);
 
 		node.ref = iface.ref = {};
 		if(clazz.output !== void 0){
