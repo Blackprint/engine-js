@@ -76,9 +76,7 @@ class Cable{
 	}
 
 	connecting(){
-		var that = this;
-		function activate(arg){ that.activation(arg) }
-
+		let activate = arg => this.activation(arg);
 		this._refreshType();
 
 		this.input.emit('connecting', {target: this.output, activate});
@@ -133,10 +131,11 @@ class Cable{
 		if(this.isRoute){ // ToDo: simplify, use 'which' instead of check all
 			let { input, output } = this;
 
-			if(output.out === this) output.out = null;
+			if(output.cables != null) output.cables.splice(0);
+			else if(output.out === this) output.out = null;
 			else if(input?.out === this) input.out = null;
 
-			let i = this.output.in.indexOf(this);
+			let i = this.output.in ? this.output.in.indexOf(this) : -1;
 			if(i !== -1){
 				this.output.in.splice(i, 1);
 			}

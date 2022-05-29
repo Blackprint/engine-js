@@ -49,7 +49,7 @@ class PortLink {
 		var linkValue = linkedPort.createLinker();
 
 		// Set on the this scope
-		if(type === Function){
+		if(type === Function || type === BP_Port.Route){
 			if(this._which === 'output')
 				Object.defineProperty(this, portName, {configurable: true, enumerable:true, writable:false, value:linkValue});
 			else this[portName] = def;
@@ -128,6 +128,10 @@ function determinePortType(val, that){
 			haveFeature = BP_Port.Union;
 			type = val.portType;
 			def = val.default;
+		}
+		else if(val === BP_Port.Route){
+			type = BP_Port.Route;
+			def = null;
 		}
 		else{
 			type = val.constructor;

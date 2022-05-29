@@ -9,7 +9,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		this.cables = [];
 		this.source = source;
 		this.iface = iface;
-		this.classAdd ='';
+		this.classAdd = '';
 
 		// this.value;
 		this.default = def;
@@ -40,10 +40,14 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 	// ex: linkedPort = node.output.portName
 	createLinker(){
 		// Only for output (type: trigger/function)
-		if(this.source === 'output' && this.type === Function){
+		if(this.source === 'output' && (this.type === Function || this.type === BP_Port.Route)){
 			// Disable sync
 			this.sync = false;
-			return this._callAll = createCallablePort(this);
+
+			if(this.type === Function)
+				return this._callAll = createCallablePort(this);
+
+			else return this._callAll = createCallableRoutePort(this);
 		}
 
 		var port = this;
@@ -215,11 +219,16 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			cable = this._scope('cables').currentCable;
 
 		// It's not a cable might
-		if(cable === void 0)
-			return;
+		if(cable === void 0) return;
 
 		if(cable.branch != null && cable.branch.length !== 0)
 			throw new Error("Can't attach cable that have branch to this port");
+
+		if(cable.isRoute){
+			this._cableConnectError('cable.not_route_port', {cable, port: this, target: cable.owner});
+			cable.disconnect();
+			return;
+		}
 
 		if(cable.owner === this) // It's referencing to same port
 			return cable.disconnect();
@@ -365,7 +374,7 @@ function getDataType(which){
 }
 
 function createCallablePort(port){
-	return function(obj){
+	return function(){
 		if(!port.iface.node.disablePorts){
 			var cables = port.cables;
 			for (var i = 0; i < cables.length; i++) {
@@ -382,7 +391,19 @@ function createCallablePort(port){
 			}
 		}
 
-		port.emit('call', obj);
-		// port.iface.node._instance.emit('port.output.call', temp);
+		port.emit('call');
+		// port.iface.node._instance.emit('port.output.call');
 	};
+}
+
+function createCallableRoutePort(port){
+	port.isRoute = true;
+	port.iface.node.routes.disableOut = true;
+
+	return async function(){
+		var cable = port.cables[0];
+		if(cable === void 0) return;
+
+		await cable.input.routeIn();
+	}
 }

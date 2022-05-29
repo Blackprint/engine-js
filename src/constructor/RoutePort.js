@@ -7,6 +7,7 @@ Blackprint.RoutePort = class RoutePort {
 
 		this.in = []; // Allow incoming route from multiple path
 		this.out = null; // Only one route/path
+		this.disableOut = false;
 	}
 
 	// For creating output cable
@@ -23,9 +24,18 @@ Blackprint.RoutePort = class RoutePort {
 	connectCable(cable){
 		if(this.in.includes(cable)) return false;
 		this.in.push(cable);
-		cable.input = this;
+		cable.target = cable.input = this;
 		cable.connected = true;
 
 		return true;
+	}
+
+	async routeIn(){
+		await this.iface.node.update();
+	}
+
+	async routeOut(){
+		if(this.out == null) return;
+		await this.out.input.routeIn();
 	}
 }
