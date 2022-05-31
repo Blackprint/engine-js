@@ -4,6 +4,7 @@
 Blackprint.RoutePort = class RoutePort {
 	constructor(iface){
 		this.iface = iface;
+		this._scope = iface._scope;
 
 		this.in = []; // Allow incoming route from multiple path
 		this.out = null; // Only one route/path
