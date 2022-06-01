@@ -153,7 +153,6 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 				port.value = val;
 				port.emit('value', { port });
-				// port.iface.node._instance.emit('port.output.value', temp);
 				port.sync(); // emit event to all input port connected to this port
 			}
 		}
@@ -166,6 +165,9 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 	// this= output/property, target=input
 	sync(){
+		// Skip sync if the node has route cable
+		if(this.iface.node.routes.out !== null) return;
+
 		// Check all connected cables, if any node need to synchronize
 		var cables = this.cables;
 
@@ -175,8 +177,8 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 				continue;
 
 			var inp = cable.input;
-			if(inp !== void 0) inp._cache = void 0;
-			else continue;
+			if(inp === void 0) continue;
+			inp._cache = void 0;
 
 			if(inp.iface.node.update && inp.iface._requesting === void 0)
 				inp.iface.node.update(inp, this, cable);
