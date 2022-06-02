@@ -117,6 +117,7 @@ function determinePortType(val, that){
 			else def = [];
 		}
 		else if(val.portFeature === BP_Port.Trigger){
+			haveFeature = val.portFeature;
 			type = Function;
 			def = val.default.bind(that._iface.node);
 		}

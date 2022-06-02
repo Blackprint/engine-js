@@ -284,7 +284,12 @@ class BPFunctionNode extends Blackprint.Node {
 		// port => input port from current node
 		let temp = this.iface._proxyInput.iface.node;
 
-		if(port == null) return temp.update();
+		if(port == null){
+			temp.update();
+			temp.routes.routeOut();
+			return;
+		}
+
 		temp.output[port.name] = cable.value;
 	}
 

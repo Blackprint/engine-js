@@ -12,7 +12,13 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		this.classAdd = '';
 
 		// this.value;
-		this.default = def;
+		if(haveFeature === BP_Port.Trigger){
+			this.default = () => {
+				def(this);
+				iface.node.routes.routeOut();
+			};
+		}
+		else this.default = def;
 
 		// this.feature == BP_Port.Listener | BP_Port.ArrayOf | BP_Port.Async
 
@@ -165,28 +171,31 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 	// this= output/property, target=input
 	sync(){
-		// Skip sync if the node has route cable
-		if(this.iface.node.routes.out !== null) return;
-
 		// Check all connected cables, if any node need to synchronize
 		var cables = this.cables;
+		let skipSync = this.iface.node.routes.out !== null;
 
 		for (var i = 0; i < cables.length; i++) {
 			var cable = cables[i];
-			if(cable.hasBranch)
-				continue;
+			if(cable.hasBranch) continue;
 
 			var inp = cable.input;
 			if(inp === void 0) continue;
 			inp._cache = void 0;
 
-			if(inp.iface.node.update && inp.iface._requesting === void 0)
-				inp.iface.node.update(inp, this, cable);
-
 			let temp = { port: inp, target: this, cable };
 
 			inp.emit('value', temp);
 			inp.iface.emit('port.value', temp);
+
+			// Skip sync if the node has route cable
+			if(skipSync) return;
+
+			let node = inp.iface.node;
+			if(node.update && inp.iface._requesting === void 0){
+				node.update(inp, this, cable);
+				node.routes.routeOut();
+			}
 		}
 	}
 
@@ -376,25 +385,24 @@ function getDataType(which){
 }
 
 function createCallablePort(port){
-	return function(){
-		if(!port.iface.node.disablePorts){
-			var cables = port.cables;
-			for (var i = 0; i < cables.length; i++) {
-				var cable = cables[i];
+	return () => {
+		if(port.iface.node.disablePorts) return;
 
-				var target = cable.input;
-				if(target === void 0)
-					continue;
+		var cables = port.cables;
+		for (var i = 0; i < cables.length; i++) {
+			var cable = cables[i];
 
-				if(Blackprint.settings.visualizeFlow)
-					cable.visualizeFlow();
+			var target = cable.input;
+			if(target === void 0)
+				continue;
 
-				target.iface.input[target.name].default();
-			}
+			if(Blackprint.settings.visualizeFlow)
+				cable.visualizeFlow();
+
+			target.iface.input[target.name].default();
 		}
 
 		port.emit('call');
-		// port.iface.node._instance.emit('port.output.call');
 	};
 }
 
