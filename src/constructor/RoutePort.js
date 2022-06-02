@@ -9,6 +9,20 @@ Blackprint.RoutePort = class RoutePort {
 		this.in = []; // Allow incoming route from multiple path
 		this.out = null; // Only one route/path
 		this.disableOut = false;
+		this._isPaused = false;
+	}
+
+	pause(){
+		if(this._isPaused) return;
+		this._isPaused = true;
+		this._disabled = this.disableOut;
+		this.disableOut = true;
+	}
+
+	unpause(){
+		if(!this._isPaused) return;
+		this._isPaused = false;
+		this.disableOut = this._disabled;
 	}
 
 	// For creating output cable
@@ -24,6 +38,11 @@ Blackprint.RoutePort = class RoutePort {
 	// Connect to input route
 	connectCable(cable){
 		if(this.in.includes(cable)) return false;
+		if(this.iface.node.update === void 0){
+			cable.disconnect();
+			throw new Error("node.update() was not defined for this node");
+		}
+
 		this.in.push(cable);
 		cable.target = cable.input = this;
 		cable.connected = true;
@@ -32,11 +51,15 @@ Blackprint.RoutePort = class RoutePort {
 	}
 
 	async routeIn(){
-		await this.iface.node.update();
+		let node = this.iface.node;
+		await node.update();
+		await node.routes.routeOut();
 	}
 
 	async routeOut(){
-		if(this.out == null) return;
-		await this.out.input.routeIn();
+		if(this.out == null || this.disableOut) return;
+		this.out.visualizeFlow();
+
+		await this.out.input?.routeIn();
 	}
 }
