@@ -119,11 +119,12 @@ class Cable{
 		out.emit('connect', {port: out, target: inp, cable: this});
 
 		if(out.value !== void 0){
-			if(inp.iface.node.update)
-				inp.iface.node.update(inp, out, this);
-
 			inp.emit('value', temp);
 			inp.iface.emit('port.value', temp);
+			
+			let node = inp.iface.node;
+			if(node.update !== void 0)
+				node.update(inp, out, this);
 		}
 	}
 

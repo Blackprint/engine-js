@@ -4,7 +4,7 @@ BP_Port.Trigger = function(func){
 	// prohibit "() => {}" or "async ()=>{}"
 	let i = func.toString().indexOf('=>');
 	if(i !== -1 && i < 15)
-		throw new Error("Please use 'function(){}' instead of arrow function'()=>{}' when using 'Blackprint.Port.Trigger' type");
+		throw new Error("Please use 'function(){}' instead of arrow function '()=>{}' when using 'Blackprint.Port.Trigger' type");
 
 	return {
 		portFeature: BP_Port.Trigger,
