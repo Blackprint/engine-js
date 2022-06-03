@@ -19,6 +19,9 @@ Blackprint.nodes.BP.Var = {
 			iface.enum = _InternalNodeEnum.BPVarSet;
 			iface._dynamicPort = true; // Port is initialized dynamically
 		}
+		update(){
+			this.iface._bpVarRef.value = this.input.Val;
+		}
 	},
 	Get: class extends Blackprint.Node {
 		static output = {};
@@ -188,17 +191,13 @@ function BPVarInit(){
 				node.createPort('output', 'Val', temp.type);
 
 				this._eventListen = 'call';
-				this._onChanged = () => {
-					ref.Val();
-				}
+				this._onChanged = () => { ref.Val() };
 			}
 			else{
 				node.createPort('output', 'Val', temp.type);
 
 				this._eventListen = 'value';
-				this._onChanged = () => {
-					ref.Val = temp._value;
-				}
+				this._onChanged = () => { ref.Val = temp._value };
 			}
 
 			temp.on(this._eventListen, this._onChanged);
@@ -227,6 +226,7 @@ function BPVarInit(){
 		_reinitPort(){
 			let {input, node} = this;
 			let temp = this._bpVarRef;
+
 			if(input.Val !== void 0)
 				node.deletePort('input', 'Val');
 
@@ -235,23 +235,9 @@ function BPVarInit(){
 					temp.emit('call');
 				}));
 			}
-			else{
-				node.createPort('input', 'Val', temp.type);
-
-				this._onChanged = ev => {
-					temp.value = ev.cable.value;
-				};
-
-				input.Val.on('value', this._onChanged);
-			}
+			else node.createPort('input', 'Val', temp.type);
 
 			return this.input.Val;
-		}
-		destroy(){
-			if(this._eventListen != null)
-				this.input.Val?.off('value', this._onChanged);
-
-			super.destroy();
 		}
 	});
 }
