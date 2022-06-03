@@ -39,7 +39,20 @@ Blackprint.nodes.BP.Fn = {
 		}
 
 		update(port, source, cable){
-			this.iface._funcMain.node.output[port.name] = cable.value;
+			let iface = this.iface._funcMain;
+			if(port == null){ // Triggered by port route
+				let IOutput = iface.output;
+				let Output = iface.node.output;
+				let thisInput = this.input;
+
+				// Sync all port value
+				for (let key in IOutput)
+					Output[key] = thisInput[key];
+	
+				return;
+			}
+
+			iface.node.output[port.name] = cable.value;
 		}
 	},
 };
@@ -71,7 +84,7 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 
 		let temp = this;
 		let uniqId = 0;
-		this.node = class extends BPFunctionNode {
+		this.node = class extends BPFunctionNode { // Main function node -> BPI/F/{FunctionName}
 			static input = input;
 			static output = output;
 			static namespace = id;
@@ -281,16 +294,21 @@ class BPFunctionNode extends Blackprint.Node {
 	}
 
 	update(port, source, cable){
-		// port => input port from current node
-		let temp = this.iface._proxyInput.iface.node;
+		let iface = this.iface._proxyInput.iface;
+		if(port == null){ // Triggered by port route
+			let IOutput = iface.output;
+			let Output = iface.node.output;
+			let thisInput = this.input;
 
-		if(port == null){
-			temp.update();
-			temp.routes.routeOut();
+			// Sync all port value
+			for (let key in IOutput)
+				Output[key] = thisInput[key];
+
 			return;
 		}
 
-		temp.output[port.name] = cable.value;
+		// port => input port from current node
+		iface.node.output[port.name] = cable.value;
 	}
 
 	destroy(){
@@ -368,8 +386,10 @@ function BPFnInit(){
 			if(port instanceof Blackprint.Engine.Cable)
 				cable = port;
 
-			if(cable != null)
+			if(cable != null){
+				if(cable.isRoute) return;
 				port = cable.owner;
+			}
 
 			if(port.iface.namespace.startsWith("BP/Fn"))
 				throw new Error("Function Input can't be connected directly to Output");

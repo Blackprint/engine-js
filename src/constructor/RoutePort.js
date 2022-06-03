@@ -9,20 +9,22 @@ Blackprint.RoutePort = class RoutePort {
 		this.in = []; // Allow incoming route from multiple path
 		this.out = null; // Only one route/path
 		this.disableOut = false;
+		this.disabled = false;
 		this._isPaused = false;
 	}
 
+	// May be deleted on future
 	pause(){
 		if(this._isPaused) return;
 		this._isPaused = true;
-		this._disabled = this.disableOut;
+		this._disableOut = this.disableOut;
 		this.disableOut = true;
 	}
 
 	unpause(){
 		if(!this._isPaused) return;
 		this._isPaused = false;
-		this.disableOut = this._disabled;
+		this.disableOut = this._disableOut;
 	}
 
 	// For creating output cable
@@ -57,9 +59,30 @@ Blackprint.RoutePort = class RoutePort {
 	}
 
 	async routeOut(){
-		if(this.out == null || this.disableOut) return;
+		if(this.disableOut) return;
+		if(this.out == null){
+			if(this.iface.enum === _InternalNodeEnum.BPFnOutput)
+				return await this.iface._funcMain.node.routes.routeIn();
+
+			return;
+		}
+
 		this.out.visualizeFlow();
 
-		await this.out.input?.routeIn();
+		let targetRoute = this.out.input;
+		if(targetRoute == null) return;
+
+		let _enum = targetRoute.iface.enum;
+
+		if(_enum === void 0)
+			return await targetRoute.routeIn();
+
+		if(_enum === _InternalNodeEnum.BPFnMain)
+			return await targetRoute.iface._proxyInput.routes.routeIn();
+
+		if(_enum === _InternalNodeEnum.BPFnOutput){
+			await targetRoute.iface.node.update();
+			return await targetRoute.iface._funcMain.node.routes.routeOut();
+		}
 	}
 }
