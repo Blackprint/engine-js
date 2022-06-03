@@ -13,6 +13,9 @@ Blackprint.nodes.BP.FnVar = {
 			iface.enum = _InternalNodeEnum.BPFnVarInput;
 			iface._dynamicPort = true; // Port is initialized dynamically
 		}
+		imported(){
+			this.routes.disabled = true;
+		}
 	},
 	Output: class extends Blackprint.Node {
 		static input = {};
@@ -57,11 +60,13 @@ function BPFnVarInit(){
 			let ports = this._parentFunc.ref.IInput;
 			let node = this.node;
 
+			this._proxyIface = this._parentFunc._proxyInput.iface;
+
 			// Create temporary port if the main function doesn't have the port
 			let name = data.name;
 			if(!(name in ports)){
 				let iPort = node.createPort('output', 'Val', null); // null = any type
-				let proxyIface = this._parentFunc._proxyInput.iface;
+				let proxyIface = this._proxyIface;
 
 				// Run when this node is being connected with other node
 				iPort.onConnect = (cable, port) => {
@@ -89,34 +94,51 @@ function BPFnVarInit(){
 
 					let portType = port.feature != null ? port.feature(port.type) : port.type;
 					let newPort = node.createPort('output', 'Val', portType);
+					this._addListener();
 
 					for (let i=0; i < backup.length; i++)
 						newPort.connectPort(backup[i]);
 				}
+
 				proxyIface.once(`_add.${name}`, this._waitPortInit);
 			}
 			else{
-				let port = ports[name];
-				let portType = port.feature != null ? port.feature(port.type) : port.type;
-				node.createPort('output', 'Val', portType);
+				if(this.output.Val === void 0){
+					let port = ports[name];
+					let portType = port.feature != null ? port.feature(port.type) : port.type;
+					node.createPort('output', 'Val', portType);
+				}
+
 				this._addListener();
 			}
 		}
 		_addListener(){
-			let data = this.data;
+			this._listener = ({ port }) => {
+				if(port.iface.node.routes.out != null){
+					let { Val } = this.ref.IOutput;
+					Val.value = port.value; // Change value without trigger node.update
 
-			this._listener = v => {
-				if(v.key !== data.name) return;
-				this.ref.Output.Val = v.value;
+					let list = Val.cables;
+					for (let i=0; i < list.length; i++) {
+						let temp = list[i];
+						if(temp.hasBranch) continue;
+
+						// Clear connected cable's cache
+						temp.input._cache = void 0;
+					}
+					return;
+				}
+
+				this.ref.Output.Val = port.value;
 			};
 
-			this._parentFunc.input[data.name].on('value', this._listener);
+			this._proxyIface.output[this.data.name].on('value', this._listener);
 		}
 		destroy(){
 			super.destroy();
 
 			if(this._listener == null) return;
-			this._parentFunc.input[this.data.name].off('value', this._listener);
+			this._proxyIface.output[this.data.name].off('value', this._listener);
 		}
 	});
 
