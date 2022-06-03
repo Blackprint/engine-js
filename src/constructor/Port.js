@@ -194,7 +194,13 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			let node = inp.iface.node;
 			if(node.update && inp.iface._requesting === void 0){
 				node.update(inp, this, cable);
-				node.routes.routeOut();
+
+				if(node.iface.enum !== _InternalNodeEnum.BPFnMain){
+					node.routes.routeOut();
+				}
+				else {
+					node.iface._proxyInput.routes.routeOut();
+				}
 			}
 		}
 	}
