@@ -84,5 +84,7 @@ Blackprint.RoutePort = class RoutePort {
 			await targetRoute.iface.node.update();
 			return await targetRoute.iface._funcMain.node.routes.routeOut();
 		}
+
+		return await targetRoute.routeIn();
 	}
 }
