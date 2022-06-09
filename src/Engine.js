@@ -237,10 +237,10 @@ Blackprint.Engine = class Engine extends CustomEvent {
 	getNode(id){
 		if(id == null) throw "ID couldn't be null or undefined";
 
-		if(id.constructor === Number)
-			return this.ifaceList[id];
-
 		var ifaces = this.ifaceList;
+		if(id.constructor === Number)
+			return ifaces[id].node;
+
 		for (var i = 0; i < ifaces.length; i++) {
 			if(ifaces[i].id === id)
 				return ifaces[i].node;
