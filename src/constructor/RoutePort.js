@@ -40,7 +40,12 @@ Blackprint.RoutePort = class RoutePort {
 	// Connect other route port (this .out to other .in port)
 	routeTo(iface){
 		let cable = this.createCable();
-		iface.node.routes.connectCable(cable);
+
+		if(iface != null)
+			iface.node.routes.connectCable(cable);
+		else {
+			// route to nothing == route ended
+		}
 	}
 
 	// Connect to input route

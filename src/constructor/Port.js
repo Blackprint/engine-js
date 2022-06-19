@@ -86,8 +86,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 						var output = cable.output;
 
 						// Request the data first
-						if(output.iface.node.request)
-							output.iface.node.request(output, port.iface);
+						output.iface.node.request?.(output, port.iface);
 
 						if(Blackprint.settings.visualizeFlow)
 							cable.visualizeFlow();
@@ -117,8 +116,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 						var output = cable.output;
 
 						// Request the data first
-						if(output.iface.node.request)
-							output.iface.node.request(output, port.iface);
+						output.iface.node.request?.(output, port.iface);
 
 						if(Blackprint.settings.visualizeFlow)
 							cable.visualizeFlow();
@@ -238,6 +236,9 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		// It's not a cable might
 		if(cable === void 0) return;
 
+		if(this.onConnect?.(cable, cable.owner) || cable.owner.onConnect?.(cable, this))
+			return;
+
 		if(cable.branch != null && cable.branch.length !== 0)
 			throw new Error("Can't attach cable that have branch to this port");
 
@@ -316,9 +317,6 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			}
 		}
 
-		if(this.onConnect?.(cable, cable.owner) || cable.owner.onConnect?.(cable, this))
-			return;
-
 		// Put port reference to the cable
 		cable.target = this;
 
@@ -391,7 +389,7 @@ function getDataType(which){
 }
 
 function createCallablePort(port){
-	return () => {
+	return function(){ // Do not use arrow function
 		if(port.iface.node.disablePorts) return;
 
 		var cables = port.cables;
@@ -405,7 +403,9 @@ function createCallablePort(port){
 			if(Blackprint.settings.visualizeFlow)
 				cable.visualizeFlow();
 
-			target.iface.input[target.name].default();
+			if(target._name != null)
+				target.iface._parentFunc.node.output[target._name.name]();
+			else target.iface.input[target.name].default();
 		}
 
 		port.emit('call');
