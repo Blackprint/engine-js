@@ -226,7 +226,7 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 		let temp = new BPVariable(id, options);
 		temp.funcInstance = this;
 
-		if(options.scope === 'shared'){
+		if(options.scope === BPVarScopeEnum.shared){
 			if(Blackprint.Sketch != null)
 				sf.Obj.set(this.variables, id, temp);
 			else this.variables[id] = temp;
@@ -241,8 +241,8 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 	addPrivateVars(id){
 		if(!this.privateVars.includes(id)){
 			this.privateVars.push(id);
-			this.emit('variable.new', {scope: 'private', id});
-			this.rootInstance.emit('variable.new', {scope: 'private', id});
+			this.emit('variable.new', {scope: BPVarScopeEnum.private, id});
+			this.rootInstance.emit('variable.new', {scope: BPVarScopeEnum.private, id});
 		}
 		else return;
 
@@ -301,8 +301,10 @@ class BPFunctionNode extends Blackprint.Node {
 			let thisInput = this.input;
 
 			// Sync all port value
-			for (let key in IOutput)
+			for (let key in IOutput){
+				if(IOutput[key].feature === BP_Port.Trigger) continue;
 				Output[key] = thisInput[key];
+			}
 
 			return;
 		}
@@ -394,9 +396,14 @@ function BPFnInit(){
 			if(port.iface.namespace.startsWith("BP/Fn"))
 				throw new Error("Function Input can't be connected directly to Output");
 
-			let name = customName || port.name;
+			let name = port._name?.name || customName || port.name;
 			let outputPort;
-			let portType = port.feature != null ? port.feature(port.type) : port.type;
+			let portType;
+
+			if(port.feature === BP_Port.Trigger){
+				portType = BP_Port.Trigger(function(){ nodeB.output[inputPort.name](); });
+			}
+			else portType = port.feature != null ? port.feature(port.type) : port.type;
 
 			let nodeA, nodeB; // Main (input) -> Input (output), Output (input) -> Main (output)
 			if(this.type === 'bp-fn-input'){ // Main (input) -> Input (output)
@@ -442,10 +449,12 @@ function BPFnInit(){
 			}
 
 			if(this.type === 'bp-fn-input'){
+				outputPort._name = {name}; // When renaming port, this also need to be changed
 				this.emit(`_add.${name}`, outputPort);
 				return outputPort;
 			}
 
+			inputPort._name = {name}; // When renaming port, this also need to be changed
 			this.emit(`_add.${name}`, inputPort);
 			return inputPort;
 		}
@@ -457,7 +466,8 @@ function BPFnInit(){
 				this.node.renamePort('output', fromName, toName);
 
 				let main = funcMainNode._funcInstance.input;
-				main[toName] = main[fromName];
+				let temp = main[toName] = main[fromName];
+				temp._name.name = toName;
 				delete main[fromName];
 			}
 			else { // Output (input) -> Main (output)
@@ -465,7 +475,8 @@ function BPFnInit(){
 				this.node.renamePort('input', fromName, toName);
 
 				let main = funcMainNode._funcInstance.output;
-				main[toName] = main[fromName];
+				let temp = main[toName] = main[fromName];
+				temp._name.name = toName;
 				delete main[fromName];
 			}
 		}
@@ -475,13 +486,13 @@ function BPFnInit(){
 				funcMainNode.deletePort('input', name);
 				this.node.deletePort('output', name);
 
-				delete funcMainNode._funcInstance.input[fromName];
+				delete funcMainNode._funcInstance.input[name];
 			}
 			else { // Output (input) -> Main (output)
 				funcMainNode.deletePort('output', name);
 				this.node.deletePort('input', name);
 
-				delete funcMainNode._funcInstance.output[fromName];
+				delete funcMainNode._funcInstance.output[name];
 			}
 		}
 	}

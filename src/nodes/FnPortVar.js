@@ -72,12 +72,15 @@ function BPFnVarInit(){
 				iPort.onConnect = (cable, port) => {
 					delete iPort.onConnect;
 					proxyIface.off(`_add.${name}`, this._waitPortInit);
+					delete this._waitPortInit;
 
 					cable.disconnect();
 					node.deletePort('output', 'Val');
 
-					let portType = port.feature != null ? port.feature(port.type) : port.type;
+					let portName = {name};
+					let portType = getFnPortType(port, 'input', this._parentFunc, portName);
 					let newPort = node.createPort('output', 'Val', portType);
+					newPort._name = portName;
 					newPort.connectPort(port);
 
 					proxyIface.addPort(port, name);
@@ -88,11 +91,12 @@ function BPFnVarInit(){
 				// Run when main node is the missing port
 				this._waitPortInit = port => {
 					delete iPort.onConnect;
+					delete this._waitPortInit;
 					let backup = this.output.Val.cables.map(cable => cable.output);
 
 					node.deletePort('output', 'Val');
 
-					let portType = port.feature != null ? port.feature(port.type) : port.type;
+					let portType = getFnPortType(port, 'input', this._parentFunc, port._name);
 					let newPort = node.createPort('output', 'Val', portType);
 					this._addListener();
 
@@ -105,7 +109,7 @@ function BPFnVarInit(){
 			else{
 				if(this.output.Val === void 0){
 					let port = ports[name];
-					let portType = port.feature != null ? port.feature(port.type) : port.type;
+					let portType = getFnPortType(port, 'input', this._parentFunc, port._name);
 					node.createPort('output', 'Val', portType);
 				}
 
@@ -113,32 +117,45 @@ function BPFnVarInit(){
 			}
 		}
 		_addListener(){
-			this._listener = ({ port }) => {
-				if(port.iface.node.routes.out != null){
-					let { Val } = this.ref.IOutput;
-					Val.value = port.value; // Change value without trigger node.update
-
-					let list = Val.cables;
-					for (let i=0; i < list.length; i++) {
-						let temp = list[i];
-						if(temp.hasBranch) continue;
-
-						// Clear connected cable's cache
-						temp.input._cache = void 0;
+			let port = this._proxyIface.output[this.data.name];
+			if(port.feature === BP_Port.Trigger){
+				this._listener = () => {
+					this.ref.Output.Val();
+				};
+	
+				port.on('call', this._listener);
+			}
+			else{
+				this._listener = ({ port }) => {
+					if(port.iface.node.routes.out != null){
+						let { Val } = this.ref.IOutput;
+						Val.value = port.value; // Change value without trigger node.update
+	
+						let list = Val.cables;
+						for (let i=0; i < list.length; i++) {
+							let temp = list[i];
+							if(temp.hasBranch) continue;
+	
+							// Clear connected cable's cache
+							temp.input._cache = void 0;
+						}
+						return;
 					}
-					return;
-				}
-
-				this.ref.Output.Val = port.value;
-			};
-
-			this._proxyIface.output[this.data.name].on('value', this._listener);
+	
+					this.ref.Output.Val = port.value;
+				};
+	
+				port.on('value', this._listener);
+			}
 		}
 		destroy(){
-			super.destroy();
-
+			// super.destroy();
 			if(this._listener == null) return;
-			this._proxyIface.output[this.data.name].off('value', this._listener);
+
+			let port = this._proxyIface.output[this.data.name];
+			if(port.feature === BP_Port.Trigger)
+				port.off('call', this._listener);
+			else port.off('value', this._listener);
 		}
 	});
 
@@ -165,12 +182,15 @@ function BPFnVarInit(){
 				iPort.onConnect = (cable, port) => {
 					delete iPort.onConnect;
 					proxyIface.off(`_add.${name}`, this._waitPortInit);
+					delete this._waitPortInit;
 
 					cable.disconnect();
 					node.deletePort('input', 'Val');
 
-					let portType = port.feature != null ? port.feature(port.type) : port.type;
+					let portName = {name};
+					let portType = getFnPortType(port, 'output', this._parentFunc, portName);
 					let newPort = node.createPort('input', 'Val', portType);
+					newPort._name = portName;
 					newPort.connectPort(port);
 
 					proxyIface.addPort(port, name);
@@ -180,11 +200,12 @@ function BPFnVarInit(){
 				// Run when main node is the missing port
 				this._waitPortInit = port => {
 					delete iPort.onConnect;
+					delete this._waitPortInit;
 					let backup = this.input.Val.cables.map(cable => cable.output);
 
 					node.deletePort('input', 'Val');
 
-					let portType = port.feature != null ? port.feature(port.type) : port.type;
+					let portType = getFnPortType(port, 'output', this._parentFunc, port._name);
 					let newPort = node.createPort('input', 'Val', portType);
 
 					for (let i=0; i < backup.length; i++)
@@ -194,11 +215,23 @@ function BPFnVarInit(){
 			}
 			else {
 				let port = ports[name];
-				let portType = port.feature != null ? port.feature(port.type) : port.type;
+				let portType = getFnPortType(port, 'output', this._parentFunc, port._name);
 				node.createPort('input', 'Val', portType);
 			}
 		}
 	});
+}
+
+function getFnPortType(port, which, parentNode, ref){
+	let portType;
+	if(port.feature === BP_Port.Trigger){
+		if(which === 'input') // Function Input (has output port inside, and input port on main node)
+			portType = Function;
+		else portType = BP_Port.Trigger(parentNode.output[ref.name]._callAll);
+	}
+	else portType = port.feature != null ? port.feature(port.type) : port.type;
+
+	return portType;
 }
 
 if(globalThis.sf && globalThis.sf.$)

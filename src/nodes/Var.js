@@ -1,7 +1,6 @@
 Blackprint.nodes.BP.Var = {
 	Set: class extends Blackprint.Node {
 		static input = {};
-		// static output = {};
 		constructor(instance){
 			super(instance);
 
@@ -10,7 +9,8 @@ Blackprint.nodes.BP.Var = {
 			// Specify data field from here to make it enumerable and exportable
 			iface.data = {
 				name: '',
-				scope: 'public'
+				_scopeName: '',
+				scope: BPVarScopeEnum.public,
 			};
 
 			iface.title = 'VarSet';
@@ -33,7 +33,8 @@ Blackprint.nodes.BP.Var = {
 			// Specify data field from here to make it enumerable and exportable
 			iface.data = {
 				name: '',
-				scope: 'public'
+				_scopeName: '',
+				scope: BPVarScopeEnum.public,
 			};
 
 			iface.title = 'VarGet';
@@ -94,25 +95,34 @@ function BPVarInit(){
 			let temp = this._bpVarRef;
 			temp.used.add(this);
 		}
-		changeVar(name, scopeName){
+		changeVar(name, scopeId){
 			if(this.data.name !== '')
 				throw new Error(`Can't change variable node that already be initialized`);
-				
+
 			this.data.name = name;
-			this.data.scope = scopeName;
+			this.data.scope = scopeId;
+
+			let _scopeName;
+			if(scopeId === BPVarScopeEnum.public) _scopeName = 'public';
+			else if(scopeId === BPVarScopeEnum.private) _scopeName = 'private';
+			else if(scopeId === BPVarScopeEnum.shared) _scopeName = 'shared';
+
+			if(Blackprint.Sketch != null)
+				this.data._scopeName = _scopeName;
 
 			let _funcInstance = this.node._instance._funcMain?.node._funcInstance;
 
 			let scope;
-			if(scopeName === 'public')
+			if(scopeId === BPVarScopeEnum.public)
 				scope = (_funcInstance?.rootInstance ?? this.node._instance).variables;
-			else if(scopeName === 'shared')
+			else if(scopeId === BPVarScopeEnum.shared)
 				scope = _funcInstance.variables;
 			else // private
 				scope = this.node._instance.variables;
 
-			if(!(name in scope))
-				throw new Error(`'${name}' variable was not defined on the '${scopeName}' instance`);
+			if(!(name in scope)){
+				throw new Error(`'${name}' variable was not defined on the '${_scopeName}' instance`);
+			}
 
 			return scope;
 		}
@@ -164,14 +174,14 @@ function BPVarInit(){
 
 	Blackprint.registerInterface('BPIC/BP/Var/Get',
 	class extends BPVarGetSet {
-		changeVar(name, scopeName){
+		changeVar(name, scopeId){
 			if(this.data.name !== '')
 				throw new Error(`Can't change variable node that already be initialized`);
 
 			if(this._onChanged != null)
-				scope[this.data.name]?.off('value', this._onChanged);
+				this._bpVarRef?.off('value', this._onChanged);
 
-			let scope = super.changeVar(name, scopeName);
+			let scope = super.changeVar(name, scopeId);
 			this.title = 'Get '+name;
 
 			let temp = this._bpVarRef = scope[this.data.name];
@@ -213,8 +223,8 @@ function BPVarInit(){
 
 	Blackprint.registerInterface('BPIC/BP/Var/Set',
 	class extends BPVarGetSet {
-		changeVar(name, scopeName){
-			let scope = super.changeVar(name, scopeName);
+		changeVar(name, scopeId){
+			let scope = super.changeVar(name, scopeId);
 			this.title = 'Set '+name;
 
 			let temp = this._bpVarRef = scope[this.data.name];
@@ -241,6 +251,12 @@ function BPVarInit(){
 		}
 	});
 }
+
+var BPVarScopeEnum = {
+	public: 0,
+	private: 1,
+	shared: 2,
+};
 
 if(globalThis.sf && globalThis.sf.$)
 	globalThis.sf.$(BPVarInit);
