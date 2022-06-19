@@ -92,7 +92,7 @@ function determinePortType(val, that){
 	if(typeof val === 'function'){
 		type = val;
 
-		// Give default value for each data type
+		// Give default value for each primitive type
 		if(type === Number)
 			def = 0;
 		else if(type === Boolean)
@@ -101,7 +101,7 @@ function determinePortType(val, that){
 			def = '';
 		else def = null;
 	}
-	else if(val === null){
+	else if(val === null || val === TypeAny){
 		type = TypeAny;
 		def = null;
 	}

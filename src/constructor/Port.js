@@ -334,17 +334,17 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 		// Remove old cable if the port not support array
 		if(inp.feature !== BP_Port.ArrayOf && inp.type !== Function){
-			let _cables = inp.cables; // Cables in input port
+			let cables = inp.cables; // Cables in input port
 
-			if(_cables.length !== 0){
-				_cables = _cables[0];
+			if(cables.length !== 0){
+				let temp = cables[0];
 
-				if(_cables === cable)
-					_cables = _cables[1];
+				if(temp === cable)
+					temp = cables[1];
 
-				if(_cables !== void 0){
-					inp._cableConnectError('cable.replaced', {cable, oldCable: _cables, port: inp, target: out});
-					_cables.disconnect();
+				if(temp !== void 0){
+					inp._cableConnectError('cable.replaced', {cable, oldCable: temp, port: inp, target: out});
+					temp.disconnect();
 				}
 			}
 		}

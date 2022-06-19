@@ -1,5 +1,4 @@
 // Global Shared Interface Enviroment
-// Environment map can be accessed with 'iface.env' on Sketch or Engine
 
 Blackprint.Environment = {
 	map: {}, // Use this instead

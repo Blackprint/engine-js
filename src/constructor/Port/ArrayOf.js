@@ -16,9 +16,8 @@ BP_Port.ArrayOf.validate = function(type, target){
 	if(type.any || target.any || type === target)
 		return true;
 
-	if(type.constructor === Array)
-		if(type.includes(target))
-			return true;
+	if(type.constructor === Array && type.includes(target))
+		return true;
 
 	return false;
 }

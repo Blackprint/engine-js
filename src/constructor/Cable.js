@@ -136,14 +136,14 @@ class Cable{
 			else if(output.out === this) output.out = null;
 			else if(input?.out === this) input.out = null;
 
-			let i = this.output.in ? this.output.in.indexOf(this) : -1;
+			let i = output.in ? output.in.indexOf(this) : -1;
 			if(i !== -1){
-				this.output.in.splice(i, 1);
+				output.in.splice(i, 1);
 			}
-			else if(this.input != null) {
-				let i = this.input.in.indexOf(this);
+			else if(input != null) {
+				let i = input.in.indexOf(this);
 				if(i !== -1)
-					this.input.in.splice(i, 1);
+					input.in.splice(i, 1);
 			}
 
 			this.connected = false;
