@@ -20,15 +20,15 @@ var Blackprint = require('./../dist/engine.min.js');
 	// 'BPIC/LibraryName/FeatureName/NodeName'
 
 	// Example below is using 'i-' to make it easier to understand
-	Blackprint.registerInterface('BPIC/i-button', class extends Blackprint.Interface {
+	Blackprint.registerInterface('BPIC/Example/Button', class extends Blackprint.Interface {
 		// Will be used for 'Example/Button/Simple' node
 		clicked(ev){
 			console.log("Engine: 'Trigger' button clicked, going to run the handler");
-			this.node.clicked && this.node.clicked(ev);
+			this.node.clicked(ev);
 		}
 	});
 
-	Blackprint.registerInterface('BPIC/i-input', class extends Blackprint.Interface {
+	Blackprint.registerInterface('BPIC/Example/Input', class extends Blackprint.Interface {
 		constructor(node){
 			super(node);
 
@@ -39,20 +39,37 @@ var Blackprint = require('./../dist/engine.min.js');
 				get value(){ return theValue },
 				set value(val){
 					theValue = val;
-
-					if(iface.node.changed !== void 0)
-						iface.node.changed(val);
+					iface.changed(val);
 				},
 			};
+		}
+
+		// Proxy string value from: data.value(setter) -> iface.changed -> output.Value
+		// And also call output.Changed() if connected to other node
+		changed(text, ev){
+			let node = this.node;
+
+			// This node still being imported
+			if(this.importing !== false)
+				return;
+
+			console.log('The input box have new value:', text);
+
+			// node.data.value === text;
+			node.output.Value = this.data.value;
+			// node.syncOut('data', {value: this.data.value});
+
+			// This will call every connected node
+			node.output.Changed();
 		}
 	});
 
 	// You can use class and use getter/setter to improve performance and memory efficiency
-	Blackprint.registerInterface('BPIC/i-logger', class extends Blackprint.Interface {
+	Blackprint.registerInterface('BPIC/Example/Logger', class extends Blackprint.Interface {
 		get log(){ return this._log }
 		set log(val){
 			this._log = val;
-			console.log("Logger:", val);
+			console.log("Logger set:", val);
 		}
 	});
 
@@ -64,12 +81,12 @@ var Blackprint = require('./../dist/engine.min.js');
 
 // === Register Node Handler ===
 	Blackprint.registerNode('Example/Math/Multiply', class extends Blackprint.Node {
-		// Handle all output port here
+		// Define output port here
 		static output = {
 			Result:Number,
 		};
 
-		// Handle all input port here
+		// Define input port here
 		static input = {
 			Exec: Blackprint.Port.Trigger(function(){
 				this.output.Result = this.multiply();
@@ -104,8 +121,8 @@ var Blackprint = require('./../dist/engine.min.js');
 		// Your own processing mechanism
 		multiply(){
 			let input = this.input;
-			console.log('Multiplying', input.A, 'with', input.B);
 
+			console.log('Multiplying', input.A, 'with', input.B);
 			return input.A * input.B;
 		}
 	});
@@ -151,7 +168,7 @@ var Blackprint = require('./../dist/engine.min.js');
 		constructor(instance){
 			super(instance);
 
-			let iface = this.setInterface('BPIC/i-logger');
+			let iface = this.setInterface('BPIC/Example/Logger');
 			iface.title = "Logger";
 			iface.description = 'Print anything into text';
 		}
@@ -186,7 +203,7 @@ var Blackprint = require('./../dist/engine.min.js');
 		constructor(instance){
 			super(instance);
 
-			let iface = this.setInterface('BPIC/i-button');
+			let iface = this.setInterface('BPIC/Example/Button');
 			iface.title = "Button";
 		}
 
@@ -206,7 +223,7 @@ var Blackprint = require('./../dist/engine.min.js');
 		constructor(instance){
 			super(instance);
 
-			let iface = this.setInterface('BPIC/i-input');
+			let iface = this.setInterface('BPIC/Example/Input');
 			iface.title = "Input";
 
 			iface.data = { value: '...' };
@@ -221,24 +238,6 @@ var Blackprint = require('./../dist/engine.min.js');
 
 			iface.data = data;
 			this.output.Value = data.value;
-		}
-
-		// Proxy string value from: node.changed -> node.changed -> output.Value
-		// And also call output.Changed() if connected to other node
-		changed(text, ev){
-			let iface = this.iface;
-
-			// This node still being imported
-			if(iface.importing !== false)
-				return;
-
-			console.log('The input box have new value:', text);
-
-			// node.data.value === text;
-			this.output.Value = iface.data.value;
-
-			// This will call every connected node
-			this.output.Changed();
 		}
 	});
 
