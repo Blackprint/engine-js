@@ -37,6 +37,12 @@ Blackprint.RoutePort = class RoutePort {
 		return cable;
 	}
 
+	// Connect other route port (this .out to other .in port)
+	routeTo(iface){
+		let cable = this.createCable();
+		iface.node.routes.connectCable(cable);
+	}
+
 	// Connect to input route
 	connectCable(cable){
 		if(this.in.includes(cable)) return false;
@@ -54,7 +60,10 @@ Blackprint.RoutePort = class RoutePort {
 
 	async routeIn(){
 		let node = this.iface.node;
-		await node.update();
+
+		if(this.iface.enum !== _InternalNodeEnum.BPFnInput)
+			await node.update();
+			
 		await node.routes.routeOut();
 	}
 
