@@ -220,10 +220,10 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		if(obj.iface) msg += `\nIFace: ${obj.iface.namespace}`;
 
 		if(obj.port)
-			msg += `\nFrom port: ${obj.port.name}\n - Type: ${obj.port.source} (${obj.port.type.name})`;
+			msg += `\nFrom port: ${obj.port.name} (iface: ${obj.port.iface.namespace})\n - Type: ${obj.port.source} (${obj.port.type.name})`;
 
 		if(obj.target)
-			msg += `\nTo port: ${obj.target.name}\n - Type: ${obj.target.source} (${obj.target.type.name})`;
+			msg += `\nTo port: ${obj.target.name} (iface: ${obj.target.iface.namespace})\n - Type: ${obj.target.source} (${obj.target.type.name})`;
 
 		obj.message = msg;
 		this.iface.node._instance.emit(name, obj);

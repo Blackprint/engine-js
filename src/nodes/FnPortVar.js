@@ -92,7 +92,7 @@ function BPFnVarInit(){
 				this._waitPortInit = port => {
 					delete iPort.onConnect;
 					delete this._waitPortInit;
-					let backup = this.output.Val.cables.map(cable => cable.output);
+					let backup = this.output.Val.cables.map(cable => cable.input);
 
 					node.deletePort('output', 'Val');
 
