@@ -156,6 +156,9 @@ Blackprint.Engine = class Engine extends CustomEvent {
 				let node = nodes[a];
 				var iface = inserted[node.i];
 
+				if(node.route != null)
+					iface.node.routes.routeTo(inserted[node.route.i]);
+
 				// If have output connection
 				if(node.output !== void 0){
 					var out = node.output;
@@ -179,7 +182,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 								linkPortA = iface.output[portName];
 							}
 							else{
-								console.error("Node port not found for", iface, "with name:", portName);
+								console.error(`Node port not found for iface (index: ${iface.i}, title: ${iface.title}) with portname: ${portName}`);
 								continue;
 							}
 						}
@@ -216,10 +219,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		}
 
 		// Call node init after creation processes was finished
-		for (var i = 0; i < handlers.length; i++){
-			let temp = handlers[i];
-			temp.init && temp.init();
-		}
+		for (var i = 0; i < handlers.length; i++)
+			handlers[i].init?.();
 
 		this.emit("json.imported", {appendMode: options.appendMode, nodes: inserted, raw: json});
 		return inserted;
@@ -360,7 +361,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		if(options.vars != null){
 			let vars = options.vars;
 			for (let i=0; i < vars.length; i++) {
-				temp.createVariable(vars[i], {scope: 'shared'});
+				temp.createVariable(vars[i], {scope: BPVarScopeEnum.shared});
 			}
 		}
 
