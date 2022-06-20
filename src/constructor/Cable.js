@@ -124,7 +124,7 @@ class Cable{
 			
 			let node = inp.iface.node;
 			if(node.update !== void 0)
-				node.update(inp, out, this);
+				node.update(this);
 		}
 	}
 
