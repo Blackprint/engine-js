@@ -74,7 +74,7 @@ export namespace Port {
 	 * This port will be used as a trigger or callable input port
 	 * @param func callback when the port was being called as a function 
 	 */
-	export function Trigger(func: any): any;
+	export function Trigger(func: Function): any;
 
 	/**
 	 * This port can allow multiple different types
@@ -495,6 +495,12 @@ declare class RoutePort_1 {
 	 * @param event [ToDo]
 	 */
 	createCable(event: any): any;
+
+	/**
+	 * Connect current output route to other node
+	 * @param iface [ToDo]
+	 */
+	routeTo(iface: Interface): Boolean;
 
 	/**
 	 * Connect route cable to this port
