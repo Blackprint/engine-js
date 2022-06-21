@@ -6,7 +6,7 @@
 // import Blackprint from 'https://cdn.skypack.dev/@blackprint/engine@0.6';
 
 // For Node
-var Blackprint = require('./../dist/engine.min.js');
+var Blackprint = require('./../../dist/engine.min.js');
 // var Blackprint = require('@blackprint/engine');
 
 // Run from your CLI
@@ -19,12 +19,11 @@ var Blackprint = require('./../dist/engine.min.js');
 	// When creating your own interface please use specific interface naming if possible
 	// 'BPIC/LibraryName/FeatureName/NodeName'
 
-	// Example below is using 'i-' to make it easier to understand
 	Blackprint.registerInterface('BPIC/Example/Button', class extends Blackprint.Interface {
 		// Will be used for 'Example/Button/Simple' node
 		clicked(ev){
-			console.log("Engine: 'Trigger' button clicked, going to run the handler");
-			this.node.clicked(ev);
+			console.log("Button/Simple: 'Trigger' button clicked");
+			this.node.output.Clicked();
 		}
 	});
 
@@ -53,7 +52,7 @@ var Blackprint = require('./../dist/engine.min.js');
 			if(this.importing !== false)
 				return;
 
-			console.log('The input box have new value:', text);
+			console.log('Input/Simple: The input box have new value:', text);
 
 			// node.data.value === text;
 			node.output.Value = this.data.value;
@@ -69,7 +68,7 @@ var Blackprint = require('./../dist/engine.min.js');
 		get log(){ return this._log }
 		set log(val){
 			this._log = val;
-			console.log("Logger set:", val);
+			console.log("Example/Logger log:", val);
 		}
 	});
 
@@ -90,7 +89,7 @@ var Blackprint = require('./../dist/engine.min.js');
 		static input = {
 			Exec: Blackprint.Port.Trigger(function(){
 				this.output.Result = this.multiply();
-				console.log("Result has been set:", this.output.Result);
+				console.log("Math/Multiply: Result has been set:", this.output.Result);
 			}),
 			A: Number,
 			B: null,
@@ -108,7 +107,7 @@ var Blackprint = require('./../dist/engine.min.js');
 			let iface = this.iface;
 
 			iface.on('cable.connect', function({port, target}){
-				console.log(`Cable connected from ${port.iface.title} (${port.name}) to ${target.iface.title} (${target.name})`);
+				console.log(`Math/Multiply: Cable connected from ${port.iface.title} (${port.name}) to ${target.iface.title} (${target.name})`);
 			});
 		}
 
@@ -122,7 +121,7 @@ var Blackprint = require('./../dist/engine.min.js');
 		multiply(){
 			let input = this.input;
 
-			console.log('Multiplying', input.A, 'with', input.B);
+			console.log('Math/Multiply: Multiplying', input.A, 'with', input.B);
 			return input.A * input.B;
 		}
 	});
@@ -147,13 +146,13 @@ var Blackprint = require('./../dist/engine.min.js');
 		}
 
 		// When the connected node is requesting for the output value
-		request(port, iface2){
+		request(cable){
 			// Only run once this node never been executed
 			// Return false if no value was changed
 			if(this.executed === true)
 				return false;
 
-			console.warn('Value request for port:', port.name, "from node:", iface2.title);
+			console.warn('Math/Random: Value request for port:', cable.output.name, "from node:", cable.input.iface.title);
 
 			// Let's create the value for him
 			this.input['Re-seed']();
@@ -183,12 +182,12 @@ var Blackprint = require('./../dist/engine.min.js');
 
 			// Let's show data after new cable was connected or disconnected
 			iface.on('cable.connect cable.disconnect', function(){
-				console.log("A cable was changed on Logger, now refresing the input element");
+				console.log("Display/Logger: A cable was changed on Logger, now refresing the input element");
 				refreshLogger(node.input.Any);
 			});
 
 			iface.input.Any.on('value', function({ target }){
-				console.log("I connected to", target.name, "target from", target.iface.title, "that have new value:", target.value);
+				console.log("Display/Logger: I connected to", target.name, "target from", target.iface.title, "that have new value:", target.value);
 
 				// Let's take all data from all connected nodes
 				// Instead showing new single data-> val
@@ -205,12 +204,6 @@ var Blackprint = require('./../dist/engine.min.js');
 
 			let iface = this.setInterface('BPIC/Example/Button');
 			iface.title = "Button";
-		}
-
-		// Proxy event object from: node.clicked -> node.clicked -> output.Clicked
-		clicked(ev){
-			console.log('button/Simple: got', ev, "time to trigger to the other node");
-			this.output.Clicked(ev);
 		}
 	});
 
@@ -233,8 +226,8 @@ var Blackprint = require('./../dist/engine.min.js');
 		imported(data){
 			let iface = this.iface;
 
-			console.warn("Old data:", JSON.stringify(iface.data));
-			console.warn("Imported data:", JSON.stringify(data));
+			console.warn("Input/Simple: Old data:", JSON.stringify(iface.data));
+			console.warn("Input/Simple: Imported data:", JSON.stringify(data));
 
 			iface.data = data;
 			this.output.Value = data.value;
@@ -246,6 +239,7 @@ var Blackprint = require('./../dist/engine.min.js');
 !async function(){
 	let instance = new Blackprint.Engine();
 
+	// await instance.importJSON('{"_":{"moduleJS":[],"functions":{"Test":{"id":"Test","title":"Test","description":"No description","vars":["shared"],"privateVars":["private"],"structure":{"BP/Fn/Input":[{"i":0,"x":389,"y":100,"z":3,"output":{"A":[{"i":2,"name":"A"}],"Exec":[{"i":2,"name":"Exec"}]}}],"BP/Fn/Output":[{"i":1,"x":973,"y":228,"z":14}],"Example/Math/Multiply":[{"i":2,"x":656,"y":99,"z":8,"output":{"Result":[{"i":3,"name":"Val"},{"i":9,"name":"Val"}]}},{"i":10,"x":661,"y":289,"z":4,"output":{"Result":[{"i":5,"name":"Val"},{"i":1,"name":"Result1"}]}}],"BP/Var/Set":[{"i":3,"x":958,"y":142,"z":9,"data":{"name":"shared","scope":2}},{"i":5,"x":971,"y":333,"z":2,"data":{"name":"private","scope":1},"route":{"i":1}}],"BP/Var/Get":[{"i":4,"x":387,"y":461,"z":5,"data":{"name":"shared","scope":2},"output":{"Val":[{"i":8,"name":"Any"}]}},{"i":6,"x":389,"y":524,"z":0,"data":{"name":"private","scope":1},"output":{"Val":[{"i":8,"name":"Any"}]}}],"BP/FnVar/Input":[{"i":7,"x":387,"y":218,"z":7,"data":{"name":"B"},"output":{"Val":[{"i":2,"name":"B"}]}},{"i":11,"x":386,"y":301,"z":6,"data":{"name":"Exec"},"output":{"Val":[{"i":10,"name":"Exec"}]}},{"i":12,"x":386,"y":370,"z":10,"data":{"name":"A"},"output":{"Val":[{"i":10,"name":"A"},{"i":10,"name":"B"}]}}],"Example/Display/Logger":[{"i":8,"x":661,"y":474,"z":11}],"BP/FnVar/Output":[{"i":9,"x":956,"y":69,"z":1,"data":{"name":"Result"}},{"i":14,"x":969,"y":629,"z":13,"data":{"name":"Clicked"}}],"Example/Button/Simple":[{"i":13,"x":634,"y":616,"z":12,"output":{"Clicked":[{"i":14,"name":"Val"}]}}]}}}},"Example/Math/Random":[{"i":0,"x":512,"y":76,"z":0,"output":{"Out":[{"i":5,"name":"A"}]},"route":{"i":5}},{"i":1,"x":512,"y":242,"z":1,"output":{"Out":[{"i":5,"name":"B"}]}}],"Example/Display/Logger":[{"i":2,"x":986,"y":282,"z":2,"id":"myLogger"}],"Example/Button/Simple":[{"i":3,"x":244,"y":64,"z":6,"id":"myButton","output":{"Clicked":[{"i":5,"name":"Exec"}]}}],"Example/Input/Simple":[{"i":4,"x":238,"y":279,"z":4,"id":"myInput","data":{"value":"saved input"},"output":{"Changed":[{"i":1,"name":"Re-seed"}],"Value":[{"i":2,"name":"Any"}]}}],"BPI/F/Test":[{"i":5,"x":738,"y":138,"z":5,"output":{"Result1":[{"i":2,"name":"Any"}],"Result":[{"i":2,"name":"Any"}],"Clicked":[{"i":6,"name":"Exec"}]},"route":{"i":6}}],"Example/Math/Multiply":[{"i":6,"x":1032,"y":143,"z":3}]}');
 	await instance.importJSON('{"Example/Math/Random":[{"i":0,"x":298,"y":73,"output":{"Out":[{"i":2,"name":"A"}]}},{"i":1,"x":298,"y":239,"output":{"Out":[{"i":2,"name":"B"}]}}],"Example/Math/Multiply":[{"i":2,"x":525,"y":155,"output":{"Result":[{"i":3,"name":"Any"}]}}],"Example/Display/Logger":[{"i":3,"id":"myLogger","x":763,"y":169}],"Example/Button/Simple":[{"i":4,"id":"myButton","x":41,"y":59,"output":{"Clicked":[{"i":2,"name":"Exec"}]}}],"Example/Input/Simple":[{"i":5,"id":"myInput","x":38,"y":281,"data":{"value":"saved input"},"output":{"Changed":[{"i":1,"name":"Re-seed"}],"Value":[{"i":3,"name":"Any"}]}}]}');
 
 	// Time to run something :)
