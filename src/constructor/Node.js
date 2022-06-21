@@ -99,6 +99,13 @@ Blackprint.Node = class Node extends Blackprint.Engine.CustomEvent {
 		return this[which]._delete(name);
 	}
 
+	log(message){
+		this.instance._log({
+			iface: this.iface,
+			message,
+		});
+	}
+
 	// Will be replaced by @blackprint/remote-control/js/src/Node.js
 	syncOut(id, data){}
 

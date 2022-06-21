@@ -376,6 +376,14 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		return temp;
 	}
 
+	_log(data){
+		data.instance = this;
+
+		if(this._mainInstance != null)
+			this._mainInstance.emit('log', data);
+		else this.emit('log', data);
+	}
+
 	destroy(){
 		this.iface = {};
 		this.ifaceList.splice(0);
