@@ -17,7 +17,12 @@ Blackprint.nodes.BP.Fn = {
 			for(let key in input)
 				this.createPort('output', key, input[key]);
 		}
-		request(cable){}
+		request(cable){
+			let name = cable.output.name;
+
+			// This will trigger the port to request from outside and assign to this node's port
+			this.output[name] = this.iface._funcMain.node.input[name];
+		}
 	},
 	Output: class extends Blackprint.Node {
 		static input = {};
@@ -77,7 +82,7 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 
 		let input = this._input = {};
 		let output = this._output = {};
-		this.used = []; // [Blackprint.Node, ...]
+		this.used = []; // [Blackprint.Interface, ...]
 
 		// This will be updated if the function sketch was modified
 		this.structure = options.structure || {
@@ -116,10 +121,10 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 		let list = this.used;
 
 		for (let a=0; a < list.length; a++) {
-			let node = list[a];
-			if(node === fromNode) continue;
+			let iface = list[a];
+			if(iface.node === fromNode) continue;
 
-			let nodeInstance = node.iface.bpInstance;
+			let nodeInstance = iface.bpInstance;
 			nodeInstance.pendingRender = true; // Force recalculation for cable position
 
 			if(eventName === 'cable.connect' || eventName === 'cable.disconnect'){
@@ -253,7 +258,7 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 		
 		let list = this.used;
 		for (let i=0; i < list.length; i++) {
-			let vars = list[i].iface.bpInstance.variables;
+			let vars = list[i].bpInstance.variables;
 
 			if(hasSketch)
 				sf.Obj.set(vars, id, new BPVariable(id));
@@ -282,7 +287,8 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 
 	destroy(){
 		let map = this.used;
-		for (let iface of map) {
+		for (let i=0; i < map.length; i++) {
+			let iface = map[i];
 			iface.node.instance.deleteNode(iface);
 		}
 	}
@@ -293,7 +299,7 @@ Blackprint._utils.BPFunction = BPFunction;
 class BPFunctionNode extends Blackprint.Node {
 	imported(data){
 		let instance = this._funcInstance;
-		instance.used.push(this);
+		instance.used.push(this.iface);
 	}
 
 	update(cable){
@@ -319,7 +325,7 @@ class BPFunctionNode extends Blackprint.Node {
 	destroy(){
 		let instance = this._funcInstance;
 
-		let i = instance.used.indexOf(this);
+		let i = instance.used.indexOf(this.iface);
 		if(i !== -1) instance.used.splice(i, 1);
 	}
 }

@@ -16,7 +16,12 @@ Blackprint.nodes.BP.FnVar = {
 		imported(){
 			this.routes.disabled = true;
 		}
-		request(cable){}
+		request(cable){
+			let iface = this.iface;
+
+			// This will trigger the port to request from outside and assign to this node's port
+			this.output.Val = iface._parentFunc.node.input[iface.data.name];
+		}
 	},
 	Output: class extends Blackprint.Node {
 		static input = {};
