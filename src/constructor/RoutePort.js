@@ -1,8 +1,10 @@
 // import { Cable } from "./Cable.js";
 
 // This will be extended if Blackprint Sketch is loaded
-Blackprint.RoutePort = class RoutePort {
+Blackprint.RoutePort = class RoutePort extends CustomEvent {
 	constructor(iface){
+		super();
+
 		this.iface = iface;
 		this._scope = iface._scope;
 
@@ -58,16 +60,16 @@ Blackprint.RoutePort = class RoutePort {
 
 		this.in.push(cable);
 		cable.target = cable.input = this;
-		cable.connected = true;
+		cable._connected();
 
 		return true;
 	}
 
-	async routeIn(){
+	async routeIn(cable){
 		let node = this.iface.node;
 
-		if(this.iface.enum !== _InternalNodeEnum.BPFnInput)
-			await node.update(null);
+		if(this.iface._enum !== _InternalNodeEnum.BPFnInput)
+			await node.update(cable);
 
 		await node.routes.routeOut();
 	}
@@ -75,8 +77,8 @@ Blackprint.RoutePort = class RoutePort {
 	async routeOut(){
 		if(this.disableOut) return;
 		if(this.out == null){
-			if(this.iface.enum === _InternalNodeEnum.BPFnOutput)
-				return await this.iface._funcMain.node.routes.routeIn();
+			if(this.iface._enum === _InternalNodeEnum.BPFnOutput)
+				return await this.iface._funcMain.node.routes.routeIn(null);
 
 			return;
 		}
@@ -86,19 +88,20 @@ Blackprint.RoutePort = class RoutePort {
 		let targetRoute = this.out.input;
 		if(targetRoute == null) return;
 
-		let _enum = targetRoute.iface.enum;
+		let _enum = targetRoute.iface._enum;
+		let cable = this.out;
 
 		if(_enum === void 0)
-			return await targetRoute.routeIn();
+			return await targetRoute.routeIn(cable);
 
 		if(_enum === _InternalNodeEnum.BPFnMain)
-			return await targetRoute.iface._proxyInput.routes.routeIn();
+			return await targetRoute.iface._proxyInput.routes.routeIn(cable);
 
 		if(_enum === _InternalNodeEnum.BPFnOutput){
-			await targetRoute.iface.node.update(null);
+			await targetRoute.iface.node.update(cable);
 			return await targetRoute.iface._funcMain.node.routes.routeOut();
 		}
 
-		return await targetRoute.routeIn();
+		return await targetRoute.routeIn(cable);
 	}
 }
