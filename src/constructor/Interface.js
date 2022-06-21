@@ -31,7 +31,7 @@ Blackprint.Interface = class Interface extends Blackprint.Engine.CustomEvent{
 		// 	iface.ref.Property = node.property;
 		// }
 
-		Object.defineProperty(iface, '_requesting', {configurable: true, writable:true, value:void 0});
+		Object.defineProperty(iface, '_requesting', {configurable: true, writable:true, value:false});
 	}
 
 	static _reuse(newIface, oldIface){
@@ -78,7 +78,7 @@ Blackprint.Interface = class Interface extends Blackprint.Engine.CustomEvent{
 			}
 		}
 
-		Object.defineProperty(iface, '_requesting', {configurable: true, writable:true, value:void 0});
+		Object.defineProperty(iface, '_requesting', {configurable: true, writable:true, value:false});
 	}
 
 	constructor(node){

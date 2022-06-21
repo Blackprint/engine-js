@@ -76,7 +76,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 						var cable = port.cables[0];
 
 						if(cable.connected === false || cable.disabled){
-							port.iface._requesting = void 0;
+							port.iface._requesting = false;
 							if(port.feature === BP_Port.ArrayOf)
 								return port._cache = [];
 
@@ -86,12 +86,12 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 						var output = cable.output;
 
 						// Request the data first
-						output.iface.node.request?.(output, port.iface);
+						output.iface.node.request?.(cable);
 
 						if(Blackprint.settings.visualizeFlow)
 							cable.visualizeFlow();
 
-						port.iface._requesting = void 0;
+						port.iface._requesting = false;
 						if(port.feature === BP_Port.ArrayOf){
 							port._cache = [];
 							if(output.value != null)
@@ -116,20 +116,20 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 						var output = cable.output;
 
 						// Request the data first
-						output.iface.node.request?.(output, port.iface);
+						output.iface.node.request?.(cable);
 
 						if(Blackprint.settings.visualizeFlow)
 							cable.visualizeFlow();
 
 						if(isNotArrayPort){
-							port.iface._requesting = void 0;
+							port.iface._requesting = false;
 							return port._cache = output.value ?? port.default;
 						}
 
 						data.push(output.value ?? port.default);
 					}
 
-					port.iface._requesting = void 0;
+					port.iface._requesting = false;
 					return port._cache = data;
 				}
 
@@ -190,10 +190,10 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			if(skipSync) return;
 
 			let node = inp.iface.node;
-			if(node.update && inp.iface._requesting === void 0){
+			if(node.update && inp.iface._requesting === false){
 				node.update(cable);
 
-				if(node.iface.enum !== _InternalNodeEnum.BPFnMain){
+				if(node.iface._enum !== _InternalNodeEnum.BPFnMain){
 					node.routes.routeOut();
 				}
 				else {
@@ -226,7 +226,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			msg += `\nTo port: ${obj.target.name} (iface: ${obj.target.iface.namespace})\n - Type: ${obj.target.source} (${obj.target.type.name})`;
 
 		obj.message = msg;
-		this.iface.node._instance.emit(name, obj);
+		this.iface.node.instance.emit(name, obj);
 	}
 
 	connectCable(cable){
@@ -420,6 +420,6 @@ function createCallableRoutePort(port){
 		var cable = port.cables[0];
 		if(cable === void 0) return;
 
-		await cable.input.routeIn();
+		await cable.input.routeIn(cable);
 	}
 }

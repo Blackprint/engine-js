@@ -5,10 +5,10 @@ Blackprint.nodes.BP.Fn = {
 			super(instance);
 
 			let iface = this.setInterface('BPIC/BP/Fn/Input');
-			iface.enum = _InternalNodeEnum.BPFnInput;
+			iface._enum = _InternalNodeEnum.BPFnInput;
 			iface._proxyInput = true; // Port is initialized dynamically
 
-			let funcMain = iface._funcMain = this._instance._funcMain;
+			let funcMain = iface._funcMain = this.instance._funcMain;
 			funcMain._proxyInput = this;
 		}
 		imported(){
@@ -17,6 +17,7 @@ Blackprint.nodes.BP.Fn = {
 			for(let key in input)
 				this.createPort('output', key, input[key]);
 		}
+		request(cable){}
 	},
 	Output: class extends Blackprint.Node {
 		static input = {};
@@ -24,10 +25,10 @@ Blackprint.nodes.BP.Fn = {
 			super(instance);
 
 			let iface = this.setInterface('BPIC/BP/Fn/Output');
-			iface.enum = _InternalNodeEnum.BPFnOutput;
+			iface._enum = _InternalNodeEnum.BPFnOutput;
 			iface._dynamicPort = true; // Port is initialized dynamically
 
-			let funcMain = iface._funcMain = this._instance._funcMain;
+			let funcMain = iface._funcMain = this.instance._funcMain;
 			funcMain._proxyOutput = this;
 		}
 
@@ -38,9 +39,9 @@ Blackprint.nodes.BP.Fn = {
 				this.createPort('input', key, output[key]);
 		}
 
-		update(port, source, cable){
+		update(cable){
 			let iface = this.iface._funcMain;
-			if(port == null){ // Triggered by port route
+			if(cable === null){ // Triggered by port route
 				let IOutput = iface.output;
 				let Output = iface.node.output;
 				let thisInput = this.input;
@@ -54,7 +55,7 @@ Blackprint.nodes.BP.Fn = {
 				return;
 			}
 
-			iface.node.output[port.name] = cable.value;
+			iface.node.output[cable.input.name] = cable.value;
 		}
 	},
 };
@@ -102,7 +103,7 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 				iface.type = 'function';
 				iface.uniqId = uniqId++;
 
-				iface.enum = _InternalNodeEnum.BPFnMain;
+				iface._enum = _InternalNodeEnum.BPFnMain;
 			}
 
 			async init(){
@@ -154,14 +155,14 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 					let targetOutput = outputIface.output[output.name];
 
 					if(targetInput == null){
-						if(inputIface.enum === _InternalNodeEnum.BPFnOutput){
+						if(inputIface._enum === _InternalNodeEnum.BPFnOutput){
 							targetInput = inputIface.addPort(targetOutput, output.name);
 						}
 						else throw new Error("Output port was not found");
 					}
 
 					if(targetOutput == null){
-						if(outputIface.enum === _InternalNodeEnum.BPFnInput){
+						if(outputIface._enum === _InternalNodeEnum.BPFnInput){
 							targetOutput = outputIface.addPort(targetInput, input.name);
 						}
 						else throw new Error("Input port was not found");
@@ -282,7 +283,7 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 	destroy(){
 		let map = this.used;
 		for (let iface of map) {
-			iface.node._instance.deleteNode(iface);
+			iface.node.instance.deleteNode(iface);
 		}
 	}
 }
@@ -295,9 +296,9 @@ class BPFunctionNode extends Blackprint.Node {
 		instance.used.push(this);
 	}
 
-	update(port, source, cable){
+	update(cable){
 		let iface = this.iface._proxyInput.iface;
-		if(port == null){ // Triggered by port route
+		if(cable === null){ // Triggered by port route
 			let IOutput = iface.output;
 			let Output = iface.node.output;
 			let thisInput = this.input;
@@ -312,7 +313,7 @@ class BPFunctionNode extends Blackprint.Node {
 		}
 
 		// port => input port from current node
-		iface.node.output[port.name] = cable.value;
+		iface.node.output[cable.input.name] = cable.value;
 	}
 
 	destroy(){
@@ -336,7 +337,7 @@ function BPFnInit(){
 			this._importOnce = true;
 			let node = this.node;
 
-			if(node._instance.constructor === Blackprint.Engine)
+			if(node.instance.constructor === Blackprint.Engine)
 				this.bpInstance = new Blackprint.Engine();
 			else this.bpInstance = new Blackprint.Sketch();
 
@@ -345,7 +346,7 @@ function BPFnInit(){
 			let newInstance = this.bpInstance;
 			newInstance.variables = {}; // private for one function
 			newInstance.sharedVariables = bpFunction.variables; // shared between function
-			newInstance.functions = node._instance.functions;
+			newInstance.functions = node.instance.functions;
 			newInstance._funcMain = this;
 			newInstance._mainInstance = bpFunction.rootInstance;
 

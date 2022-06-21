@@ -16,7 +16,7 @@ Blackprint.nodes.BP.Var = {
 			iface.title = 'VarSet';
 			iface.type = 'bp-var-set';
 
-			iface.enum = _InternalNodeEnum.BPVarSet;
+			iface._enum = _InternalNodeEnum.BPVarSet;
 			iface._dynamicPort = true; // Port is initialized dynamically
 		}
 		update(){
@@ -40,7 +40,7 @@ Blackprint.nodes.BP.Var = {
 			iface.title = 'VarGet';
 			iface.type = 'bp-var-get';
 
-			iface.enum = _InternalNodeEnum.BPVarGet;
+			iface._enum = _InternalNodeEnum.BPVarGet;
 			iface._dynamicPort = true; // Port is initialized dynamically
 		}
 	},
@@ -74,7 +74,7 @@ class BPVariable extends CustomEvent {
 	destroy(){
 		let map = this.used;
 		for (let iface of map) {
-			iface.node._instance.deleteNode(iface);
+			iface.node.instance.deleteNode(iface);
 		}
 	}
 }
@@ -110,15 +110,15 @@ function BPVarInit(){
 			if(Blackprint.Sketch != null)
 				this.data._scopeName = _scopeName;
 
-			let _funcInstance = this.node._instance._funcMain?.node._funcInstance;
+			let _funcInstance = this.node.instance._funcMain?.node._funcInstance;
 
 			let scope;
 			if(scopeId === BPVarScopeEnum.public)
-				scope = (_funcInstance?.rootInstance ?? this.node._instance).variables;
+				scope = (_funcInstance?.rootInstance ?? this.node.instance).variables;
 			else if(scopeId === BPVarScopeEnum.shared)
 				scope = _funcInstance.variables;
 			else // private
-				scope = this.node._instance.variables;
+				scope = this.node.instance.variables;
 
 			if(!(name in scope)){
 				throw new Error(`'${name}' variable was not defined on the '${_scopeName}' instance`);

@@ -6,7 +6,7 @@ Blackprint.Node = class Node extends Blackprint.Engine.CustomEvent {
 			throw new Error("First parameter was not found, did you forget 'super(instance)' when extending Blackprint.Node?");
 
 		super();
-		this._instance = instance;
+		this.instance = instance;
 		this._scope = instance.scope; // Only in Blackprint.Sketch
 		this.syncThrottle = 250; // One syncOut per 250ms, last state will be synced
 		this.disablePorts = false; // Disable output port from synchronizing data to other nodes

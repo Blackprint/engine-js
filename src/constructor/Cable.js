@@ -13,7 +13,7 @@ class Cable{
 
 	visualizeFlow(){
 		if(Blackprint.settings._remoteEngine)
-			this.owner.iface.node._instance.emit('_flowEvent', this);
+			this.owner.iface.node.instance.emit('_flowEvent', this);
 	}
 	get value(){
 		if(Blackprint.settings.visualizeFlow)
@@ -83,7 +83,7 @@ class Cable{
 		this.output.emit('connecting', {target: this.input, activate});
 
 		if(this.disabled){
-			// inp.iface.node._instance.emit('cable.connecting', {
+			// inp.iface.node.instance.emit('cable.connecting', {
 			// 	port: this.input, target: this.output
 			// });
 			return;
@@ -113,7 +113,7 @@ class Cable{
 		});
 
 		let temp = {port: inp, target: out, cable: this};
-		inp.iface.node._instance.emit('cable.connect', temp);
+		inp.iface.node.instance.emit('cable.connect', temp);
 
 		inp.emit('connect', temp);
 		out.emit('connect', {port: out, target: inp, cable: this});
@@ -173,14 +173,14 @@ class Cable{
 
 				owner.emit('disconnect', temp);
 				owner.iface.emit('cable.disconnect', temp);
-				owner.iface.node._instance.emit('cable.disconnect', temp);
+				owner.iface.node.instance.emit('cable.disconnect', temp);
 
 				alreadyEmitToInstance = true;
 			}
 			else{
 				let temp = {port: owner, cable: this};
 				owner.iface.emit('cable.cancel', temp);
-				// owner.iface.node._instance.emit('cable.cancel', temp);
+				// owner.iface.node.instance.emit('cable.cancel', temp);
 			}
 
 			hasOwner = true;
@@ -202,7 +202,7 @@ class Cable{
 			target.iface.emit('cable.disconnect', temp);
 
 			if(!alreadyEmitToInstance)
-				target.iface.node._instance.emit('cable.disconnect', temp);
+				target.iface.node.instance.emit('cable.disconnect', temp);
 
 			hasTarget = true;
 		}

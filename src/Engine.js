@@ -169,14 +169,14 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 						var linkPortA = iface.output[portName];
 						if(linkPortA === void 0){
-							if(iface.enum === _InternalNodeEnum.BPFnInput){
-								let target = this._getTargetPortType(iface.node._instance, 'input', port);
+							if(iface._enum === _InternalNodeEnum.BPFnInput){
+								let target = this._getTargetPortType(iface.node.instance, 'input', port);
 								linkPortA = iface.addPort(target, portName);
 
 								if(linkPortA === void 0)
 									throw new Error(`Can't create output port (${portName}) for function (${iface._funcMain.node._funcInstance.id})`);
 							}
-							else if(iface.enum === _InternalNodeEnum.BPVarGet){
+							else if(iface._enum === _InternalNodeEnum.BPVarGet){
 								let target = this._getTargetPortType(this, 'input', port);
 								iface.useType(target);
 								linkPortA = iface.output[portName];
@@ -195,13 +195,13 @@ Blackprint.Engine = class Engine extends CustomEvent {
 							// output can only meet input port
 							var linkPortB = targetNode.input[target.name];
 							if(linkPortB === void 0){
-								if(targetNode.enum === _InternalNodeEnum.BPFnOutput){
+								if(targetNode._enum === _InternalNodeEnum.BPFnOutput){
 									linkPortB = targetNode.addPort(linkPortA, target.name);
 
 									if(linkPortB === void 0)
 										throw new Error(`Can't create output port (${target.name}) for function (${targetNode._funcMain.node._funcInstance.id})`);
 								}
-								else if(targetNode.enum === _InternalNodeEnum.BPVarSet){
+								else if(targetNode._enum === _InternalNodeEnum.BPVarSet){
 									targetNode.useType(linkPortA);
 									linkPortB = targetNode.input[target.name];
 								}

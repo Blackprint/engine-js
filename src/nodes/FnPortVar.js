@@ -10,12 +10,13 @@ Blackprint.nodes.BP.FnVar = {
 			iface.data = {name: ''};
 			iface.title = 'FnInput';
 
-			iface.enum = _InternalNodeEnum.BPFnVarInput;
+			iface._enum = _InternalNodeEnum.BPFnVarInput;
 			iface._dynamicPort = true; // Port is initialized dynamically
 		}
 		imported(){
 			this.routes.disabled = true;
 		}
+		request(cable){}
 	},
 	Output: class extends Blackprint.Node {
 		static input = {};
@@ -28,7 +29,7 @@ Blackprint.nodes.BP.FnVar = {
 			iface.data = {name: ''};
 			iface.title = 'FnOutput';
 
-			iface.enum = _InternalNodeEnum.BPFnVarOutput;
+			iface._enum = _InternalNodeEnum.BPFnVarOutput;
 			iface._dynamicPort = true; // Port is initialized dynamically
 		}
 		update(){
@@ -45,7 +46,7 @@ function BPFnVarInit(){
 		imported(data){
 			if(!data.name) throw new Error("Parameter 'name' is required");
 			this.data.name = data.name;
-			this._parentFunc = this.node._instance._funcMain;
+			this._parentFunc = this.node.instance._funcMain;
 		}
 	};
 
