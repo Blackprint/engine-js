@@ -367,6 +367,19 @@ export class Interface extends CustomEvent {
 	/** Node's ID */
 	get id(): any;
 	set id(val: any);
+
+	/**
+	 * This function will be called once the nodes has been created and the cables has been connected
+	 * @override you can override/replace this functionality on your class
+	 */
+	 init(): void;
+
+	 /**
+	  * This function will be called before init, where this node still not connected to any cables
+	  * @override you can override/replace this functionality on your class
+	  * @param data Data that was passed when importing JSON or creating new node
+	  */
+	 imported(data: Object): void;
 }
 
 /** Can be used to show information for nodes in Sketch */
@@ -418,6 +431,33 @@ export class Node {
 	 * @param icNamespace interface component's namespace that was declared with instance.registerInterface()
 	 */
 	setInterface(icNamespace?: string): Interface;
+
+	/**
+	 * This function will be called once the nodes has been created and the cables has been connected
+	 * @override you can override/replace this functionality on your class
+	 */
+	init(): void;
+
+	/**
+	 * This function will be called before init, where this node still not connected to any cables
+	 * @override you can override/replace this functionality on your class
+	 * @param data Data that was passed when importing JSON or creating new node
+	 */
+	imported(data: Object): void;
+
+	/**
+	 * This function will be called everytime there's an update or new value from output port from other nodes
+	 * But if this node has route cable, this update function will be called until this node has turn to be executed
+	 * @param cable Related cable where the data flow happen
+	 */
+	update(cable: Cable): void;
+
+	/**
+	 * This function will be called if this node has a null value in output port
+	 * The other node that need an input will requesting a output value from this node
+	 * @param cable Related cable that calling this function
+	 */
+	request(cable: Cable): void;
 
 	/**
 	 * Dynamically create port to this node
