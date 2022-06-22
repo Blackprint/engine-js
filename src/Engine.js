@@ -39,6 +39,16 @@ Blackprint.Engine = class Engine extends CustomEvent {
 			}
 		}
 
+		let routes = iface.node.routes;
+		if(routes.in.length !== 0){
+			let inp = routes.in;
+			for (let i=0; i < inp.length; i++) {
+				inp[i].disconnect();
+			}
+		}
+
+		if(routes.out !== null) routes.out.disconnect();
+
 		// Delete reference
 		delete this.iface[iface.id];
 		// delete this.ref[iface.id];
