@@ -39,6 +39,7 @@ Blackprint.Interface = class Interface extends Blackprint.Engine.CustomEvent{
 		let node = newIface.node;
 
 		iface._event = oldIface._event;
+		iface._eventLen = oldIface._eventLen;
 		node.ref = iface.ref = oldIface.ref;
 
 		iface.output = iface.ref.IOutput;

@@ -9,6 +9,8 @@ class CustomEvent {
 				writable: true,
 				value:{ }
 			});
+		}
+		if(this._eventLen === void 0){
 			Object.defineProperty(this, '_eventLen', {
 				enumerable: false,
 				configurable: true,
