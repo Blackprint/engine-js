@@ -9,6 +9,7 @@ class Cable{
 		// If false then we assume it's haven't been connected
 		this.disabled = false;
 		this.connected = false;
+		this.isRoute = false;
 	}
 
 	visualizeFlow(){
