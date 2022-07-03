@@ -71,7 +71,7 @@ function BPFnVarInit(){
 			// Create temporary port if the main function doesn't have the port
 			let name = data.name;
 			if(!(name in ports)){
-				let iPort = node.createPort('output', 'Val', null); // null = any type
+				let iPort = node.createPort('output', 'Val', Types.Any);
 				let proxyIface = this._proxyIface;
 
 				// Run when this node is being connected with other node
@@ -181,7 +181,7 @@ function BPFnVarInit(){
 			// Create temporary port if the main function doesn't have the port
 			let name = data.name;
 			if(!(name in ports)){
-				let iPort = node.createPort('input', 'Val', null); // null = any type
+				let iPort = node.createPort('input', 'Val', Types.Any);
 				let proxyIface = this._parentFunc._proxyOutput.iface;
 
 				// Run when this node is being connected with other node

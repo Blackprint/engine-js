@@ -3,7 +3,7 @@
 // it's only one type, not union
 // for union port, please split it to different port to handle it
 BP_Port.ArrayOf = function(type){
-	if(type !== null && type.constructor === Array)
+	if(type !== Types.Any && type.constructor === Array)
 		throw new Error("Currently Blackprint.Port.ArrayOf only accept one types");
 
 	return {

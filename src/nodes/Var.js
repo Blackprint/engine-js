@@ -150,13 +150,12 @@ function BPVarInit(){
 
 			temp.type = port.type;
 
-			let targetPort = this._reinitPort();
-			if(cable != null)
-				targetPort.connectCable(cable);
-
 			// Also create port for other node that using this variable
-			for (let item of temp.used)
-				item._reinitPort();
+			for (let item of temp.used){
+				let temp = item._reinitPort();
+				if(item === this)
+					temp.connectCable(cable);
+			}
 		}
 		destroy(){
 			let temp = this._bpVarRef;
