@@ -101,8 +101,8 @@ function determinePortType(val, that){
 			def = '';
 		else def = null;
 	}
-	else if(val === null || val === TypeAny){
-		type = TypeAny;
+	else if(val === Types.Any){
+		type = Types.Any;
 		def = null;
 	}
 	else{
@@ -110,8 +110,9 @@ function determinePortType(val, that){
 			haveFeature = val.portFeature;
 			type = val.portType;
 
-			if(type === null){
-				type = {name:'Any', any:true};
+			if(type === Types.Any){
+				// type = {name:'Any', any:true};
+				type = Types.Any;
 				def = null;
 			}
 			else def = [];

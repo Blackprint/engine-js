@@ -1,5 +1,3 @@
-let TypeAny = {name:'Any', any:true};
-
 Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 	constructor(name, type, def, source, iface, haveFeature){
 		super();
@@ -149,7 +147,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 				// Data type validation
 				else if(val.constructor !== port.type){
-					if(port.type === TypeAny); // Pass
+					if(port.type === Types.Any); // Pass
 					else if(port.type.union && port.type.includes(val.constructor)); // Pass
 					else if(!(val instanceof port.type))
 						throw new Error(port.iface.title+"> "+getDataType(val) + " is not instance of "+port.type.name);

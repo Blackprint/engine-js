@@ -2,6 +2,11 @@
 // Project: https://github.com/Blackprint/Blackprint
 // Definitions by: StefansArya <https://github.com/stefansarya>
 
+export let Types = {
+	/** Allow any type as port type */
+	Any: Object
+};
+
 /**
  * Change global Blackprint settings
  * @param which setting name

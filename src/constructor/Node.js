@@ -59,10 +59,10 @@ Blackprint.Node = class Node extends Blackprint.Engine.CustomEvent {
 		if(which !== 'input' && which !== 'output')
 			throw new Error("Can only create port for 'input' and 'output'");
 
-		if(type === void 0)
+		if(type == null)
 			throw new Error("Type is required for creating new port");
 
-		if(type === null || type.any || type.constructor === Function
+		if(type.any || type.constructor === Function
 		   || (type.constructor === Object && type.portFeature !== void 0)){
 			return this[which]._add(name, type);
 		}

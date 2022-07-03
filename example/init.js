@@ -92,7 +92,7 @@ var Blackprint = require('./../../dist/engine.min.js');
 				console.log("Math/Multiply: Result has been set:", this.output.Result);
 			}),
 			A: Number,
-			B: null,
+			B: Blackprint.Types.Any,
 		};
 
 		constructor(instance){
