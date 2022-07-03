@@ -234,7 +234,7 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 		let temp = new BPVariable(id, options);
 		temp.funcInstance = this;
 
-		if(options.scope === BPVarScopeEnum.shared){
+		if(options.scope === VarScope.Shared){
 			if(Blackprint.Sketch != null)
 				sf.Obj.set(this.variables, id, temp);
 			else this.variables[id] = temp;
@@ -249,8 +249,8 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 	addPrivateVars(id){
 		if(!this.privateVars.includes(id)){
 			this.privateVars.push(id);
-			this.emit('variable.new', {scope: BPVarScopeEnum.private, id});
-			this.rootInstance.emit('variable.new', {scope: BPVarScopeEnum.private, id});
+			this.emit('variable.new', {scope: VarScope.Private, id});
+			this.rootInstance.emit('variable.new', {scope: VarScope.Private, id});
 		}
 		else return;
 

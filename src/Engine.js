@@ -371,7 +371,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		if(options.vars != null){
 			let vars = options.vars;
 			for (let i=0; i < vars.length; i++) {
-				temp.createVariable(vars[i], {scope: BPVarScopeEnum.shared});
+				temp.createVariable(vars[i], {scope: VarScope.Shared});
 			}
 		}
 

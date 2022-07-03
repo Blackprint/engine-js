@@ -10,7 +10,7 @@ Blackprint.nodes.BP.Var = {
 			iface.data = {
 				name: '',
 				_scopeName: '',
-				scope: BPVarScopeEnum.public,
+				scope: VarScope.Public,
 			};
 
 			iface.title = 'VarSet';
@@ -34,7 +34,7 @@ Blackprint.nodes.BP.Var = {
 			iface.data = {
 				name: '',
 				_scopeName: '',
-				scope: BPVarScopeEnum.public,
+				scope: VarScope.Public,
 			};
 
 			iface.title = 'VarGet';
@@ -103,9 +103,10 @@ function BPVarInit(){
 			this.data.scope = scopeId;
 
 			let _scopeName;
-			if(scopeId === BPVarScopeEnum.public) _scopeName = 'public';
-			else if(scopeId === BPVarScopeEnum.private) _scopeName = 'private';
-			else if(scopeId === BPVarScopeEnum.shared) _scopeName = 'shared';
+			if(scopeId === VarScope.Public) _scopeName = 'public';
+			else if(scopeId === VarScope.Private) _scopeName = 'private';
+			else if(scopeId === VarScope.Shared) _scopeName = 'shared';
+			else throw new Error("Unrecognized scopeId: " + scopeId);
 
 			if(Blackprint.Sketch != null)
 				this.data._scopeName = _scopeName;
@@ -113,9 +114,9 @@ function BPVarInit(){
 			let _funcInstance = this.node.instance._funcMain?.node._funcInstance;
 
 			let scope;
-			if(scopeId === BPVarScopeEnum.public)
+			if(scopeId === VarScope.Public)
 				scope = (_funcInstance?.rootInstance ?? this.node.instance).variables;
-			else if(scopeId === BPVarScopeEnum.shared)
+			else if(scopeId === VarScope.Shared)
 				scope = _funcInstance.variables;
 			else // private
 				scope = this.node.instance.variables;
@@ -252,10 +253,10 @@ function BPVarInit(){
 	});
 }
 
-var BPVarScopeEnum = {
-	public: 0,
-	private: 1,
-	shared: 2,
+var VarScope = Blackprint.VarScope = {
+	Public: 0,
+	Private: 1,
+	Shared: 2,
 };
 
 if(globalThis.sf && globalThis.sf.$)
