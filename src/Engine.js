@@ -7,7 +7,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		this.functions = {}; // { category => { name, variables, input, output, used: [], node, description, childs:{ category } } }
 
 		this.iface = {}; // { id => IFace }
-		// this.ref = {}; // { id => Port references }
+		this.ref = {}; // { id => Port references }
 	}
 
 	deleteNode(iface){
@@ -47,11 +47,11 @@ Blackprint.Engine = class Engine extends CustomEvent {
 			}
 		}
 
-		if(routes.out !== null) routes.out.disconnect();
+		routes.out?.disconnect();
 
 		// Delete reference
 		delete this.iface[iface.id];
-		// delete this.ref[iface.id];
+		delete this.ref[iface.id];
 
 		this.emit('node.deleted', eventData);
 	}
@@ -67,7 +67,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 		this.ifaceList.splice(0);
 		this.iface = {};
-		// this.ref = {};
+		this.ref = {};
 	}
 
 	// ToDo: import route cables
@@ -317,7 +317,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 		if(iface.id !== void 0){
 			this.iface[iface.id] = iface;
-			// this.ref[iface.id] = iface.ref;
+			this.ref[iface.id] = iface.ref;
 		}
 
 		if(options.oldIface !== void 0 && options.oldIface.namespace === iface.namespace)
