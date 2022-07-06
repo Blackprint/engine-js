@@ -2,10 +2,10 @@
 // Project: https://github.com/Blackprint/Blackprint
 // Definitions by: StefansArya <https://github.com/stefansarya>
 
-export let Types = {
+export namespace Types {
 	/** Allow any type as port type */
-	Any: Object
-};
+	export let Any: Object;
+}
 
 /**
  * Change global Blackprint settings
