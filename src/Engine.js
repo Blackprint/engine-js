@@ -53,6 +53,10 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		delete this.iface[iface.id];
 		delete this.ref[iface.id];
 
+		let parent = iface.node.instance._funcMain;
+		if(parent != null)
+			delete parent.ref[iface.id];
+
 		this.emit('node.deleted', eventData);
 	}
 
@@ -242,6 +246,35 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		return targetIface[whichPort][target.name];
 	}
 
+	changeNodeId(iface, newId){
+		let sketch = iface.node.instance;
+		let oldId = iface.id;
+		if(oldId === newId || iface.importing) return;
+
+		if(!!oldId){
+			delete sketch.iface[oldId];
+			delete sketch.ref[oldId];
+
+			if(sketch._funcMain != null)
+				delete sketch._funcMain.ref[oldId];
+		}
+
+		newId ??= '';
+		iface.id = newId;
+
+		if(newId !== ''){
+			sketch.iface[newId] = iface;
+			sketch.ref[newId] = iface.ref;
+
+			if(sketch._funcMain != null)
+				sketch._funcMain.ref[newId] = iface.ref;
+		}
+
+		iface.node.instance.emit('node.id.changed', {
+			iface, from: oldId, to: newId
+		});
+	}
+
 	getNode(id){
 		if(id == null) throw "ID couldn't be null or undefined";
 
@@ -315,16 +348,22 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		// Assign the iface options
 		Object.assign(iface, options);
 
-		if(iface.id !== void 0){
+		if(iface.id)
 			this.iface[iface.id] = iface;
-			this.ref[iface.id] = iface.ref;
-		}
 
 		if(options.oldIface !== void 0 && options.oldIface.namespace === iface.namespace)
 			Blackprint.Interface._reuse(iface, options.oldIface);
 
 		// Create the linker between the node and the iface
 		else Blackprint.Interface._prepare(node, iface);
+
+		if(iface.id){
+			this.ref[iface.id] = iface.ref;
+
+			let parent = iface.node.instance._funcMain;
+			if(parent != null)
+				parent.ref[iface.id] = iface.ref;
+		}
 
 		if(iface.i !== void 0)
 			this.ifaceList[iface.i] = iface;

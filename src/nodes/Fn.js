@@ -362,7 +362,7 @@ function BPFnInit(){
 			await this.bpInstance.importJSON(swallowCopy, {pendingRender: true});
 
 			let debounce;
-			this.bpInstance.on('cable.connect cable.disconnect node.created node.delete node.move', (ev, eventName)=>{
+			this.bpInstance.on('cable.connect cable.disconnect node.created node.delete node.move node.id.changed', (ev, eventName)=>{
 				clearTimeout(debounce);
 				debounce = setTimeout(() => {
 					bpFunction.structure = this.bpInstance.exportJSON({
