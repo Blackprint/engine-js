@@ -468,25 +468,48 @@ function BPFnInit(){
 			return inputPort;
 		}
 		renamePort(fromName, toName){
-			let funcMainNode = this._funcMain.node;
+			let bpFunction = this._funcMain.node._funcInstance;
+			let mainPort, proxyPort;
 
 			if(this.type === 'bp-fn-input'){ // Main (input) -> Input (output)
-				funcMainNode.renamePort('input', fromName, toName);
-				this.node.renamePort('output', fromName, toName);
-
-				let main = funcMainNode._funcInstance.input;
-				let temp = main[toName] = main[fromName];
-				temp._name.name = toName;
+				let main = bpFunction.input;
+				main[toName] = main[fromName];
 				delete main[fromName];
+
+				mainPort = 'input';
+				proxyPort = 'output';
 			}
 			else { // Output (input) -> Main (output)
-				funcMainNode.renamePort('output', fromName, toName);
-				this.node.renamePort('input', fromName, toName);
-
-				let main = funcMainNode._funcInstance.output;
-				let temp = main[toName] = main[fromName];
-				temp._name.name = toName;
+				let main = bpFunction.output;
+				main[toName] = main[fromName];
 				delete main[fromName];
+
+				mainPort = 'output';
+				proxyPort = 'input';
+			}
+
+			let used = bpFunction.used;
+			for (let i=0; i < used.length; i++) {
+				let iface = used[i];
+				iface.node.renamePort(mainPort, fromName, toName);
+
+				let temp = mainPort === 'output' ? iface._proxyOutput : iface._proxyInput;
+				temp.iface[proxyPort][fromName]._name.name = toName;
+				temp.renamePort(proxyPort, fromName, toName);
+
+				let ifaces = iface.bpInstance.ifaceList;
+				for (let a=0; a < ifaces.length; a++) {
+					let proxyVar = ifaces[a];
+					if((mainPort === 'output' && proxyVar.namespace !== "BP/FnVar/Output")
+						|| (mainPort === 'input' && proxyVar.namespace !== "BP/FnVar/Input"))
+						continue;
+
+					if(proxyVar.data.name !== fromName) continue;
+					proxyVar.data.name = toName;
+
+					if(mainPort === 'output')
+						proxyVar[proxyPort].Val._name.name = toName;
+				}
 			}
 		}
 		deletePort(name){
