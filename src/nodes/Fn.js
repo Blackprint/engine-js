@@ -394,7 +394,7 @@ function BPFnInit(){
 			await this.bpInstance.importJSON(swallowCopy, {pendingRender: true});
 
 			let debounce;
-			this.bpInstance.on('cable.connect cable.disconnect node.created node.delete node.move node.id.changed', (ev, eventName)=>{
+			this._save = (ev, eventName, force) => {
 				clearTimeout(debounce);
 				debounce = setTimeout(() => {
 					bpFunction.structure = this.bpInstance.exportJSON({
@@ -404,7 +404,7 @@ function BPFnInit(){
 					});
 				}, 1000);
 
-				if(bpFunction._syncing) return;
+				if(force || bpFunction._syncing) return;
 
 				ev.bpFunction = bpFunction;
 				newInstance._mainInstance.emit(eventName, ev);
@@ -412,10 +412,13 @@ function BPFnInit(){
 				bpFunction._syncing = true;
 				bpFunction._onFuncChanges(eventName, ev, node);
 				bpFunction._syncing = false;
-			});
+			};
+
+			this.bpInstance.on('cable.connect cable.disconnect node.created node.delete node.move node.id.changed', this._save);
 		}
 		renamePort(which, fromName, toName){
 			this.node._funcInstance.renamePort(which, fromName, toName);
+			this._save(false, false, true);
 		}
 	});
 
