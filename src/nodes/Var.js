@@ -210,6 +210,8 @@ function BPVarInit(){
 				this._onChanged = () => { ref.Val = temp._value };
 			}
 
+			node.output.Val = temp._value;
+
 			temp.on(this._eventListen, this._onChanged);
 			return this.output.Val;
 		}
