@@ -74,7 +74,6 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		this.ref = {};
 	}
 
-	// ToDo: import route cables
 	async importJSON(json, options){
 		if(window.sf && window.sf.loader)
 			await window.sf.loader.task;
@@ -139,6 +138,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 		var inserted = this.ifaceList;
 		var handlers = []; // nodes
+		let appendLength = options.appendMode ? inserted.length : 0;
 
 		// Prepare all nodes depend on the namespace
 		// before we create cables for them
@@ -148,6 +148,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 			// Every nodes that using this namespace name
 			for (var a = 0; a < nodes.length; a++){
 				let temp = nodes[a];
+				temp.i += appendLength;
+
 				let iface = this.createNode(namespace, {
 					id: temp.id, // Named ID (if exist)
 					i: temp.i, // List Index
@@ -204,6 +206,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 						// Current output's available targets
 						for (var k = 0; k < port.length; k++) {
 							var target = port[k];
+							target.i += appendLength;
+
 							var targetNode = inserted[target.i];
 
 							// output can only meet input port
