@@ -347,7 +347,9 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		options ??= {};
 
 		var savedData = options.data;
+		var defaultInputData = options.input_d;
 		delete options.data;
+		delete options.input_d;
 
 		// Assign the iface options
 		Object.assign(iface, options);
@@ -373,11 +375,14 @@ Blackprint.Engine = class Engine extends CustomEvent {
 			this.ifaceList[iface.i] = iface;
 		else this.ifaceList.push(iface);
 
+		if(defaultInputData != null)
+			iface._importInputs(defaultInputData);
+
 		// Assign the saved options if exist
 		// Must be called here to avoid port trigger
 		iface.importing = false;
-		iface.imported && iface.imported(savedData);
-		node.imported && node.imported(savedData);
+		iface.imported?.(savedData);
+		node.imported?.(savedData);
 
 		if(handlers !== void 0)
 			handlers.push(node);

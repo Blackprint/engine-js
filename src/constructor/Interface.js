@@ -93,4 +93,18 @@ Blackprint.Interface = class Interface extends Blackprint.Engine.CustomEvent{
 	_newPort(portName, type, def, which, haveFeature){
 		return new Blackprint.Engine.Port(portName, type, def, which, this, haveFeature);
 	}
+
+	_importInputs(ports){
+		// Load saved port data value
+		let inputs = this.input;
+		for (let key in ports) {
+			if(key in inputs){
+				let port = inputs[key];
+				port.default = ports[key];
+
+				if(port._boxInput != null)
+					port._boxInput.value = port.default;
+			}
+		}
+	}
 }
