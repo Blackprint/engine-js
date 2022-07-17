@@ -8,6 +8,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		this.source = source;
 		this.iface = iface;
 		this.classAdd = '';
+		this.splitted = false;
 
 		// this.value;
 		if(haveFeature === BP_Port.Trigger){
@@ -16,6 +17,12 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 				iface.node.routes.routeOut();
 			};
 		}
+		else if(haveFeature === BP_Port.StructOf){
+			if(Blackprint.Sketch != null)
+				this.classAdd = 'StructOf ';
+
+			this.struct = def;
+		}
 		else this.default = def;
 
 		// this.feature == BP_Port.Listener | BP_Port.ArrayOf | BP_Port.Async
@@ -23,7 +30,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		if(haveFeature){
 			this.feature = haveFeature;
 
-			if(haveFeature === BP_Port.ArrayOf)
+			if(haveFeature === BP_Port.ArrayOf && Blackprint.Sketch != null)
 				this.classAdd = 'ArrayOf ';
 		}
 	}
@@ -155,6 +162,12 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 				port.value = val;
 				port.emit('value', { port });
+
+				if(port.feature === BP_Port.StructOf && port.splitted){
+					BP_Port.StructOf.handle(port, val);
+					return;
+				}
+
 				port.sync(); // emit event to all input port connected to this port
 			}
 		}

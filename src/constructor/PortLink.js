@@ -131,6 +131,11 @@ function determinePortType(val, that){
 			type = val.portType;
 			def = val.default;
 		}
+		else if(val.portFeature === BP_Port.StructOf){
+			haveFeature = BP_Port.StructOf;
+			type = val.portType;
+			def = val.default;
+		}
 		else if(val === BP_Port.Route){
 			type = BP_Port.Route;
 			def = null;
