@@ -155,6 +155,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 					i: temp.i, // List Index
 					data: temp.data, // if exist
 					oldIface: oldIfaces[temp.id],
+					input_d: temp.input_d,
+					output_sp: temp.output_sp,
 				}, handlers);
 
 				// For custom function node
@@ -348,8 +350,10 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 		var savedData = options.data;
 		var defaultInputData = options.input_d;
+		var splittedPort = options.output_sp;
 		delete options.data;
 		delete options.input_d;
+		delete options.output_sp;
 
 		// Assign the iface options
 		Object.assign(iface, options);
@@ -377,6 +381,12 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 		if(defaultInputData != null)
 			iface._importInputs(defaultInputData);
+
+		if(splittedPort != null){
+			for (let key in splittedPort) {
+				Blackprint.Port.StructOf.split(iface.output[key]);
+			}
+		}
 
 		// Assign the saved options if exist
 		// Must be called here to avoid port trigger

@@ -41,7 +41,9 @@ BP_Port.StructOf.split = function(port){
 
 	port.splitted = true;
 	port.disconnectAll();
-	BP_Port.StructOf.handle(port, node.output[port.name]);
+
+	let data = node.output[port.name];
+	if(data != null) BP_Port.StructOf.handle(port, data);
 }
 
 BP_Port.StructOf.unsplit = function(port){
