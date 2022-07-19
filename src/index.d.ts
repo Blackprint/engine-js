@@ -87,6 +87,22 @@ export namespace Port {
 	 * @param types Allowed data types
 	 */
 	export function Union(types: Array<any>): any;
+
+	/**
+	 * This port can allow multiple different types
+	 * like an 'any' port, but can only contain one value
+	 * @param type Type data of the original data
+	 */
+	export function StructOf(type: any, struct: {
+		[key: string]: {
+			/* Type data of the splitted port */
+			type: any,
+			/* Data handler for this specific port */
+			handle?: Function,
+			/* Obtain data from a field for this specific port */
+			field?: String,
+		}
+	}): any;
 }
 
 /**

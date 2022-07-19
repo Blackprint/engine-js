@@ -26,7 +26,7 @@ BP_Port.StructOf.split = function(port){
 
 	for (let key in struct) {
 		let ref = struct[key];
-		ref._name ??= port.name + ' ' + key;
+		ref._name ??= port.name + key;
 
 		let newPort = node.createPort('output', ref._name, ref.type);
 		newPort._parent = port;
@@ -48,6 +48,9 @@ BP_Port.StructOf.split = function(port){
 
 BP_Port.StructOf.unsplit = function(port){
 	let parent = port._parent;
+	if(parent == null && port.struct != null)
+		parent = port;
+
 	parent.splitted = false;
 
 	let struct = parent.struct;
