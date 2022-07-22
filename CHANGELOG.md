@@ -1,3 +1,67 @@
+# 0.7.0
+
+### Features
+- Add `node.instance` property that can be used to access current instance for the node
+- Add TypeScript definition
+- Add feature to split port with structure
+- Add feature to use default input with primitive type when the port is not connected
+- Add `node.log` for emit logging data to instance
+- Add callable route port output type
+- Add route port to handle data flow
+- Dynamically add empty environment variable if not exist
+- Add event name as parameter
+- Add node for handling environment variables
+- Emit event when node id was changed
+- Emit event when node will be deleted
+- Emit event when creating new variables/function
+- Emit event when renaming environment variable
+- Finishing function node and the separated I/O node
+
+### Bug Fix
+- Fix import for append mode
+- Fix initial value for variable node
+- Fix feature for renamine function port
+- Fix data request and saved data
+- Fix `Port.Trigger` type and add `routeTo`
+- Fix incorrect port check for function node
+- Fix function's input/output node
+- Fix variable scope id and route connection
+- Fix returned object from `getNode`
+- Fix route pass for custom function node
+- Fix `cable.disconnect` event that not emitted on iface
+- Fix dynamic port for custom function input/output node
+- Fix variable node scope
+- Fix bug for environment variable
+- Avoid emitting `cable.disconnect` event to instance twice
+- Restrict connection between dynamic port
+
+### Breaking Changes
+- Port's `Any` type is no longer use `null`, please use `Blackprint.Types.Any` instead
+- `update(port, source, cable)` will now only receive single arguments `update(cable)`. Please use `cable.input` to obtain `port`, and `cable.output` to obtain `source`.
+- `request(port, sourceIface)` will now only receive single arguments `request(cable)`. Please use `cable.output` to obtain `port`, and `cable.input.iface` to obtain `sourceIface`.
+
+```js
+class MyNode extends Blackprint.Node {
+	static input = {
+		// Before
+		AnyType: null,
+
+		// After
+		AnyType: Blackprint.Types.Any,
+	}
+
+	// Before
+	update(port, source, cable){}
+	// After
+	update(cable){} // port = cable.input, source = cable.output
+
+	// Before
+	request(port, sourceIface){}
+	// After
+	request(cable){} // port = cable.output, sourceIface = cable.input.iface
+}
+```
+
 # 0.6.6
 
 ### Bug Fix
