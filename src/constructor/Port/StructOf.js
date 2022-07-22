@@ -23,24 +23,29 @@ BP_Port.StructOf.split = function(port){
 	port.structList ??= Object.keys(port.struct);
 
 	let hasSketch = Blackprint.Sketch != null;
-
+	let newPort;
 	for (let key in struct) {
 		let ref = struct[key];
 		ref._name ??= port.name + key;
 
-		let newPort = node.createPort('output', ref._name, ref.type);
+		newPort = node.createPort('output', ref._name, ref.type);
 		newPort._parent = port;
 		newPort._structSplitted = true;
 
 		if(hasSketch)
-			newPort.classAdd = 'StructSplit ' + newPort.classAdd;
+		newPort.classAdd = 'BP-StructSplit ' + newPort.classAdd;
 	}
 
 	if(hasSketch)
-		port.classAdd = 'BP-Hide ' + port.classAdd;
+		newPort.classAdd = 'BP-Last ' + newPort.classAdd;
 
 	port.splitted = true;
 	port.disconnectAll();
+
+	if(hasSketch){
+		port.classAdd = 'BP-Open ' + port.classAdd;
+		port.iface._recalculateSize?.();
+	}
 
 	let data = node.output[port.name];
 	if(data != null) BP_Port.StructOf.handle(port, data);
@@ -60,8 +65,10 @@ BP_Port.StructOf.unsplit = function(port){
 		node.deletePort('output', struct[key]._name);
 	}
 
-	if(Blackprint.Sketch != null)
-		parent.classAdd = parent.classAdd.replace('BP-Hide ', '');
+	if(Blackprint.Sketch != null){
+		parent.classAdd = parent.classAdd.replace('BP-Open ', '');
+		port.iface._recalculateSize?.();
+	}
 }
 
 BP_Port.StructOf.handle = function(port, data){

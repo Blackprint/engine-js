@@ -19,7 +19,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		}
 		else if(haveFeature === BP_Port.StructOf){
 			if(Blackprint.Sketch != null)
-				this.classAdd = 'StructOf ';
+				this.classAdd = 'BP-StructOf ';
 
 			this.struct = def;
 		}
