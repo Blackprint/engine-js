@@ -9,6 +9,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		this.iface = iface;
 		this.classAdd = '';
 		this.splitted = false;
+		this.allowResync = false; // Retrigger connected node's .update when the output value is similar
 
 		// this.value;
 		if(haveFeature === BP_Port.Trigger){
@@ -146,7 +147,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		// Can only obtain data when accessing input port
 		if(port.source !== 'input'){
 			prepare.set = function(val){ // for output/property port
-				if(port.value === val || port.iface.node.disablePorts)
+				if(port.iface.node.disablePorts || (!(port.splitted || port.allowResync) && port.value === val))
 					return;
 
 				if(val == null)
