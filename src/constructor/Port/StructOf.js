@@ -77,8 +77,7 @@ BP_Port.StructOf.handle = function(port, data){
 
 	let structList = port.structList;
 	for (let i=0; i < structList.length; i++) {
-		let key = structList[i];
-		let ref = struct[key];
+		let ref = struct[structList[i]];
 
 		if(ref.field != null)
 			output[ref._name] = data[ref.field];
