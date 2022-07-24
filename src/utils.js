@@ -4,6 +4,11 @@ function deepProperty(obj, path, value, onCreate){
 	if(value !== void 0){
 		for(var i = 0, n = path.length-1; i < n; i++){
 			temp = path[i];
+
+			// Disallow diving into internal JavaScript property
+			if(temp === "constructor" || temp === "__proto__" || temp === "prototype")
+				return;
+
 			if(obj[temp] === void 0){
 				obj[temp] = {};
 				onCreate && onCreate(obj[temp]);
@@ -12,7 +17,11 @@ function deepProperty(obj, path, value, onCreate){
 			obj = obj[temp];
 		}
 
-		obj[path[i]] = value;
+		temp = path[i];
+		if(temp === "constructor" || temp === "__proto__" || temp === "prototype")
+			return;
+
+		obj[temp] = value;
 		return;
 	}
 
@@ -32,10 +41,10 @@ function ObjectLinker(obj, key, val){
 	if(obj.push === void 0)
 		throw new Error("Parameter one of sf.link should be an array of object that would be linked.");
 
-	const createScope = value=> ({
+	const createScope = value => ({
 		configurable:true, enumerable:true,
-		get:()=> value,
-		set:(val)=> {value = val}
+		get(){return value},
+		set: val => value = val,
 	});
 
 	var candidate = false;
@@ -70,12 +79,16 @@ function ObjectLinker(obj, key, val){
 
 const isClass = Blackprint._utils.isClass = (function(){
   const classDefaultProp = {
+	_scopeURL:true, // Private data when using Blackprint modules
+	input:true,
+	output:true,
+	property:true,
+
   	name:true,
   	length:true,
   	prototype:true,
   	arguments:true,
   	caller:true,
-  	_scopeURL:true, // Private data when using Blackprint modules
   };
 
   return function(func){
@@ -93,7 +106,7 @@ const isClass = Blackprint._utils.isClass = (function(){
 
     // Check if at least have one static property
     let props = Object.getOwnPropertyNames(func);
-    for(let i=0; i<props.length; i++){
+    for(let i=0; i < props.length; i++){
       let prop = props[i];
       if(!(prop in classDefaultProp) && prop.slice(0, 1) !== '_')
         return true;
