@@ -85,9 +85,10 @@ Blackprint.allowModuleOrigin = function(list){
 		if(temp.startsWith('localhost')){
 			list[i] = 'http://'+temp+'/';
 			list[i] = 'https://'+temp+'/';
+			continue;
 		}
 
-		if(temp.startsWith('https:'))
+		if(temp.startsWith('https:') || temp.startsWith('http:'))
 			continue;
 
 		list[i] = 'https://'+temp+'/';
