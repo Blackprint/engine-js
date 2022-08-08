@@ -1,3 +1,12 @@
+# 0.7.2
+
+### Features
+- Add `isGhost` on interface for standalone port
+
+### Bug Fix
+- Fix index error when creating new function
+- Allow module import from `http:` for internal network support (like company network)
+
 # 0.7.1
 
 ### Features
