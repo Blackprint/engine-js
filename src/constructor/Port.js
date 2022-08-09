@@ -199,7 +199,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			inp.iface.emit('port.value', temp);
 
 			// Skip sync if the node has route cable
-			if(skipSync) return;
+			if(skipSync) continue;
 
 			let node = inp.iface.node;
 			if(node.update && inp.iface._requesting === false){
