@@ -25,7 +25,7 @@ Please specify the version when importing, breaking changes may happen on v0.\*.
 
 Browser
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@blackprint/engine@0.6"></script>
+<script src="https://cdn.jsdelivr.net/npm/@blackprint/engine@0.7"></script>
 <script>
     let instance = new Blackprint.Engine();
     instance.importJSON("{...}");
@@ -35,7 +35,7 @@ Browser
 Node.js
 ```sh
 # Add the dependency first
-npm i @blackprint/engine@0.6
+npm i @blackprint/engine@0.7
 ```
 
 ```js
@@ -47,7 +47,7 @@ instance.importJSON("{...}");
 
 Deno
 ```js
-import Blackprint from 'https://cdn.skypack.dev/@blackprint/engine@0.6';
+import Blackprint from 'https://cdn.skypack.dev/@blackprint/engine@0.7';
 
 let instance = new Blackprint.Engine();
 instance.importJSON("{...}");

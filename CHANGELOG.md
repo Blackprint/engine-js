@@ -1,3 +1,7 @@
+# 0.7.3
+### Bug Fix
+- Fix skipped cache removal for route mode
+
 # 0.7.2
 
 ### Features
