@@ -76,12 +76,20 @@ BP_Port.StructOf.handle = function(port, data){
 	let { output } = port.iface.node;
 
 	let structList = port.structList;
-	for (let i=0; i < structList.length; i++) {
-		let ref = struct[structList[i]];
 
-		if(ref.field != null)
-			output[ref._name] = data[ref.field];
-		else
-			output[ref._name] = ref.handle(data);
+	if(data != null){
+		for (let i=0; i < structList.length; i++) {
+			let ref = struct[structList[i]];
+	
+			if(ref.field != null)
+				output[ref._name] = data[ref.field];
+			else
+				output[ref._name] = ref.handle(data);
+		}
+	}
+	else {
+		for (let i=0; i < structList.length; i++) {
+			output[struct[structList[i]]._name] = null;
+		}
 	}
 }
