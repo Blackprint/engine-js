@@ -52,7 +52,7 @@ class PortLink {
 		if(type === Function || type === BP_Port.Route){
 			if(this._which === 'output')
 				Object.defineProperty(this, portName, {configurable: true, enumerable:true, writable:false, value:linkValue});
-			else this[portName] = def;
+			else this[portName] = linkedPort.default;
 		}
 		else Object.defineProperty(this, portName, linkValue);
 
@@ -120,7 +120,7 @@ function determinePortType(val, that){
 		else if(val.portFeature === BP_Port.Trigger){
 			haveFeature = val.portFeature;
 			type = Function;
-			def = val.default.bind(that._iface.node);
+			def = val.default;
 		}
 		else if(val.portFeature === BP_Port.Default){
 			type = val.portType;
