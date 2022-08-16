@@ -31,6 +31,8 @@ class PortLink {
 	}
 
 	_add(portName, val){
+		portName = ''+portName;
+
 		var iPort = this._iface[this._which];
 		let exist = iPort[portName];
 
