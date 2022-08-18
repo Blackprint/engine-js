@@ -162,7 +162,7 @@ Blackprint.loadModuleFromURL = async function(url, options){
 			}
 		}
 
-		if(hasUpdate) Blackprint.emit('moduleUpdate');
+		if(hasUpdate) Blackprint.emit('module.update');
 	}
 
 	if(Blackprint.loadModuleFromURL.browser === void 0)
@@ -213,6 +213,6 @@ Blackprint.deleteModuleFromURL = function(url){
 		delete nodes[val];
 	}
 
-	if(modules[url] != null) Blackprint.emit('moduleDelete', { url });
+	if(modules[url] != null) Blackprint.emit('module.delete', { url });
 	delete modules[url];
 }

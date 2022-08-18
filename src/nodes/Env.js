@@ -55,12 +55,12 @@ function BPEnvInit(){
 					this.data.name = now;
 				};
 
-				Blackprint.on('environment-renamed', this._nameListener);
+				Blackprint.on('environment.renamed', this._nameListener);
 			}
 		}
 		destroy(){
 			if(this._nameListener == null) return;
-			Blackprint.off('environment-renamed', this._nameListener);
+			Blackprint.off('environment.renamed', this._nameListener);
 		}
 	};
 
@@ -73,14 +73,14 @@ function BPEnvInit(){
 				this.ref.Output.Val = v.value;
 			};
 
-			Blackprint.on('environment-changed environment-added', this._listener);
+			Blackprint.on('environment.changed environment.added', this._listener);
 			this.ref.Output.Val = Blackprint.Environment.map[this.data.name];
 		}
 		destroy(){
 			super.destroy();
 
 			if(this._listener == null) return;
-			Blackprint.off('environment-changed environment-added', this._listener);
+			Blackprint.off('environment.changed environment.added', this._listener);
 		}
 	});
 

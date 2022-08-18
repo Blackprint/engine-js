@@ -561,7 +561,7 @@ Blackprint.registerNode = function(namespace, func){
 
 		if(temp === void 0){
 			temp = Blackprint.modulesURL[this._scopeURL] = { _url: this._scopeURL };
-			Blackprint.emit('moduleAdded', {url: this._scopeURL});
+			Blackprint.emit('module.added', {url: this._scopeURL});
 			Blackprint._modulesURL.push(temp);
 		}
 

@@ -20,7 +20,7 @@ Blackprint.Environment = {
 			this.set(key, obj[key]);
 
 		this._noEvent = false;
-		Blackprint.emit('environment-imported');
+		Blackprint.emit('environment.imported');
 	},
 
 	set(key, value){
@@ -45,7 +45,7 @@ Blackprint.Environment = {
 					get(){return temp.value},
 					set(v){
 						temp.value = v;
-						Blackprint.emit('environment-changed', temp);
+						Blackprint.emit('environment.changed', temp);
 					},
 				});
 			}
@@ -54,7 +54,7 @@ Blackprint.Environment = {
 		this.map[key] = value;
 
 		if(!this._noEvent)
-			Blackprint.emit('environment-added', temp);
+			Blackprint.emit('environment.added', temp);
 	},
 
 	_rename(keyA, keyB){
@@ -71,7 +71,7 @@ Blackprint.Environment = {
 		Object.defineProperty(map, keyB, Object.getOwnPropertyDescriptor(map, keyA));
 		delete map[keyA];
 
-		Blackprint.emit('environment-renamed', {old: keyA, now: keyB});
+		Blackprint.emit('environment.renamed', {old: keyA, now: keyB});
 	},
 
 	delete(key){
@@ -83,7 +83,7 @@ Blackprint.Environment = {
 
 		delete _map[key];
 		delete map[key];
-		Blackprint.emit('environment-deleted', {key});
+		Blackprint.emit('environment.deleted', {key});
 	}
 };
 
