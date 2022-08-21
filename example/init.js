@@ -87,9 +87,9 @@ var Blackprint = require('./../../dist/engine.min.js');
 
 		// Define input port here
 		static input = {
-			Exec: Blackprint.Port.Trigger(function(){
-				this.output.Result = this.multiply();
-				console.log("Math/Multiply: Result has been set:", this.output.Result);
+			Exec: Blackprint.Port.Trigger(function({ iface: { node } }){
+				node.output.Result = node.multiply();
+				console.log("Math/Multiply: Result has been set:", node.output.Result);
 			}),
 			A: Number,
 			B: Blackprint.Types.Any,
@@ -131,9 +131,9 @@ var Blackprint = require('./../../dist/engine.min.js');
 
 		static output = { Out:Number };
 		static input = {
-			'Re-seed':Blackprint.Port.Trigger(function(){
-				this.executed = true;
-				this.output.Out = Math.round(Math.random()*100);
+			'Re-seed':Blackprint.Port.Trigger(function({ iface: { node } }){
+				node.executed = true;
+				node.output.Out = Math.round(Math.random()*100);
 			})
 		};
 

@@ -123,7 +123,7 @@ export function registerNode(namespace: String, clazz: Function): void;
 /**
  * Register interface to Blackprint (For browser and non-browser).
  * If you're creating Sketch UI, you will need to register with Blackprint.Sketch.registerInterface too.
- * @param icNamespace Interface component's namespace
+ * @param icNamespace Interface component's namespace, must be started with "BPIC/"
  * @param clazz Class that extends Blackprint.Interface
  */
 export function registerInterface(icNamespace: String, clazz: Function): void;
@@ -310,6 +310,10 @@ export class Engine extends CustomEvent {
 	destroy(): void;
 }
 
+export namespace Engine {
+	export { CustomEvent };
+}
+
 /** Cable that connect to node's input and output port */
 declare class Cable {
 	/**
@@ -333,15 +337,17 @@ declare class Cable {
 
 	/**
 	 * Activate or disable this cable
-	 * @param enable undefined (mark as async), false (disconnect), true (enabled)
+	 * @param enable undefined (mark as inactive), false (disconnect), true (enabled)
 	 */
-	activation(enable: undefined | Boolean): void;
+	activation(enable?: undefined | Boolean): void;
 
 	/**
 	 * Disconnect and destroy a cable
 	 */
 	disconnect(): void;
 }
+
+export type { Cable };
 
 /** Interface Port that contains connection data */
 export class IFacePort {
@@ -393,14 +399,14 @@ export class Interface extends CustomEvent {
 	 * This function will be called once the nodes has been created and the cables has been connected
 	 * @override you can override/replace this functionality on your class
 	 */
-	 init(): void;
+	init(): void;
 
 	 /**
 	  * This function will be called before init, where this node still not connected to any cables
 	  * @override you can override/replace this functionality on your class
 	  * @param data Data that was passed when importing JSON or creating new node
 	  */
-	 imported(data: Object): void;
+	imported(data: Object): void;
 }
 
 /** Can be used to show information for nodes in Sketch */
@@ -438,6 +444,8 @@ declare class Decoration {
 	success(msg: any, timeout?: any): any;
 }
 
+export type { Decoration };
+
 /** Blackprint Node */
 export class Node {
 	/**
@@ -449,7 +457,7 @@ export class Node {
 
 	/**
 	 * This must be called once to attach interface to this node
-	 * @param icNamespace interface component's namespace that was declared with instance.registerInterface()
+	 * @param icNamespace interface component's namespace that was declared with instance.registerInterface(), must be started with "BPIC/"
 	 */
 	setInterface(icNamespace?: string): Interface;
 
@@ -583,6 +591,8 @@ declare class RoutePort extends RoutePort_1 {
 	 */
 	constructor(iface: Interface);
 }
+
+export type { RoutePort };
 
 /**
  * [Experimental] [ToDo]
