@@ -1,4 +1,15 @@
+# 0.7.4
+
+### Features
+- Improve TypeScript definition file
+
+### Bug Fix
+- Reset every struct port into null
+- Fix port feature that must be already breaking for this version
+- Fix error if the portName was a number type
+
 # 0.7.3
+
 ### Bug Fix
 - Fix skipped cache removal for route mode
 
