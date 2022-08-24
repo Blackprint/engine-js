@@ -13,6 +13,7 @@ Blackprint.RoutePort = class RoutePort extends CustomEvent {
 		this.disableOut = false;
 		this.disabled = false;
 		this._isPaused = false;
+		this.isRoute = true;
 	}
 
 	// May be deleted on future
