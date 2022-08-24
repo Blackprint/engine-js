@@ -86,6 +86,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		if(options === void 0) options = {};
 		if(!options.appendMode) this.clearNodes();
 
+		this.emit("json.importing", {appendMode: options.appendMode, raw: json});
+
 		var metadata = json._;
 		delete json._;
 
