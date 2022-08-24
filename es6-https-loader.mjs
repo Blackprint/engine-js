@@ -1,4 +1,5 @@
 // Modified from https://nodejs.org/api/esm.html#esm_https_loader
+// [Experimental] https://github.com/nodejs/node/tree/main/lib/internal/modules/esm
 import https from 'https';
 import http from 'http';
 import readline from 'readline';
@@ -12,19 +13,20 @@ function isSecure(url){
 	return false;
 }
 
-export function resolve(specifier, context, defaultResolve) {
+// [Experimental] Node.js may have changes for the API
+export function resolve(specifier, context, nextResolve) {
 	const { parentURL = null } = context;
 
 	// Normally Node.js would error on specifiers starting with 'https://', so
 	// this hook intercepts them and converts them into absolute URLs to be
 	// passed along to the later hooks below.
 	if(isSecure(specifier))
-		return { url: specifier };
+		return { shortCircuit: true, url: specifier };
 	else if(parentURL && isSecure(parentURL))
-		return { url: new URL(specifier, parentURL).href };
+		return { shortCircuit: true, url: new URL(specifier, parentURL).href };
 
 	// Let Node.js handle all other specifiers.
-	return defaultResolve(specifier, context, defaultResolve);
+	return nextResolve(specifier, context);
 }
 
 function request(url, callback) {
@@ -48,7 +50,8 @@ function request(url, callback) {
 	});
 }
 
-export function load(url, context, defaultGetSource) {
+// [Experimental] Node.js may have changes for the API
+export function load(url, context, nextLoad) {
 	// For JavaScript to be loaded over the network, we need to fetch and return it.
 	if (!url.startsWith('file:') && isSecure(url)) {
 		let dir = url.replace(/(https|http):\/\//, '')
@@ -97,17 +100,17 @@ export function load(url, context, defaultGetSource) {
 									process.stdout.write(' '.repeat(14+url.length)+`\r`);
 								}
 
-								resolve({ format: 'module', source: data });
+								resolve({ format: 'module', shortCircuit: true, source: data });
 							});
 						});
 					});
 				}
 
-				resolve({ format: 'module', source: data });
+				resolve({ format: 'module', shortCircuit: true, source: data });
 			});
 		});
 	}
 
 	// Let Node.js handle all other URLs.
-	return defaultGetSource(url, context, defaultGetSource);
+	return nextLoad(url, context);
 }
