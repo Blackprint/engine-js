@@ -227,6 +227,9 @@ Blackprint.Engine = class Engine extends CustomEvent {
 									targetNode.useType(linkPortA);
 									linkPortB = targetNode.input[target.name];
 								}
+								else if(linkPortA.type === Blackprint.Port.Route){
+									linkPortB = targetNode.node.routes;
+								}
 								else{
 									console.error("Node port not found for", targetNode, "with name:", target.name);
 									continue;
