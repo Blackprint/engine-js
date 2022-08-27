@@ -396,6 +396,18 @@ function BPFnInit(){
 			let swallowCopy = Object.assign({}, bpFunction.structure);
 			await this.bpInstance.importJSON(swallowCopy, {pendingRender: true});
 
+			// Init port switches
+			if(this._portSw_ != null){
+				this._initPortSwitches(this._portSw_);
+				delete this._portSw_;
+
+				let InputIface = this._proxyInput.iface;
+				if(InputIface._portSw_ != null){
+					InputIface._initPortSwitches(InputIface._portSw_);
+					delete InputIface._portSw_;
+				}
+			}
+
 			let debounce;
 			this._save = (ev, eventName, force) => {
 				clearTimeout(debounce);

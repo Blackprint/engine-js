@@ -94,6 +94,21 @@ Blackprint.Interface = class Interface extends Blackprint.Engine.CustomEvent{
 		return new Blackprint.Engine.Port(portName, type, def, which, this, haveFeature);
 	}
 
+	_initPortSwitches(portSwitches){
+		for (let key in portSwitches) {
+			let temp = portSwitches[key];
+			let ref = this.output[key];
+
+			if((temp | 1) === 1)
+				Blackprint.Port.StructOf.split(ref);
+
+			if((temp | 2) === 2){
+				ref.allowResync = true;
+				ref.classAdd += 'BP-AllowResync ' + ref.classAdd;
+			}
+		}
+	}
+
 	_importInputs(ports){
 		// Load saved port data value
 		let inputs = this.input;
