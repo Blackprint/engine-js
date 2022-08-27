@@ -70,8 +70,11 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 	constructor(id, options, instance){
 		super();
 
+		this.title = options.title || id;
+		id = id.replace(/[`~!@#$%^&*()\-_+={}\[\]:"|;'\\,./<>?]+/g, '_');
+		this.id = id
+
 		this.rootInstance = instance; // root instance
-		this.id = this.title = id;
 		this.description = options?.description ?? '';
 
 		// {name: BPVariable}
