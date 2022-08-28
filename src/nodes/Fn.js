@@ -331,6 +331,7 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 
 Blackprint._utils.BPFunction = BPFunction;
 
+// Main function node
 class BPFunctionNode extends Blackprint.Node {
 	imported(data){
 		let instance = this._funcInstance;
@@ -339,9 +340,10 @@ class BPFunctionNode extends Blackprint.Node {
 
 	update(cable){
 		let iface = this.iface._proxyInput.iface;
+		let Output = iface.node.output;
+
 		if(cable === null){ // Triggered by port route
 			let IOutput = iface.output;
-			let Output = iface.node.output;
 			let thisInput = this.input;
 
 			// Sync all port value
@@ -353,8 +355,8 @@ class BPFunctionNode extends Blackprint.Node {
 			return;
 		}
 
-		// port => input port from current node
-		iface.node.output[cable.input.name] = cable.value;
+		// Update output value on the input node inside the function node
+		Output[cable.input.name] = cable.value;
 	}
 
 	destroy(){
@@ -518,6 +520,11 @@ function BPFnInit(){
 
 			inputPort._name = {name}; // When renaming port, this also need to be changed
 			this.emit(`_add.${name}`, inputPort);
+
+			inputPort.on('value', ({ cable }) => {
+				outputPort.iface.node.output[outputPort.name] = cable.output.value;
+			});
+
 			return inputPort;
 		}
 		renamePort(fromName, toName){
