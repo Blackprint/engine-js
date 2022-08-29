@@ -1,3 +1,15 @@
+# 0.7.5
+### Features
+- Add isRoute flag on route port
+- Add json.importing event
+- Update ES6 remote module loader for Node.js
+
+### Bug Fix
+- Remove symbols from var or function id
+- Fix route port connection
+- Fix port switches initialization
+- Fix port value for function node and fix update priority
+
 # 0.7.4
 
 ### Features

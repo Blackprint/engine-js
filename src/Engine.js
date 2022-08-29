@@ -64,9 +64,10 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		let list = this.ifaceList;
 		for (var i = 0; i < list.length; i++) {
 			let iface = list[i];
+			if(iface == null) return;
 
-			iface.node.destroy && iface.node.destroy();
-			iface.destroy && iface.destroy();
+			iface.node.destroy?.();
+			iface.destroy?.();
 		}
 
 		this.ifaceList.splice(0);
