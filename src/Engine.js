@@ -53,9 +53,9 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		delete this.iface[iface.id];
 		delete this.ref[iface.id];
 
-		let parent = iface.node.instance._funcMain;
+		let parent = iface.node._funcInstance;
 		if(parent != null)
-			delete parent.ref[iface.id];
+			delete parent.rootInstance.ref[iface.id];
 
 		this.emit('node.deleted', eventData);
 	}
@@ -64,7 +64,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		let list = this.ifaceList;
 		for (var i = 0; i < list.length; i++) {
 			let iface = list[i];
-			if(iface == null) return;
+			if(iface == null) continue;
 
 			iface.node.destroy?.();
 			iface.destroy?.();
@@ -376,9 +376,9 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		if(iface.id){
 			this.ref[iface.id] = iface.ref;
 
-			let parent = iface.node.instance._funcMain;
+			let parent = iface.node._funcInstance;
 			if(parent != null)
-				parent.ref[iface.id] = iface.ref;
+				parent.rootInstance.ref[iface.id] = iface.ref;
 		}
 
 		if(iface.i !== void 0)
