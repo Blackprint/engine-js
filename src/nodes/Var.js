@@ -194,19 +194,18 @@ function BPVarInit(){
 		_reinitPort(){
 			let temp = this._bpVarRef;
 			let node = this.node;
+			
 			if(this.output.Val !== void 0)
 				node.deletePort('output', 'Val');
 
 			let ref = this.node.output;
-			if(temp.type === Function || temp.type.prototype instanceof Function){
-				node.createPort('output', 'Val', temp.type);
+			node.createPort('output', 'Val', temp.type);
 
+			if(temp.type === Function || temp.type.prototype instanceof Function){
 				this._eventListen = 'call';
 				this._onChanged = () => { ref.Val() };
 			}
 			else{
-				node.createPort('output', 'Val', temp.type);
-
 				this._eventListen = 'value';
 				this._onChanged = () => { ref.Val = temp._value };
 			}
