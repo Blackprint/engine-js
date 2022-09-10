@@ -99,7 +99,7 @@ Blackprint.RoutePort = class RoutePort extends CustomEvent {
 			return await targetRoute.iface._proxyInput.routes.routeIn(cable);
 
 		if(_enum === _InternalNodeEnum.BPFnOutput){
-			await targetRoute.iface.node.update(cable);
+			await targetRoute.iface.node.update();
 			return await targetRoute.iface._funcMain.node.routes.routeOut();
 		}
 
