@@ -10,8 +10,8 @@ class PortLink {
 
 		let iPort = iface[which] = {};
 
-		// Check if a browser
-		if(typeof sf !== 'undefined' && sf.Obj !== void 0 && sf.Obj.set !== void 0){
+		// Check if a browser or output port
+		if(which === 'output' || (typeof sf !== 'undefined' && sf.Obj !== void 0 && sf.Obj.set !== void 0)){
 			this._sf = true;
 			Object.defineProperty(iPort, '_portList', {
 				enumerable: false,
@@ -45,7 +45,7 @@ class PortLink {
 		var linkedPort = this._iface._newPort(portName, type, def, this._which, haveFeature);
 		iPort[portName] = linkedPort;
 
-		if(this._sf === true)
+		if(iPort._portList !== undefined)
 			iPort._portList.push(linkedPort);
 
 		var linkValue = linkedPort.createLinker();
@@ -71,8 +71,8 @@ class PortLink {
 		let port = iPort[portName];
 		port.disconnectAll();
 
-		// Check if a browser or not
-		if(this._sf === true){
+		// Only for browser or output port
+		if(iPort._portList !== undefined){
 			let i = iPort._portList.indexOf(port);
 
 			if(i !== -1)

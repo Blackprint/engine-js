@@ -7,6 +7,7 @@ Blackprint.Node = class Node extends Blackprint.Engine.CustomEvent {
 
 		super();
 		this.instance = instance;
+		this._bpUpdateWait = 0;
 		this._scope = instance.scope; // Only in Blackprint.Sketch
 		this.syncThrottle = 250; // One syncOut per 250ms, last state will be synced
 		this.disablePorts = false; // Disable output port from synchronizing data to other nodes
@@ -104,6 +105,50 @@ Blackprint.Node = class Node extends Blackprint.Engine.CustomEvent {
 			iface: this.iface,
 			message,
 		});
+	}
+
+	_bpUpdate(cable){
+		if(this.routes.out == null){
+			this._bpUpdating = true;
+			this.update(cable);
+			this._bpUpdating = false;
+
+			if(this._bpHasUpdate){
+				this._bpHasUpdate = false;
+
+				let outputs = this.iface.output._portList;
+				let hasError = null;
+				for (let i=0; i < outputs.length; i++) {
+					let output = outputs[i];
+					if(output._bpHasUpdate === false) continue;
+
+					let cables = output.cables;
+					for (let a=0; a < cables.length; a++) {
+						let cable = cables[a];
+						let targetNode = cable.input._node;
+
+						if(targetNode._bpUpdateWait !== 0){
+							if(--targetNode._bpUpdateWait !== 0) continue;
+						}
+
+						if(hasError) continue;
+
+						try {
+							targetNode._bpUpdate(cable);
+						} catch(e) {
+							hasError = e;
+						}
+					}
+				}
+
+				if(hasError !== null) throw hasError;
+			}
+		}
+		else this.update(cable);
+
+		if(this.iface._enum !== _InternalNodeEnum.BPFnMain)
+			this.routes.routeOut();
+		else this.iface._proxyInput.routes.routeOut();
 	}
 
 	// Will be replaced by @blackprint/remote-control/js/src/Node.js

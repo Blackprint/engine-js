@@ -122,10 +122,9 @@ class Cable{
 		if(out.value !== void 0){
 			inp.emit('value', temp);
 			inp.iface.emit('port.value', temp);
-			
+
 			let node = inp.iface.node;
-			if(node.update !== void 0)
-				node.update(this);
+			if(node.update !== void 0) node._bpUpdate(this);
 		}
 	}
 

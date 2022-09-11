@@ -7,8 +7,10 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		this.cables = [];
 		this.source = source;
 		this.iface = iface;
+		this._node = iface.node;
 		this.classAdd = '';
 		this.splitted = false;
+		this._bpHasUpdate = false;
 		this.allowResync = false; // Retrigger connected node's .update when the output value is similar
 
 		// this.value;
@@ -193,9 +195,15 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			if(inp === void 0) continue;
 			inp._cache = void 0;
 
-			let temp = { port: inp, target: this, cable };
-			let inpIface = inp.iface;
+			if(this._node._bpUpdating){
+				inp._node._bpUpdateWait++;
+				this._node._bpHasUpdate = true;
+				this._bpHasUpdate = true;
+				continue;
+			}
 
+			let inpIface = inp.iface;
+			let temp = { port: inp, target: this, cable };
 			inp.emit('value', temp);
 			inpIface.emit('port.value', temp);
 
@@ -203,16 +211,8 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			if(skipSync) continue;
 
 			let node = inpIface.node;
-			if(node.update && inpIface._requesting === false && node.routes.in.length === 0){
-				node.update(cable);
-
-				if(node.iface._enum !== _InternalNodeEnum.BPFnMain){
-					node.routes.routeOut();
-				}
-				else {
-					node.iface._proxyInput.routes.routeOut();
-				}
-			}
+			if(node.update && inpIface._requesting === false && node.routes.in.length === 0)
+				node._bpUpdate(cable);
 		}
 	}
 
