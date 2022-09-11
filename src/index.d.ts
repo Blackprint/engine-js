@@ -271,6 +271,7 @@ export class Engine extends CustomEvent {
 	/**
 	 * Get single node interface that has the specified ID
 	 * @param id Node ID
+	 * @deprecated please use `instance.iface` or `instance.ifaceList` instead
 	 */
 	getNode(id: string): Node;
 

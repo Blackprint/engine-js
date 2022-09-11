@@ -287,6 +287,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		});
 	}
 
+	// Deprecated, please use `instance.iface` or `instance.ifaceList` instead
 	getNode(id){
 		if(id == null) throw "ID couldn't be null or undefined";
 
