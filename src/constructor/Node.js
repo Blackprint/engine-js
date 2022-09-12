@@ -1,13 +1,12 @@
 // Constructor cycle
 // CreateNode = Blackprint.Node then Blackprint.Interface
-Blackprint.Node = class Node extends Blackprint.Engine.CustomEvent {
+Blackprint.Node = class Node {
 	constructor(instance){
 		if(instance === void 0)
 			throw new Error("First parameter was not found, did you forget 'super(instance)' when extending Blackprint.Node?");
 
-		super();
+		// super();
 		this.instance = instance;
-		this._bpUpdateWait = 0;
 		this._scope = instance.scope; // Only in Blackprint.Sketch
 		this.syncThrottle = 250; // One syncOut per 250ms, last state will be synced
 		this.disablePorts = false; // Disable output port from synchronizing data to other nodes
@@ -107,48 +106,19 @@ Blackprint.Node = class Node extends Blackprint.Engine.CustomEvent {
 		});
 	}
 
-	_bpUpdate(cable){
+	async _bpUpdate(){
+		this._bpUpdating = true;
+		await this.update();
+		this._bpUpdating = false;
+
 		if(this.routes.out == null){
-			this._bpUpdating = true;
-			this.update(cable);
-			this._bpUpdating = false;
-
-			if(this._bpHasUpdate){
-				this._bpHasUpdate = false;
-
-				let outputs = this.iface.output._portList;
-				let hasError = null;
-				for (let i=0; i < outputs.length; i++) {
-					let output = outputs[i];
-					if(output._bpHasUpdate === false) continue;
-
-					let cables = output.cables;
-					for (let a=0; a < cables.length; a++) {
-						let cable = cables[a];
-						let targetNode = cable.input._node;
-
-						if(targetNode._bpUpdateWait !== 0){
-							if(--targetNode._bpUpdateWait !== 0) continue;
-						}
-
-						if(hasError) continue;
-
-						try {
-							targetNode._bpUpdate(cable);
-						} catch(e) {
-							hasError = e;
-						}
-					}
-				}
-
-				if(hasError !== null) throw hasError;
-			}
+			await this.instance._executionOrder.next();
 		}
-		else this.update(cable);
-
-		if(this.iface._enum !== _InternalNodeEnum.BPFnMain)
-			this.routes.routeOut();
-		else this.iface._proxyInput.routes.routeOut();
+		else{
+			if(this.iface._enum !== _InternalNodeEnum.BPFnMain)
+				await this.routes.routeOut();
+			else await this.iface._proxyInput.routes.routeOut();
+		}
 	}
 
 	// Will be replaced by @blackprint/remote-control/js/src/Node.js

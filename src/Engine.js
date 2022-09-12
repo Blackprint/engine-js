@@ -8,6 +8,9 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 		this.iface = {}; // { id => IFace }
 		this.ref = {}; // { id => Port references }
+
+		this._executionOrder = new OrderedExecution();
+		this._importing = false;
 	}
 
 	deleteNode(iface){
@@ -87,6 +90,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		if(options === void 0) options = {};
 		if(!options.appendMode) this.clearNodes();
 
+		this._importing = true;
 		this.emit("json.importing", {appendMode: options.appendMode, raw: json});
 
 		var metadata = json._;
@@ -248,7 +252,10 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		for (var i = 0; i < handlers.length; i++)
 			handlers[i].init?.();
 
+		this._importing = false;
 		this.emit("json.imported", {appendMode: options.appendMode, nodes: inserted, raw: json});
+		this._executionOrder.next();
+
 		return inserted;
 	}
 

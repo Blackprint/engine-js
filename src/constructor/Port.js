@@ -10,7 +10,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		this._node = iface.node;
 		this.classAdd = '';
 		this.splitted = false;
-		this._bpHasUpdate = false;
+		this._hasUpdate = false;
 		this.allowResync = false; // Retrigger connected node's .update when the output value is similar
 
 		// this.value;
@@ -184,8 +184,15 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 	// this= output/property, target=input
 	sync(){
 		// Check all connected cables, if any node need to synchronize
-		var cables = this.cables;
+		let cables = this.cables;
 		let skipSync = this.iface.node.routes.out !== null;
+		let instance = this._node.instance;
+
+		let singlePortUpdate = false;
+		if(!this._node._bpUpdating){
+			singlePortUpdate = true;
+			this._node._bpUpdating = true;
+		}
 
 		for (var i = 0; i < cables.length; i++) {
 			var cable = cables[i];
@@ -196,9 +203,15 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			inp._cache = void 0;
 
 			if(this._node._bpUpdating){
-				inp._node._bpUpdateWait++;
-				this._node._bpHasUpdate = true;
-				this._bpHasUpdate = true;
+				if(inp.feature === BP_Port.ArrayOf){
+					inp._hasUpdate = true;
+					cable._hasUpdate = true;
+				}
+				else inp._hasUpdateCable = cable;
+
+				if(skipSync === false)
+					instance._executionOrder.add(inp._node);
+
 				continue;
 			}
 
@@ -212,7 +225,12 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 			let node = inpIface.node;
 			if(node.update && inpIface._requesting === false && node.routes.in.length === 0)
-				node._bpUpdate(cable);
+				node._bpUpdate();
+		}
+
+		if(singlePortUpdate){
+			this._node._bpUpdating = false;
+			this._node.instance._executionOrder.next();
 		}
 	}
 
@@ -433,6 +451,6 @@ function createCallableRoutePort(port){
 		var cable = port.cables[0];
 		if(cable === void 0) return;
 
-		await cable.input.routeIn(cable);
+		await cable.input.routeIn();
 	}
 }

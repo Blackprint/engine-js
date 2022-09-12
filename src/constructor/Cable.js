@@ -124,7 +124,11 @@ class Cable{
 			inp.iface.emit('port.value', temp);
 
 			let node = inp.iface.node;
-			if(node.update !== void 0) node._bpUpdate(this);
+			if(node.update !== void 0) {
+				if(node.instance._importing)
+					node.instance._executionOrder.add(node);
+				else node._bpUpdate();
+			}
 		}
 	}
 

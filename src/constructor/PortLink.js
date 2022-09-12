@@ -10,8 +10,8 @@ class PortLink {
 
 		let iPort = iface[which] = {};
 
-		// Check if a browser or output port
-		if(which === 'output' || (typeof sf !== 'undefined' && sf.Obj !== void 0 && sf.Obj.set !== void 0)){
+		// Check if a browser or input port
+		if(which === 'input' || (typeof sf !== 'undefined' && sf.Obj !== void 0 && sf.Obj.set !== void 0)){
 			this._sf = true;
 			Object.defineProperty(iPort, '_portList', {
 				enumerable: false,
@@ -71,7 +71,6 @@ class PortLink {
 		let port = iPort[portName];
 		port.disconnectAll();
 
-		// Only for browser or output port
 		if(iPort._portList !== undefined){
 			let i = iPort._portList.indexOf(port);
 

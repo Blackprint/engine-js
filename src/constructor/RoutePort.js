@@ -66,13 +66,13 @@ Blackprint.RoutePort = class RoutePort extends CustomEvent {
 		return true;
 	}
 
-	async routeIn(cable){
+	async routeIn(){
 		let node = this.iface.node;
+		console.log('routeIn', this.iface.id || this.iface.title);
 
 		if(this.iface._enum !== _InternalNodeEnum.BPFnInput)
-			await node.update(cable);
-
-		await node.routes.routeOut();
+			await node._bpUpdate();
+		else await node.routes.routeOut();
 	}
 
 	async routeOut(){
@@ -88,21 +88,20 @@ Blackprint.RoutePort = class RoutePort extends CustomEvent {
 
 		let targetRoute = this.out.input;
 		if(targetRoute == null) return;
+		console.error('routeOut', targetRoute.iface.id || targetRoute.iface.title);
 
 		let _enum = targetRoute.iface._enum;
-		let cable = this.out;
-
 		if(_enum === void 0)
-			return await targetRoute.routeIn(cable);
+			return await targetRoute.routeIn();
 
 		if(_enum === _InternalNodeEnum.BPFnMain)
-			return await targetRoute.iface._proxyInput.routes.routeIn(cable);
+			return await targetRoute.iface._proxyInput.routes.routeIn();
 
 		if(_enum === _InternalNodeEnum.BPFnOutput){
 			await targetRoute.iface.node.update();
 			return await targetRoute.iface._funcMain.node.routes.routeOut();
 		}
 
-		return await targetRoute.routeIn(cable);
+		return await targetRoute.routeIn();
 	}
 }
