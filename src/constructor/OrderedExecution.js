@@ -54,7 +54,7 @@ class OrderedExecution {
 						let cables = inp.cables;
 
 						for (let a=0; a < cables.length; a++) {
-							let cable = cables[i];
+							let cable = cables[a];
 							let temp = { port: inp, target: cable.output, cable };
 							inp.emit('value', temp);
 							inpIface.emit('port.value', temp);
