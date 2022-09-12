@@ -269,13 +269,6 @@ export class Engine extends CustomEvent {
 	}): Promise<Array<Interface>>;
 
 	/**
-	 * Get single node interface that has the specified ID
-	 * @param id Node ID
-	 * @deprecated please use `instance.iface` or `instance.ifaceList` instead
-	 */
-	getNode(id: string): Node;
-
-	/**
 	 * Get list of nodes that created from specific namespace
 	 * @param namespace Node namespace
 	 */
