@@ -44,6 +44,10 @@ class OrderedExecution {
 		try{
 			let portList = next.iface.input._portList;
 			next._bpUpdating = true;
+
+			if(next.partialUpdate && next.update == null)
+				next.partialUpdate = false;
+
 			for (let i=0; i < portList.length; i++) {
 				let inp = portList[i];
 				let inpIface = inp.iface;

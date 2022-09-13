@@ -10,6 +10,8 @@ Blackprint.Node = class Node {
 		this._scope = instance.scope; // Only in Blackprint.Sketch
 		this.syncThrottle = 250; // One syncOut per 250ms, last state will be synced
 		this.disablePorts = false; // Disable output port from synchronizing data to other nodes
+
+		this.partialUpdate = false;
 	}
 
 	setInterface(path='BP/default'){
@@ -107,9 +109,11 @@ Blackprint.Node = class Node {
 	}
 
 	async _bpUpdate(){
-		this._bpUpdating = true;
-		await this.update();
-		this._bpUpdating = false;
+		if(this.update != null){
+			this._bpUpdating = true;
+			await this.update();
+			this._bpUpdating = false;
+		}
 
 		if(this.routes.out == null){
 			await this.instance._executionOrder.next();

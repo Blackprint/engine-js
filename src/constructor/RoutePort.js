@@ -88,7 +88,6 @@ Blackprint.RoutePort = class RoutePort extends CustomEvent {
 
 		let targetRoute = this.out.input;
 		if(targetRoute == null) return;
-		console.error('routeOut', targetRoute.iface.id || targetRoute.iface.title);
 
 		let _enum = targetRoute.iface._enum;
 		if(_enum === void 0)
