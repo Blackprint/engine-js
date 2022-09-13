@@ -14,17 +14,23 @@ export namespace Types {
  */
 export function settings(which: String, value: any): void;
 
-/**
- * Wait and get module's shared context that being created on different .js file
- * @param name desc
- */
-export function getContext(name: String): Promise<object>;
+type ModuleContext = {
+	[key: string]: any;
+	IFace: any;
+	VirtualType: (originalType: object, virtualName: String | Array<String>) => any;
+}
 
 /**
  * Create shared context for a module
  * @param name desc
  */
-export function createContext(name: String): object;
+export function createContext(name: String): ModuleContext;
+
+/**
+ * Wait and get module's shared context that being created on different .js file
+ * @param name desc
+ */
+export function getContext(name: String): Promise<ModuleContext>;
 
 /**
  * Create an object that extend Blackprint object with additional options.
@@ -103,6 +109,15 @@ export namespace Port {
 			field?: String,
 		}
 	}): any;
+
+	/**
+	 * This only exist on JavaScript, just like a typed string or other typed primitives
+	 * Mostly can be useful for Blackprint Sketch as a helper/shortcut when creating nodes
+	 * @param originalType Original type class
+	 * @param virtualName Custom virtual name for the specified context
+	 * @param context A context where this virtual type will be registered
+	 */
+	export function VirtualType(originalType: any, virtualName: String | Array<String>, context: Object): any;
 }
 
 /**
@@ -443,6 +458,11 @@ export type { Decoration };
 /** Blackprint Node */
 export class Node {
 	/**
+	 * Set this to true if you want .update function being called for every data changes from different input port
+	 */
+	partialUpdate: boolean = false;
+	
+	/**
 	 * You mustn't use this class to manually construct Blackprint Node
 	 * But please use 'instance.createNode()' instead
 	 * @param instance current instance where this node was created
@@ -471,7 +491,7 @@ export class Node {
 	/**
 	 * This function will be called everytime there's an update or new value from output port from other nodes
 	 * But if this node has route cable, this update function will be called until this node has turn to be executed
-	 * @param cable Related cable where the data flow happen
+	 * @param cable Related cable where the data flow happen, `this.partialUpdate` must be set to true to have this parameter
 	 */
 	update(cable: Cable): void;
 

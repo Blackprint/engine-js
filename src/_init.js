@@ -48,7 +48,13 @@ let _Context = Blackprint.getContext._context = {};
 Blackprint.createContext = function(name){
 	if(name in _Context) return _Context[name];
 
-	let temp = _Context[name] = {IFace:{}};
+	let temp = _Context[name] = {
+		IFace: {},
+
+		__virtualTypes: {},
+		VirtualType: (originalType, virtualName) => BP_Port.VirtualType(originalType, virtualName, temp)
+	};
+
 	if(name in _getContextWait){
 		setTimeout(function(){
 			_getContextWait[name](temp);

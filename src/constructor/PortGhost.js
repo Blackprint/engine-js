@@ -19,18 +19,20 @@ class PortGhost extends Blackprint.Engine.Port {
 // These may be useful for testing or creating custom port without creating nodes when scripting
 Blackprint.OutputPort = class extends PortGhost {
 	constructor(type){
-		var { type, def, haveFeature } = determinePortType(type, fakeIface);
+		var { type, def, haveFeature, virtualType } = determinePortType(type, fakeIface);
 
 		super('Blackprint.OutputPort', type, def, 'output', fakeIface, haveFeature);
 		this._ghost = true;
+		this.virtualType = virtualType;  // For engine-js only
 	}
 }
 
 Blackprint.InputPort = class extends PortGhost {
 	constructor(type){
-		var { type, def, haveFeature } = determinePortType(type, fakeIface);
+		var { type, def, haveFeature, virtualType } = determinePortType(type, fakeIface);
 
 		super('Blackprint.InputPort', type, def, 'input', fakeIface, haveFeature);
 		this._ghost = true;
+		this.virtualType = virtualType;  // For engine-js only
 	}
 }

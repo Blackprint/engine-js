@@ -40,9 +40,10 @@ class PortLink {
 			return exist;
 
 		// Determine type and add default value for each type
-		let { type, def, haveFeature } = determinePortType(val, this);
+		let { type, def, haveFeature, virtualType } = determinePortType(val, this);
 
 		var linkedPort = this._iface._newPort(portName, type, def, this._which, haveFeature);
+		linkedPort.virtualType = virtualType; // For engine-js only
 		iPort[portName] = linkedPort;
 
 		if(iPort._portList !== undefined)
@@ -86,7 +87,7 @@ class PortLink {
 Blackprint.Engine.PortLink = PortLink;
 
 function determinePortType(val, that){
-	var type, def, haveFeature;
+	var type, def, haveFeature, virtualType;
 	if(val === void 0)
 		throw new Error("Port type can't be undefined, error when processing: "+that._iface.title+", "+that._which+' port');
 
@@ -146,9 +147,12 @@ function determinePortType(val, that){
 			def = val;
 		}
 
+		// For engine-js only, as this only for Blackprint Sketch
+		virtualType = val.virtualType;
+
 		// Default must be null (because it's defined but don't have data)
 		if(def === void 0) def = null;
 	}
 
-	return { type, def, haveFeature };
+	return { type, def, haveFeature, virtualType };
 }
