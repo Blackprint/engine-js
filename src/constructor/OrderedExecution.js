@@ -20,7 +20,7 @@ class OrderedExecution {
 		if(this.isPending(node)) return;
 
         let i = this.index+1;
-        if(i >= this.list.length)
+        if(i >= this.list.length || this.length >= this.initialSize)
             throw new Error("Execution order limit was exceeded");
 
 		this.list[this.length++] = node;
