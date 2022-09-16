@@ -108,6 +108,10 @@ Blackprint.Node = class Node {
 		});
 	}
 
+	async request(cable){
+		await this.update?.(cable);
+	}
+
 	async _bpUpdate(){
 		if(this.update != null){
 			this._bpUpdating = true;

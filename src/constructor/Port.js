@@ -94,7 +94,8 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 						var output = cable.output;
 
 						// Request the data first
-						output.iface.node.request?.(cable);
+						if(output.value == null)
+							output.iface.node.request?.(cable);
 
 						if(Blackprint.settings.visualizeFlow)
 							cable.visualizeFlow();
@@ -124,7 +125,8 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 						var output = cable.output;
 
 						// Request the data first
-						output.iface.node.request?.(cable);
+						if(output.value == null)
+							output.iface.node.request?.(cable);
 
 						if(Blackprint.settings.visualizeFlow)
 							cable.visualizeFlow();
@@ -201,6 +203,8 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			var inp = cable.input;
 			if(inp === void 0) continue;
 			inp._cache = void 0;
+			
+			let inpIface = inp.iface;
 
 			if(this._node._bpUpdating){
 				if(inp.feature === BP_Port.ArrayOf){
@@ -209,13 +213,12 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 				}
 				else inp._hasUpdateCable = cable;
 
-				if(skipSync === false)
+				if(skipSync === false && inpIface._requesting === false)
 					instance._executionOrder.add(inp._node);
 
 				continue;
 			}
 
-			let inpIface = inp.iface;
 			let temp = { port: inp, target: this, cable };
 			inp.emit('value', temp);
 			inpIface.emit('port.value', temp);
