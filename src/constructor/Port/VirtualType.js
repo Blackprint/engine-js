@@ -1,7 +1,7 @@
 // This only exist on JavaScript, just like a typed string or other typed primitives
 // Mostly can be useful for Blackprint Sketch as a helper/shortcut when creating nodes
 BP_Port.VirtualType = function(originalType, virtualName, context){
-	if(Blackprint.Sketch === null) return originalType;
+	if(Blackprint.Sketch == null) return originalType;
 
 	if(virtualName.constructor !== Array)
 		virtualName = [virtualName];

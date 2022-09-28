@@ -46,7 +46,7 @@ Blackprint.nodes.BP.Fn = {
 
 		update(cable){
 			let iface = this.iface._funcMain;
-			if(cable === null){ // Triggered by port route
+			if(cable == null){ // Triggered by port route
 				let IOutput = iface.output;
 				let Output = iface.node.output;
 				let thisInput = this.input;
@@ -342,7 +342,7 @@ class BPFunctionNode extends Blackprint.Node {
 		let iface = this.iface._proxyInput.iface;
 		let Output = iface.node.output;
 
-		if(cable === null){ // Triggered by port route
+		if(cable == null){ // Triggered by port route
 			let IOutput = iface.output;
 			let thisInput = this.input;
 

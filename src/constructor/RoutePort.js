@@ -68,7 +68,7 @@ Blackprint.RoutePort = class RoutePort extends CustomEvent {
 
 	async routeIn(){
 		let node = this.iface.node;
-		console.log('routeIn', this.iface.id || this.iface.title);
+		// console.log('routeIn', this.iface.id || this.iface.title);
 
 		if(this.iface._enum !== _InternalNodeEnum.BPFnInput)
 			await node._bpUpdate();
