@@ -9,7 +9,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		this.iface = {}; // { id => IFace }
 		this.ref = {}; // { id => Port references }
 
-		this._executionOrder = new OrderedExecution();
+		this.executionOrder = new OrderedExecution();
 		this._importing = false;
 	}
 
@@ -254,7 +254,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 		this._importing = false;
 		this.emit("json.imported", {appendMode: options.appendMode, nodes: inserted, raw: json});
-		this._executionOrder.next();
+		this.executionOrder.next();
 
 		return inserted;
 	}

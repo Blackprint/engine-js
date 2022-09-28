@@ -214,7 +214,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 				else inp._hasUpdateCable = cable;
 
 				if(skipSync === false && inpIface._requesting === false)
-					instance._executionOrder.add(inp._node);
+					instance.executionOrder.add(inp._node);
 
 				continue;
 			}
@@ -233,7 +233,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 		if(singlePortUpdate){
 			this._node._bpUpdating = false;
-			this._node.instance._executionOrder.next();
+			this._node.instance.executionOrder.next();
 		}
 	}
 

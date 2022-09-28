@@ -4,6 +4,8 @@ class OrderedExecution {
 		this.list = new Array(size);
 		this.index = 0;
 		this.length = 0;
+		this.pause = false;
+		this.stepMode = false;
 	}
 	isPending(node){
 		return this.list.includes(node, this.index);
@@ -20,7 +22,7 @@ class OrderedExecution {
 		if(this.isPending(node)) return;
 
         let i = this.index+1;
-        if(i >= this.list.length || this.length >= this.initialSize)
+        if(i >= this.initialSize || this.length >= this.initialSize)
             throw new Error("Execution order limit was exceeded");
 
 		this.list[this.length++] = node;
@@ -38,6 +40,9 @@ class OrderedExecution {
         return temp;
 	}
 	async next(){
+		if(this.pause) return;
+		if(this.stepMode) this.pause = true;
+
 		let next = this._next(); // next => node
 		if(next == null) return;
 
@@ -84,6 +89,8 @@ class OrderedExecution {
 		} catch(e){
 			this.clear();
 			throw e;
+		} finally {
+			if(this.stepMode) this.pause = false;
 		}
 	}
 }

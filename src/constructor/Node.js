@@ -120,7 +120,7 @@ Blackprint.Node = class Node {
 		}
 
 		if(this.routes.out == null){
-			await this.instance._executionOrder.next();
+			await this.instance.executionOrder.next();
 		}
 		else{
 			if(this.iface._enum !== _InternalNodeEnum.BPFnMain)
