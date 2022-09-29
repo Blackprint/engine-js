@@ -64,10 +64,14 @@ class OrderedExecution {
 
 						for (let a=0; a < cables.length; a++) {
 							let cable = cables[a];
+
+							if(!cable._hasUpdate) continue;
+							cable._hasUpdate = false;
+
 							let temp = { port: inp, target: cable.output, cable };
 							inp.emit('value', temp);
 							inpIface.emit('port.value', temp);
-		
+
 							if(next.partialUpdate) await next.update(cable);
 						}
 					}
