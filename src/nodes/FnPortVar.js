@@ -76,6 +76,9 @@ function BPFnVarInit(){
 
 				// Run when this node is being connected with other node
 				iPort.onConnect = (cable, port) => {
+					// Skip port with feature: ArrayOf
+					if(port.feature === BP_Port.ArrayOf) return;
+
 					delete iPort.onConnect;
 					proxyIface.off(`_add.${name}`, this._waitPortInit);
 					delete this._waitPortInit;
@@ -96,6 +99,9 @@ function BPFnVarInit(){
 
 				// Run when main node is the missing port
 				this._waitPortInit = port => {
+					// Skip port with feature: ArrayOf
+					if(port.feature === BP_Port.ArrayOf) return;
+
 					delete iPort.onConnect;
 					delete this._waitPortInit;
 					let backup = this.output.Val.cables.map(cable => cable.input);
@@ -128,7 +134,7 @@ function BPFnVarInit(){
 				this._listener = () => {
 					this.ref.Output.Val();
 				};
-	
+
 				port.on('call', this._listener);
 			}
 			else{
@@ -147,10 +153,10 @@ function BPFnVarInit(){
 						}
 						return;
 					}
-	
+
 					this.ref.Output.Val = port.value;
 				};
-	
+
 				port.on('value', this._listener);
 			}
 		}
@@ -186,6 +192,9 @@ function BPFnVarInit(){
 
 				// Run when this node is being connected with other node
 				iPort.onConnect = (cable, port) => {
+					// Skip port with feature: ArrayOf
+					if(port.feature === BP_Port.ArrayOf) return;
+
 					delete iPort.onConnect;
 					proxyIface.off(`_add.${name}`, this._waitPortInit);
 					delete this._waitPortInit;
@@ -205,6 +214,9 @@ function BPFnVarInit(){
 
 				// Run when main node is the missing port
 				this._waitPortInit = port => {
+					// Skip port with feature: ArrayOf
+					if(port.feature === BP_Port.ArrayOf) return;
+
 					delete iPort.onConnect;
 					delete this._waitPortInit;
 					let backup = this.input.Val.cables.map(cable => cable.output);
