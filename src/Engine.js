@@ -189,6 +189,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 				let node = nodes[a];
 				var iface = inserted[node.i];
 
+				// Connect route cable
 				if(node.route != null)
 					iface.node.routes.routeTo(inserted[node.route.i]);
 
@@ -460,6 +461,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		else if(node.init !== void 0)
 			node.init();
 
+		// this.emit('node.created', { iface });
 		return iface;
 	}
 
