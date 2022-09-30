@@ -146,6 +146,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		var inserted = this.ifaceList;
 		var handlers = []; // nodes
 		let appendLength = options.appendMode ? inserted.length : 0;
+		let reorderInputPort = [];
 
 		// Prepare all nodes depend on the namespace
 		// before we create cables for them
@@ -165,6 +166,13 @@ Blackprint.Engine = class Engine extends CustomEvent {
 					input_d: temp.input_d,
 					output_sw: temp.output_sw,
 				}, handlers);
+
+				if(temp.input != null){
+					reorderInputPort.push({
+						iface: iface,
+						config: temp,
+					});
+				}
 
 				// For custom function node
 				await iface._BpFnInit?.();
@@ -245,6 +253,36 @@ Blackprint.Engine = class Engine extends CustomEvent {
 						}
 					}
 				}
+			}
+		}
+
+		// Fix input port cable order
+		for (let i=0; i < reorderInputPort.length; i++) {
+			let { iface, config } = reorderInputPort[i];
+			let cInput = config.input;
+
+			for (let key in cInput) {
+				let port = iface.input[key];
+				let cables = port.cables;
+				let temp = new Array(cables.length);
+
+				let conf = cInput[key];
+				for (let a=0; a < conf.length; a++) {
+					let { i: index, name } = conf[a];
+					let targetIface = inserted[index + appendLength];
+					
+					for (let z=0; z < cables.length; z++) {
+						let cable = cables[z];
+						if(cable.output.name !== name && cable.output.iface !== targetIface) continue;
+						temp[a] = cable;
+					}
+				}
+
+				for (let a=0; a < temp.length; a++) {
+					if(temp[a] == null) console.error(`Some cable failed to be ordered for (${iface.title}: ${key})`);
+				}
+
+				port.cables = temp;
 			}
 		}
 
