@@ -93,8 +93,8 @@ Blackprint.RoutePort = class RoutePort extends CustomEvent {
 		if(_enum === void 0)
 			return await targetRoute.routeIn();
 
-		if(_enum === _InternalNodeEnum.BPFnMain)
-			return await targetRoute.iface._proxyInput.routes.routeIn();
+		// if(_enum === _InternalNodeEnum.BPFnMain)
+		// 	return await targetRoute.iface._proxyInput.routes.routeIn();
 
 		if(_enum === _InternalNodeEnum.BPFnOutput){
 			await targetRoute.iface.node.update();

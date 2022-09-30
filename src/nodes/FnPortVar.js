@@ -40,6 +40,9 @@ Blackprint.nodes.BP.FnVar = {
 		update(){
 			let id = this.iface.data.name;
 			this.refOutput[id] = this.ref.Input.Val;
+
+			// Also update the cache on the proxy node
+			this.iface._parentFunc._proxyOutput.ref.IInput[id]._cache = this.ref.Input.Val;
 		}
 	},
 };

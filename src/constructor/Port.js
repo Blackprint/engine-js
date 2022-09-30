@@ -71,10 +71,10 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			get(){
 				// This port must use values from connected output
 				if(port.source === 'input'){
+					if(port._cache !== void 0) return port._cache;
+
 					if(port.cables.length === 0)
 						return port.default;
-
-					if(port._cache !== void 0) return port._cache;
 
 					// Flag current node is requesting value to other node
 					port.iface._requesting = true;
@@ -282,7 +282,6 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			cable.disconnect();
 			return;
 		}
-
 
 		if(cableOwner === this) // It's referencing to same port
 			return cable.disconnect();
