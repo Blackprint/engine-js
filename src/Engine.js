@@ -273,8 +273,10 @@ Blackprint.Engine = class Engine extends CustomEvent {
 					
 					for (let z=0; z < cables.length; z++) {
 						let cable = cables[z];
-						if(cable.output.name !== name && cable.output.iface !== targetIface) continue;
+						if(cable.output.name !== name || cable.output.iface !== targetIface) continue;
+
 						temp[a] = cable;
+						break;
 					}
 				}
 
