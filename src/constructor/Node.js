@@ -109,7 +109,7 @@ Blackprint.Node = class Node {
 	}
 
 	async request(cable){
-		await this.update?.(cable);
+		// await this.update?.(cable);
 	}
 
 	async _bpUpdate(){

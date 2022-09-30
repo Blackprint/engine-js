@@ -6,6 +6,7 @@ class OrderedExecution {
 		this.length = 0;
 		this.pause = false;
 		this.stepMode = false;
+		this._onceComplete = [];
 	}
 	isPending(node){
 		return this.list.includes(node, this.index);
@@ -27,8 +28,34 @@ class OrderedExecution {
 
 		this.list[this.length++] = node;
 	}
+	onceComplete(func){
+		if(this.length === 0) return func?.();
+
+		// Only for JavaScript, return promise if no callback provided
+		if(func == null){
+			this._promiseWait ??= new Promise(resolve => {
+				this._onceComplete.push(()=> {
+					this._promiseResolve = this._promiseWait = null;
+					resolve();
+				});
+			});
+
+			return this._promiseWait;
+		}
+
+		if(this._onceComplete.includes(func)) return;
+		this._onceComplete.push(func);
+	}
 	_next(){
-		if(this.index >= this.length) return;
+		if(this.index >= this.length){
+			let temp = this._onceComplete;
+			for (let i=0; i < temp.length; i++) {
+				temp[i]();
+			}
+
+			temp.length = 0;
+			return;
+		}
 
         let i = this.index;
 		let temp = this.list[this.index++];
