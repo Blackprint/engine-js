@@ -113,19 +113,28 @@ Blackprint.Node = class Node {
 	}
 
 	async _bpUpdate(){
-		if(this.update != null){
+		let thisIface = this.iface;
+		let isMainFuncNode = thisIface._enum === _InternalNodeEnum.BPFnMain;
+
+		if(this.update != null && !(isMainFuncNode && this.routes.out != null)){
 			this._bpUpdating = true;
 			await this.update();
 			this._bpUpdating = false;
 		}
 
 		if(this.routes.out == null){
-			await this.instance.executionOrder.next();
+			let ref = this.instance.executionOrder;
+			if(isMainFuncNode && thisIface.node.routes.out != null){
+				await thisIface.bpInstance.executionOrder.onceComplete();
+				thisIface.node.routes.routeOut();
+				await ref.next();
+			}
+			else await ref.next();
 		}
 		else{
-			if(this.iface._enum !== _InternalNodeEnum.BPFnMain)
+			if(!isMainFuncNode)
 				await this.routes.routeOut();
-			else await this.iface._proxyInput.routes.routeOut();
+			else await thisIface._proxyInput.routes.routeOut();
 		}
 	}
 

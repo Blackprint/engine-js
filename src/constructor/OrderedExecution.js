@@ -73,13 +73,21 @@ class OrderedExecution {
 		let next = this._next(); // next => node
 		if(next == null) return;
 
+		let skipUpdate = next.routes.in.length !== 0;
+		let nextIface = next.iface;
+		let portList = nextIface.input._portList;
+		next._bpUpdating = true;
+
+		if(next.partialUpdate && next.update == null)
+			next.partialUpdate = false;
+
+		let fnInstance = false;
+		if(nextIface._enum === _InternalNodeEnum.BPFnMain){
+			fnInstance = true;
+			nextIface._proxyInput._bpUpdating = true;
+		}
+
 		try{
-			let portList = next.iface.input._portList;
-			next._bpUpdating = true;
-
-			if(next.partialUpdate && next.update == null)
-				next.partialUpdate = false;
-
 			for (let i=0; i < portList.length; i++) {
 				let inp = portList[i];
 				let inpIface = inp.iface;
@@ -99,7 +107,7 @@ class OrderedExecution {
 							inp.emit('value', temp);
 							inpIface.emit('port.value', temp);
 
-							if(next.partialUpdate) await next.update(cable);
+							if(next.partialUpdate && !skipUpdate) await next.update(cable);
 						}
 					}
 				}
@@ -111,13 +119,17 @@ class OrderedExecution {
 					inp.emit('value', temp);
 					inpIface.emit('port.value', temp);
 
-					if(next.partialUpdate) await next.update(cable);
+					if(next.partialUpdate && !skipUpdate) await next.update(cable);
 				}
 			}
-			next._bpUpdating = false;
 
-			if(!next.partialUpdate) await next._bpUpdate();
+			next._bpUpdating = false;
+			if(fnInstance) nextIface._proxyInput._bpUpdating = false;
+
+			if(!next.partialUpdate && !skipUpdate) await next._bpUpdate();
 		} catch(e){
+			if(fnInstance) nextIface._proxyInput._bpUpdating = false;
+
 			this.clear();
 			throw e;
 		} finally {

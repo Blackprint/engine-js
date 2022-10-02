@@ -364,6 +364,8 @@ class BPFunctionNode extends Blackprint.Node {
 
 		let i = instance.used.indexOf(this.iface);
 		if(i !== -1) instance.used.splice(i, 1);
+
+		this.iface.bpInstance.destroy();
 	}
 }
 

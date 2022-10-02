@@ -17,7 +17,9 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		if(haveFeature === BP_Port.Trigger){
 			this.default = () => {
 				def(this);
-				iface.node.routes.routeOut();
+
+				if(iface._enum !== _InternalNodeEnum.BPFnMain)
+					iface.node.routes.routeOut();
 			};
 		}
 		else if(haveFeature === BP_Port.StructOf){
@@ -187,13 +189,20 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 	sync(){
 		// Check all connected cables, if any node need to synchronize
 		let cables = this.cables;
-		let skipSync = this.iface.node.routes.out !== null;
-		let instance = this._node.instance;
+		let thisNode = this._node;
+		let skipSync = thisNode.routes.out !== null;
+		let instance = thisNode.instance;
 
 		let singlePortUpdate = false;
-		if(!this._node._bpUpdating){
+		if(!thisNode._bpUpdating){
 			singlePortUpdate = true;
-			this._node._bpUpdating = true;
+			thisNode._bpUpdating = true;
+		}
+
+		if(thisNode.routes.out !== null
+		   && thisNode.iface._enum === _InternalNodeEnum.BPFnMain
+		   && thisNode.iface.bpInstance.executionOrder.length !== 0){
+			skipSync = true;
 		}
 
 		for (var i = 0; i < cables.length; i++) {
@@ -203,10 +212,10 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			var inp = cable.input;
 			if(inp === void 0) continue;
 			inp._cache = void 0;
-			
+
 			let inpIface = inp.iface;
 
-			if(this._node._bpUpdating){
+			if(thisNode._bpUpdating){
 				if(inp.feature === BP_Port.ArrayOf){
 					inp._hasUpdate = true;
 					cable._hasUpdate = true;
@@ -232,8 +241,8 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		}
 
 		if(singlePortUpdate){
-			this._node._bpUpdating = false;
-			this._node.instance.executionOrder.next();
+			thisNode._bpUpdating = false;
+			thisNode.instance.executionOrder.next();
 		}
 	}
 
@@ -447,7 +456,7 @@ function createCallablePort(port){
 				cable.visualizeFlow();
 
 			if(target._name != null)
-				target.iface._parentFunc.node.output[target._name.name]();
+				target.iface._funcMain.node.output[target._name.name]();
 			else target.iface.input[target.name].default();
 		}
 
