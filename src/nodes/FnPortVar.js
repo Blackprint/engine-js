@@ -20,7 +20,7 @@ Blackprint.nodes.BP.FnVar = {
 			let iface = this.iface;
 
 			// This will trigger the port to request from outside and assign to this node's port
-			this.output.Val = iface._parentFunc.node.input[iface.data.name];
+			this.output.Val = iface._funcMain.node.input[iface.data.name];
 		}
 	},
 	Output: class extends Blackprint.Node {
@@ -42,7 +42,7 @@ Blackprint.nodes.BP.FnVar = {
 			this.refOutput[id] = this.ref.Input.Val;
 
 			// Also update the cache on the proxy node
-			this.iface._parentFunc._proxyOutput.ref.IInput[id]._cache = this.ref.Input.Val;
+			this.iface._funcMain._proxyOutput.ref.IInput[id]._cache = this.ref.Input.Val;
 		}
 	},
 };
@@ -54,7 +54,7 @@ function BPFnVarInit(){
 		imported(data){
 			if(!data.name) throw new Error("Parameter 'name' is required");
 			this.data.name = data.name;
-			this._parentFunc = this.node.instance._funcMain;
+			this._funcMain = this.node.instance._funcMain;
 		}
 	};
 
@@ -66,10 +66,10 @@ function BPFnVarInit(){
 		}
 		imported(data){
 			super.imported(data);
-			let ports = this._parentFunc.ref.IInput;
+			let ports = this._funcMain.ref.IInput;
 			let node = this.node;
 
-			this._proxyIface = this._parentFunc._proxyInput.iface;
+			this._proxyIface = this._funcMain._proxyInput.iface;
 
 			// Create temporary port if the main function doesn't have the port
 			let name = data.name;
@@ -90,7 +90,7 @@ function BPFnVarInit(){
 					node.deletePort('output', 'Val');
 
 					let portName = {name};
-					let portType = getFnPortType(port, 'input', this._parentFunc, portName);
+					let portType = getFnPortType(port, 'input', this._funcMain, portName);
 					let newPort = node.createPort('output', 'Val', portType);
 					newPort._name = portName;
 					newPort.connectPort(port);
@@ -111,7 +111,7 @@ function BPFnVarInit(){
 
 					node.deletePort('output', 'Val');
 
-					let portType = getFnPortType(port, 'input', this._parentFunc, port._name);
+					let portType = getFnPortType(port, 'input', this._funcMain, port._name);
 					let newPort = node.createPort('output', 'Val', portType);
 					this._addListener();
 
@@ -124,7 +124,7 @@ function BPFnVarInit(){
 			else{
 				if(this.output.Val === void 0){
 					let port = ports[name];
-					let portType = getFnPortType(port, 'input', this._parentFunc, port._name);
+					let portType = getFnPortType(port, 'input', this._funcMain, port._name);
 					node.createPort('output', 'Val', portType);
 				}
 
@@ -182,16 +182,16 @@ function BPFnVarInit(){
 		}
 		imported(data){
 			super.imported(data);
-			let ports = this._parentFunc.ref.IOutput;
+			let ports = this._funcMain.ref.IOutput;
 			let node = this.node;
 
-			node.refOutput = this._parentFunc.ref.Output;
+			node.refOutput = this._funcMain.ref.Output;
 
 			// Create temporary port if the main function doesn't have the port
 			let name = data.name;
 			if(!(name in ports)){
 				let iPort = node.createPort('input', 'Val', Types.Any);
-				let proxyIface = this._parentFunc._proxyOutput.iface;
+				let proxyIface = this._funcMain._proxyOutput.iface;
 
 				// Run when this node is being connected with other node
 				iPort.onConnect = (cable, port) => {
@@ -206,7 +206,7 @@ function BPFnVarInit(){
 					node.deletePort('input', 'Val');
 
 					let portName = {name};
-					let portType = getFnPortType(port, 'output', this._parentFunc, portName);
+					let portType = getFnPortType(port, 'output', this._funcMain, portName);
 					let newPort = node.createPort('input', 'Val', portType);
 					newPort._name = portName;
 					newPort.connectPort(port);
@@ -226,7 +226,7 @@ function BPFnVarInit(){
 
 					node.deletePort('input', 'Val');
 
-					let portType = getFnPortType(port, 'output', this._parentFunc, port._name);
+					let portType = getFnPortType(port, 'output', this._funcMain, port._name);
 					let newPort = node.createPort('input', 'Val', portType);
 
 					for (let i=0; i < backup.length; i++)
@@ -236,7 +236,7 @@ function BPFnVarInit(){
 			}
 			else {
 				let port = ports[name];
-				let portType = getFnPortType(port, 'output', this._parentFunc, port._name);
+				let portType = getFnPortType(port, 'output', this._funcMain, port._name);
 				node.createPort('input', 'Val', portType);
 			}
 		}

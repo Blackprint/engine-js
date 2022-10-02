@@ -68,6 +68,7 @@ class BPVariable extends CustomEvent {
 	_value = null;
 	get value(){return this._value}
 	set value(val){
+		if(this._value === val) return;
 		this._value = val;
 		this.emit('value');
 	}
