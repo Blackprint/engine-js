@@ -71,7 +71,7 @@ export function load(url, context, nextLoad) {
 			throw new Error("Can't import module");
 		}
 
-		dir.unshift('.', 'node_modules'); //> ./node_modules/
+		dir.unshift('.', 'node_modules', 'bpModuleCache'); //> ./node_modules/bpModuleCache
 		dir = dir.join('/');
 
 		if(fileName.includes('.') === false)
