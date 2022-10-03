@@ -64,6 +64,13 @@ class CustomEvent {
 	}
 
 	once(eventName, func, options){
+		if(func == null && options == null){
+			return new Promise(resolve => {
+				resolve.once = true;
+				this.on(eventName, resolve);
+			});
+		}
+
 		if(func.constructor === Object){
 			let temp = options;
 			options = func;
