@@ -64,13 +64,6 @@ class CustomEvent {
 	}
 
 	once(eventName, func, options){
-		if(func == null && options == null){
-			return new Promise(resolve => {
-				resolve.once = true;
-				this.on(eventName, resolve);
-			});
-		}
-
 		if(func.constructor === Object){
 			let temp = options;
 			options = func;
@@ -80,6 +73,13 @@ class CustomEvent {
 		func.once = true;
 		this.on.apply(this, arguments);
 		return this;
+	}
+
+	waitOnce(eventName){
+		return new Promise(resolve => {
+			resolve.once = true;
+			this.once(eventName, resolve);
+		});
 	}
 
 	off(eventName, func, options){
@@ -147,6 +147,7 @@ class CustomEvent {
 			}
 
 			if(eventName !== '*' && this._event['*'] !== void 0){
+				obj ??= {};
 				obj.eventName = eventName;
 				return this.emit('*', obj);
 			}
@@ -165,6 +166,7 @@ class CustomEvent {
 		}
 
 		if(eventName !== '*' && this._event['*'] !== void 0){
+			obj ??= {};
 			obj.eventName = eventName;
 			return this.emit('*', obj);
 		}
