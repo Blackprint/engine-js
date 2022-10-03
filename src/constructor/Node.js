@@ -120,13 +120,13 @@ Blackprint.Node = class Node {
 			this._bpUpdating = true;
 			await this.update();
 			this._bpUpdating = false;
+			this.iface.emit('updated');
 		}
 
+		let ref = this.instance.executionOrder;
 		if(this.routes.out == null){
-			let ref = this.instance.executionOrder;
 			if(isMainFuncNode && thisIface.node.routes.out != null){
-				await thisIface.bpInstance.executionOrder.onceComplete();
-				thisIface.node.routes.routeOut();
+				await thisIface.node.routes.routeOut();
 				await ref.next();
 			}
 			else await ref.next();
@@ -135,6 +135,8 @@ Blackprint.Node = class Node {
 			if(!isMainFuncNode)
 				await this.routes.routeOut();
 			else await thisIface._proxyInput.routes.routeOut();
+
+			await ref.next();
 		}
 	}
 

@@ -214,26 +214,23 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			inp._cache = void 0;
 
 			let inpIface = inp.iface;
+			let temp = { port: inp, target: this, cable };
+			inp.emit('value', temp);
+			inpIface.emit('port.value', temp);
 
-			if(thisNode._bpUpdating){
+			if(skipSync === false && thisNode._bpUpdating){
 				if(inp.feature === BP_Port.ArrayOf){
 					inp._hasUpdate = true;
 					cable._hasUpdate = true;
 				}
 				else inp._hasUpdateCable = cable;
 
-				if(skipSync === false && inpIface._requesting === false)
+				if(inpIface._requesting === false)
 					instance.executionOrder.add(inp._node);
-
-				continue;
 			}
 
-			let temp = { port: inp, target: this, cable };
-			inp.emit('value', temp);
-			inpIface.emit('port.value', temp);
-
 			// Skip sync if the node has route cable
-			if(skipSync) continue;
+			if(skipSync || thisNode._bpUpdating) continue;
 
 			let node = inpIface.node;
 			if(node.update && inpIface._requesting === false && node.routes.in.length === 0)
