@@ -512,6 +512,7 @@ function BPFnInit(){
 				inputPort = nodeA.createPort('input', name, Blackprint.Port.Trigger(outputPort._callAll));
 			else inputPort = nodeA.createPort('input', name, portType);
 
+			// When using Blackprint.Sketch we need to reconnect the cable
 			if(cable != null){
 				if(this.type === 'bp-fn-input')
 					outputPort.connectCable(cable);

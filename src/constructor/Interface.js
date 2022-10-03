@@ -75,8 +75,11 @@ Blackprint.Interface = class Interface extends Blackprint.Engine.CustomEvent{
 				port.iface = iface;
 
 				if(port.source === "output")
-					port.value = undefined;
-				else port.value = port.default;
+					port.value = void 0;
+				else {
+					port.value = port.default;
+					port._cache = void 0;
+				}
 			}
 		}
 
