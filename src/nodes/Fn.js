@@ -114,9 +114,9 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 				iface._enum = _InternalNodeEnum.BPFnMain;
 			}
 
-			async init(){
-				if(!this.iface._importOnce) await this.iface._BpFnInit();
-			}
+			// async init(){
+			// 	if(!this.iface._importOnce) await this.iface._BpFnInit();
+			// }
 		};
 	}
 
