@@ -295,7 +295,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 		this._importing = false;
 		this.emit("json.imported", {appendMode: options.appendMode, nodes: inserted, raw: json});
-		this.executionOrder.next();
+		await this.executionOrder.next();
 
 		return inserted;
 	}
@@ -333,20 +333,6 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		iface.node.instance.emit('node.id.changed', {
 			iface, from: oldId, to: newId
 		});
-	}
-
-	// Deprecated, please use `instance.iface` or `instance.ifaceList` instead
-	getNode(id){
-		if(id == null) throw "ID couldn't be null or undefined";
-
-		var ifaces = this.ifaceList;
-		if(id.constructor === Number)
-			return ifaces[id].node;
-
-		for (var i = 0; i < ifaces.length; i++) {
-			if(ifaces[i].id === id)
-				return ifaces[i].node;
-		}
 	}
 
 	// ToDo: Improve
