@@ -40,7 +40,6 @@ var Blackprint = require('./../../dist/engine.min.js');
 				set value(val){
 					theValue = val;
 					iface.changed(val);
-					iface.node.routes.routeOut();
 				},
 			};
 		}

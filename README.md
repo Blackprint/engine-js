@@ -16,7 +16,7 @@ This repository is designed to be used together with [Blackprint](https://github
 > Warning: This project haven't reach it stable version (semantic versioning at v1.0.0)<br>
 > But please try to use it and help improve this project
 
-If you want to port this engine to another programming language, please use [engine-php](https://github.com/Blackprint/engine-php) as a reference instead.
+If you want to port this engine to another programming language, please use [engine-php](https://github.com/Blackprint/engine-php) or [engine-python](https://github.com/Blackprint/engine-python) as a reference instead.
 
 ---
 
@@ -25,7 +25,7 @@ Please specify the version when importing, breaking changes may happen on v0.\*.
 
 Browser
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@blackprint/engine@0.7"></script>
+<script src="https://cdn.jsdelivr.net/npm/@blackprint/engine@0.8"></script>
 <script>
     let instance = new Blackprint.Engine();
     instance.importJSON("{...}");
@@ -35,7 +35,7 @@ Browser
 Node.js
 ```sh
 # Add the dependency first
-npm i @blackprint/engine@0.7
+npm i @blackprint/engine@0.8
 ```
 
 ```js
@@ -47,11 +47,14 @@ instance.importJSON("{...}");
 
 Deno
 ```js
-import Blackprint from 'https://cdn.skypack.dev/@blackprint/engine@0.7';
+import Blackprint from 'https://cdn.skypack.dev/@blackprint/engine@0.8';
 
 let instance = new Blackprint.Engine();
 instance.importJSON("{...}");
 ```
+
+> For Deno, you need to use `--allow-net` to allow importing modules from URL
+
 ---
 
 ### Creating Custom Nodes
@@ -60,13 +63,13 @@ You can use [this template](https://github.com/Blackprint/template-js) for creat
 You can also use different build tools like Rollup/WebPack/etc.
 
 ### Defining Blackprint Node and Interface
-Because JavaScript does support Class Oriented programming, defining Node and Interface with `class` is more recommended for better performance and memory usage. Defining with `function` will still being possible, especially if the custom node developer is coming from functional programming background that doesn't support `class` like Golang.
+Because JavaScript does support class-based programming, we will create our custom nodes and interface by using `class`. Below is an example for plain JavaScript, in case your compiler does support for using decorator you can also use `@Blackprint.registerNode("...")` as class decorator.
 
 ```js
 // Node will be initialized first by Blackprint Engine
 // This should be used for initialize port structure and set the target interface
 Blackprint.registerNode('LibraryName/FeatureName/Template',
-class MyTemplate extends Blackprint.Node{
+class MyTemplate extends Blackprint.Node {
     // this == node
 
     // You can use type data like Number/String or "Blackprint.Port"
@@ -98,9 +101,25 @@ class MyTemplate extends Blackprint.Node{
         // Called before iface.init()
     }
 
-    update(){
+    update(cable=null){
         // Triggered when any output value from other node are updated
         // And this node's input connected to that output
+
+        /**
+         * Using this .update() function is MORE recommended rather than listening
+         * for value changes with event listener.
+         * 
+         * Multiple input update will be delayed by the internal execution order
+         * and this function will be triggered once this node has turn to be updated
+         * 
+         * In case you need to partially update for specific ports
+         * you can enable the mode by adding code below on your constructor function
+         * > this.partialUpdate = true;
+         * 
+         * By using `.partialUpdate` when this node is going to be updated
+         * this `.update` function will be called multiple times for every updated cable
+         * and the `cable` parameter will no longer null, but it will referencing to the updated cable
+         */ 
     }
 
     request(){
@@ -114,7 +133,7 @@ class MyTemplate extends Blackprint.Node{
 });
 ```
 
-Because Node is supposed to contain structure only it should be designed to be simple, the another complexity like calling system API or providing API for developer to interact with your node should be placed on Interface class.
+Let's also define our custom interface, this is optional and needed only if you want to provide access for other developer. Just like an API (Application Programming Interface).
 
 ```js
 var Context = {IFace: {}};
@@ -132,7 +151,7 @@ Context.IFace.MyTemplate = class IMyTemplate extends Blackprint.Interface {
         this.myData = 123;
         this._log = '...';
 
-        // If the data was stored on this, they will be exported as JSON
+        // If the data was stored on this field ".data", they will be exported as JSON
         // (Property name with _ or $ will be ignored)
         this.data = {
             get value(){ return this._value },
@@ -185,7 +204,7 @@ Context.IFace.MyTemplate = class IMyTemplate extends Blackprint.Interface {
 ```js
 // For Sketch Interface, this will being passed to ScarletsFrame
 // - first parameter is IFace namespace
-// - second parameter is optional, you can use if for custom options
+// - second parameter can be used for custom options (this is required if you're not using Blackprint compiler and want to define custom HTML)
 // - third parameter can be placed on second parameter, it's must be class/function for construction
 Blackprint.Sketch.registerInterface('BPIC/LibraryName/FeatureName/Template', {
   html: `
@@ -350,7 +369,7 @@ console.log(instance.iface["foo"].data["value"]);
 
 ### Example
 Please visit the `/example` folder if you want to try the code.
-![VEfiZCFQAi](https://user-images.githubusercontent.com/11073373/143415090-44eae35f-4863-45cc-8c4c-fe331fee5044.png)
+![B71rGnn84k](https://user-images.githubusercontent.com/11073373/194287719-9e37b3a1-eb5a-4f58-a746-df982420299b.jpg)
 
 ## Contributing
 Feel free to contribute any bug fix, improvement, report an issue or ask a feature for the Engine.

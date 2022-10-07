@@ -1,7 +1,61 @@
+# 0.8.0
+
+### Features
+- Add `waitOnce` for waiting for an event with Promise
+- Add pausible execution feature and change node execution order (experimental, please expect changes in version 0.8)
+- Add VirtualType port feature
+- Export cable input order for Sketch instance
+
+### Bug Fix
+- Fix `value` event trigger
+- Fix execution order for custom function node
+- Fix incorrect value when using function port's node
+- Fix cable input order
+- Fix route and partial update
+- Fix incorrect iface id references
+- Clear port cache when reusing port
+- Avoid re-emitting event on updated cable
+- Avoid using ArrayOf port for custom function node
+
+### Breaking Changes
+- Remove deprecated function `instance.getNode()`, please use `instance.iface[id]` or `instance.ifaceList[index]`
+
+```js
+let instance = new Blackprint.Engine();
+instance.importJSON('...');
+
+// Get iface by node id
+instance.getNode('nodeId'); // Before
+instance.iface['nodeId']; // After
+
+// Get iface by node index
+instance.getNode(0); // Before
+instance.ifaceList[0]; // After
+```
+
+- `.update` function will no longer receive parameter if `.partialUpdate` is not set to true
+
+```js
+// Before
+class extends Blackprint.Node {
+	update(cable){...}
+}
+
+// After
+class extends Blackprint.Node {
+	constructor(){
+		this.partialUpdate = true;
+	}
+
+	update(cable){...}
+}
+```
+
 # 0.7.5
+
 ### Features
 - Add isRoute flag on route port
-- Add json.importing event
+- Add `json.importing` event
 - Update ES6 remote module loader for Node.js
 
 ### Bug Fix
