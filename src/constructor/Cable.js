@@ -159,8 +159,13 @@ class Cable{
 		let hasTarget = false;
 		let alreadyEmitToInstance = false;
 
-		if(this.input !== void 0)
-			this.input._cache = void 0;
+		let inputPort = this.input;
+		if(inputPort !== void 0){
+			inputPort._cache = void 0;
+
+			if(inputPort._hasUpdateCable === this)
+				inputPort._hasUpdateCable = null;
+		}
 
 		// Remove from cable owner
 		if(owner && (!which || owner === which)){
