@@ -156,6 +156,9 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 				if(port.iface.node.disablePorts || (!(port.splitted || port.allowResync) && port.value === val))
 					return;
 
+				let isNoConnection = port._node.instance._locked_ && port.cables === 0;
+				if(isNoConnection && port._event?.value == null) return;
+
 				if(val == null)
 					val = port.default;
 
@@ -170,8 +173,19 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 				port.value = val;
 				port.emit('value', { port });
 
+				if(isNoConnection) return;
+
 				if(port.feature === BP_Port.StructOf && port.splitted){
+					let node = port._node;
+					let oldStatus = node._bpUpdating;
+
+					node._bpUpdating = true;
 					BP_Port.StructOf.handle(port, val);
+					node._bpUpdating = oldStatus;
+
+					if(oldStatus === false)
+						node.instance.executionOrder.next();
+
 					return;
 				}
 
@@ -219,11 +233,13 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			inpIface.emit('port.value', temp);
 
 			if(skipSync === false && thisNode._bpUpdating){
-				if(inp.feature === BP_Port.ArrayOf){
-					inp._hasUpdate = true;
-					cable._hasUpdate = true;
+				if(inpIface.partialUpdate){
+					if(inp.feature === BP_Port.ArrayOf){
+						inp._hasUpdate = true;
+						cable._hasUpdate = true;
+					}
+					else inp._hasUpdateCable = cable;
 				}
-				else inp._hasUpdateCable = cable;
 
 				if(inpIface._requesting === false)
 					instance.executionOrder.add(inp._node);
