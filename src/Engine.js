@@ -14,6 +14,9 @@ Blackprint.Engine = class Engine extends CustomEvent {
 	}
 
 	deleteNode(iface){
+		if(this._locked_)
+			throw new Error("This instance was locked");
+
 		let list = this.ifaceList;
 		var i = list.indexOf(iface);
 
@@ -64,6 +67,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 	}
 
 	clearNodes(){
+		if(this._locked_) throw new Error("This instance was locked");
+
 		let list = this.ifaceList;
 		for (var i = 0; i < list.length; i++) {
 			let iface = list[i];
@@ -78,7 +83,10 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		this.ref = {};
 	}
 
+	// If this was changed, we also need to change the `importJSON` on the `@blackprint/sketch`
 	async importJSON(json, options){
+		if(this._locked_) throw new Error("This instance was locked");
+
 		if(window.sf && window.sf.loader)
 			await window.sf.loader.task;
 
@@ -307,6 +315,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 	}
 
 	changeNodeId(iface, newId){
+		if(this._locked_) throw new Error("This instance was locked");
+
 		let sketch = iface.node.instance;
 		let oldId = iface.id;
 		if(oldId === newId || iface.importing) return;
@@ -350,6 +360,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 	// ToDo: turn this into async and wait call to `iface.imported`
 	createNode(namespace, options, handlers){
+		if(this._locked_) throw new Error("This instance was locked");
+
 		var node, func;
 		if(!(namespace.prototype instanceof Blackprint.Node)){
 			func = deepProperty(Blackprint.nodes, namespace.split('/'));
@@ -452,6 +464,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 	}
 
 	createVariable(id, options){
+		if(this._locked_) throw new Error("This instance was locked");
+
 		if(id in this.variables){
 			this.variables[id].destroy();
 			delete this.variables[id];
@@ -467,6 +481,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 	}
 
 	createFunction(id, options){
+		if(this._locked_) throw new Error("This instance was locked");
+
 		if(id in this.functions){
 			this.functions[id].destroy();
 			delete this.functions[id];
@@ -501,9 +517,58 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		else this.emit('log', data);
 	}
 
+	/*
+	Mark this instance as locked, nodes/cable connection can't be modified and optimize for performance
+	Any unconnected output port will no longer update `port.value` and 'value' event will not be emitted
+	`port.disabled` flag will be set to `true` or get deleted from the node
+	*/
+	lock(){
+		console.log("Instance lock feature is still experimental, this may get deleted/changed anytime. Feel free to create a discussion if you need this feature.");
+
+		this._locked_ = true;
+		let list = this.ifaceList;
+
+		for (let i=0; i < list.length; i++) {
+			let iface = list[i];
+			if(iface._enum === _InternalNodeEnum.BPFnMain)
+				iface.bpInstance.lock();
+
+			// Check and disable any unconnected ports
+			let { output } = iface; // Port Interface
+			for (let key in output) {
+				let port = output[key];
+
+				// Skip port created by from `StructOf` port feature and it's not being splitted too
+				if(port._structSplitted && port.structList == null) continue;
+
+				// Transverse over all output port that have `.structList` and disable any unconnected port
+				// In JavaScript we will also remove from `.structList`
+				let { struct, structList } = port;
+				if(structList != null){
+					for (let a=structList.length-1; a >= 0; a--) {
+						let iPort = output[struct[structList[a]]._name];
+						if(iPort.cables.length === 0){
+							// iface.node.deletePort('output', iPort.name);
+							iPort.disabled = true;
+							structList.splice(a, 1);
+						}
+					}
+
+					// Unsplit any splitted port for 'StructOf' port feature to improve performance if no connection
+					if(structList.length === 0){
+						BP_Port.StructOf.unsplit(port);
+						port.disabled = true;
+					}
+				}
+				else if(port.cables.length === 0){
+					port.disabled = true;
+				}
+			}
+		}
+	}
+
 	destroy(){
-		this.iface = {};
-		this.ifaceList.splice(0);
+		this._locked_ = false;
 		this.clearNodes();
 	}
 }

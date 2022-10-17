@@ -20,7 +20,7 @@ BP_Port.StructOf.split = function(port){
 
 	let node = port.iface.node;
 	let struct = port.struct;
-	port.structList ??= Object.keys(port.struct);
+	port.structList ??= Object.keys(struct);
 
 	let hasSketch = Blackprint.Sketch != null;
 	let newPort;
@@ -72,9 +72,8 @@ BP_Port.StructOf.unsplit = function(port){
 }
 
 BP_Port.StructOf.handle = function(port, data){
-	let struct = port.struct;
+	let { struct, structList } = port;
 	let { output } = port.iface.node;
-	let structList = port.structList;
 
 	if(data != null){
 		for (let i=0; i < structList.length; i++) {

@@ -10,6 +10,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		this._node = iface.node;
 		this.classAdd = '';
 		this.splitted = false;
+		this.disabled = false; // for output port
 		this._hasUpdate = false;
 		this.allowResync = false; // Retrigger connected node's .update when the output value is similar
 
@@ -153,10 +154,10 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		// Can only obtain data when accessing input port
 		if(port.source !== 'input'){
 			prepare.set = function(val){ // for output/property port
-				if(port.iface.node.disablePorts || (!(port.splitted || port.allowResync) && port.value === val))
+				if(port.iface.node.disablePorts || (!(port.splitted || port.allowResync) && port.value === val) || port.disabled)
 					return;
 
-				let isNoConnection = port._node.instance._locked_ && port.cables === 0;
+				let isNoConnection = port._node.instance._locked_ && port.cables === 0 && !port.splitted;
 				if(isNoConnection && port._event?.value == null) return;
 
 				if(val == null)
@@ -286,6 +287,9 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 	}
 
 	connectCable(cable){
+		if(this._node.instance._locked_)
+			throw new Error("This instance was locked");
+
 		if(cable === void 0 && this._scope !== void 0)
 			cable = this._scope('cables').currentCable;
 
@@ -420,6 +424,9 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 	}
 
 	connectPort(port){
+		if(this._node.instance._locked_)
+			throw new Error("This instance was locked");
+
 		if(!(port instanceof Engine.Port))
 			throw new Error("First parameter must be instance of Port");
 
