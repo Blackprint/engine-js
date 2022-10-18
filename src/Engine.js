@@ -199,7 +199,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 				// Connect route cable
 				if(node.route != null)
-					iface.node.routes.routeTo(inserted[node.route.i]);
+					iface.node.routes.routeTo(inserted[node.route.i + appendLength]);
 
 				// If have output connection
 				if(node.output !== void 0){
@@ -234,7 +234,17 @@ Blackprint.Engine = class Engine extends CustomEvent {
 							var target = port[k];
 							target.i += appendLength;
 
-							var targetNode = inserted[target.i];
+							var targetNode = inserted[target.i]; // iface
+
+							if(linkPortA.isRoute){
+								let cable = new Cable(linkPortA);
+								cable.isRoute = true;
+								cable.output = linkPortA;
+								linkPortA.cables.push(cable);
+
+								targetNode.node.routes.connectCable(cable);
+								continue;
+							}
 
 							// output can only meet input port
 							var linkPortB = targetNode.input[target.name];

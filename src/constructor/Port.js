@@ -139,7 +139,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 							return port._cache = output.value ?? port.default;
 						}
 
-						data.push(output.value ?? port.default);
+						data.push(output.value);
 					}
 
 					port.iface._requesting = false;
@@ -234,7 +234,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			inpIface.emit('port.value', temp);
 
 			if(skipSync === false && thisNode._bpUpdating){
-				if(inpIface.partialUpdate){
+				if(inpIface.node.partialUpdate){
 					if(inp.feature === BP_Port.ArrayOf){
 						inp._hasUpdate = true;
 						cable._hasUpdate = true;
