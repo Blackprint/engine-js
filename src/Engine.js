@@ -466,8 +466,13 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 		if(handlers !== void 0)
 			handlers.push(node);
-		else if(node.init !== void 0)
-			node.init();
+		else {
+			if(node.init !== void 0)
+				node.init();
+
+			if(iface.init !== void 0)
+				iface.init();
+		}
 
 		// this.emit('node.created', { iface });
 		return iface;
@@ -485,6 +490,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 		// BPVariable = ./nodes/Var.js
 		let temp = this.variables[id] = new BPVariable(id, options);
+		temp._scope = VarScope.Public;
 		this.emit('variable.new', temp);
 
 		return temp;
