@@ -283,7 +283,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			msg += `\nTo port: ${obj.target.name} (iface: ${obj.target.iface.namespace})\n - Type: ${obj.target.source} (${obj.target.type.name})`;
 
 		obj.message = msg;
-		this.iface.node.instance.emit(name, obj);
+		this.iface.node.instance._emit(name, obj);
 	}
 
 	connectCable(cable){

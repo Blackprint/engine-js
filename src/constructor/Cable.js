@@ -14,7 +14,7 @@ class Cable{
 
 	visualizeFlow(){
 		if(Blackprint.settings._remoteEngine)
-			this.owner.iface.node.instance.emit('_flowEvent', this);
+			this.owner.iface.node.instance._emit('_flowEvent', {cable: this});
 	}
 	get value(){
 		if(Blackprint.settings.visualizeFlow)

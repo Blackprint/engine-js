@@ -390,7 +390,10 @@ function BPFnInit(){
 
 			if(node.instance.constructor === Blackprint.Engine)
 				this.bpInstance = new Blackprint.Engine();
-			else this.bpInstance = new Blackprint.Sketch();
+			else{
+				this.bpInstance = new Blackprint.Sketch();
+				this.bpInstance.pendingRender = true;
+			}
 
 			let bpFunction = node._funcInstance;
 
@@ -423,7 +426,7 @@ function BPFnInit(){
 				clearTimeout(debounce);
 				debounce = setTimeout(() => {
 					if(this.bpInstance.exportJSON == null){
-						this.bpInstance.emit('_fn.structure.update', this);
+						this.bpInstance._emit('_fn.structure.update', { iface: this });
 						return;
 					}
 
@@ -444,7 +447,7 @@ function BPFnInit(){
 				bpFunction._syncing = false;
 			};
 
-			this.bpInstance.on('cable.connect cable.disconnect node.created node.delete node.move node.id.changed', this._save);
+			this.bpInstance.on('cable.connect cable.disconnect node.created node.delete node.move node.id.changed port.default.changed _port.split _port.unsplit _port.resync.allow _port.resync.disallow', this._save);
 		}
 		renamePort(which, fromName, toName){
 			this.node._funcInstance.renamePort(which, fromName, toName);

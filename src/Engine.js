@@ -22,7 +22,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 		if(i !== -1)
 			list.splice(i, 1);
-		else return this.emit('error', {
+		else return this._emit('error', {
 			type: 'node_delete_not_found',
 			data: {iface}
 		});
@@ -30,7 +30,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		iface._bpDestroy = true;
 
 		let eventData = { iface };
-		this.emit('node.delete', eventData);
+		this._emit('node.delete', eventData);
 
 		iface.node.destroy && iface.node.destroy();
 		iface.destroy && iface.destroy();
@@ -63,7 +63,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		if(parent != null)
 			delete parent.rootInstance.ref[iface.id];
 
-		this.emit('node.deleted', eventData);
+		this._emit('node.deleted', eventData);
 	}
 
 	clearNodes(){
@@ -491,7 +491,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		// BPVariable = ./nodes/Var.js
 		let temp = this.variables[id] = new BPVariable(id, options);
 		temp._scope = VarScope.Public;
-		this.emit('variable.new', temp);
+		this._emit('variable.new', temp);
 
 		return temp;
 	}
@@ -521,7 +521,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 			}
 		}
 
-		this.emit('function.new', temp);
+		this._emit('function.new', temp);
 		return temp;
 	}
 
@@ -529,8 +529,20 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		data.instance = this;
 
 		if(this._mainInstance != null)
-			this._mainInstance.emit('log', data);
-		else this.emit('log', data);
+			this._mainInstance._emit('log', data);
+		else this._emit('log', data);
+	}
+
+	_emit(evName, data){
+		this.emit(evName, data);
+		if(this._funcMain == null) return;
+
+		let rootInstance = this._funcMain.node._funcInstance.rootInstance;
+		if(rootInstance._remote == null) return;
+
+		data ??= {};
+		data.bpFunction = rootInstance._funcInstance;
+		rootInstance.emit(evName, data);
 	}
 
 	/*
