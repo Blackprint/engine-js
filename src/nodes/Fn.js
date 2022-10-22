@@ -114,9 +114,10 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 				iface._enum = _InternalNodeEnum.BPFnMain;
 			}
 
-			// async init(){
-			// 	if(!this.iface._importOnce) await this.iface._BpFnInit();
-			// }
+			async init(){
+				// This is required when the node is created at runtime (maybe from remote or Sketch)
+				if(!this.iface._importOnce) await this.iface._BpFnInit();
+			}
 		};
 	}
 
@@ -236,6 +237,7 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 		// BPVariable = ./Var.js
 		let temp = new BPVariable(id, options);
 		temp.funcInstance = this;
+		temp._scope = options.scope;
 
 		if(options.scope === VarScope.Shared){
 			if(Blackprint.Sketch != null)
@@ -253,7 +255,11 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 		if(!this.privateVars.includes(id)){
 			this.privateVars.push(id);
 			this.emit('variable.new', {scope: VarScope.Private, id});
-			this.rootInstance.emit('variable.new', {scope: VarScope.Private, id});
+			this.rootInstance.emit('variable.new', {
+				funcInstance: this,
+				scope: VarScope.Private,
+				id,
+			});
 		}
 		else return;
 
@@ -416,6 +422,11 @@ function BPFnInit(){
 			this._save = (ev, eventName, force) => {
 				clearTimeout(debounce);
 				debounce = setTimeout(() => {
+					if(this.bpInstance.exportJSON == null){
+						this.bpInstance.emit('_fn.structure.update', this);
+						return;
+					}
+
 					bpFunction.structure = this.bpInstance.exportJSON({
 						toRawObject: true,
 						exportFunctions: false,
