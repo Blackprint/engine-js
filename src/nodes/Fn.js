@@ -452,6 +452,11 @@ function BPFnInit(){
 		renamePort(which, fromName, toName){
 			this.node._funcInstance.renamePort(which, fromName, toName);
 			this._save(false, false, true);
+
+			this.node.instance._emit('_fn.rename.port', {
+				iface: this,
+				which, fromName, toName,
+			});
 		}
 	});
 
@@ -557,6 +562,11 @@ function BPFnInit(){
 
 			// Output (input) -> Main (output)
 			else bpFunction.renamePort('output', fromName, toName);
+
+			this.node.instance._emit('_fn.rename.port', {
+				iface: this,
+				which, fromName, toName,
+			});
 		}
 		deletePort(name){
 			let funcMainNode = this._funcMain.node;
