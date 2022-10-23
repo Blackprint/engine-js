@@ -57,6 +57,33 @@ function BPEnvInit(){
 
 				Blackprint.on('environment.renamed', this._nameListener);
 			}
+
+			let name = this.data.name;
+			let rules = Blackprint.Environment._rules[name];
+
+			// Only allow connection to certain node namespace
+			if(rules != null){
+				if(this._enum === _InternalNodeEnum.BPEnvGet && rules.allowGet != null){
+					let Val = this.output.Val;
+					Val.onConnect = function(cable, targetPort){
+						if(!rules.allowGet.includes(targetPort.iface.namespace)){
+							Val._cableConnectError('cable.rule.disallowed', {cable, port: Val, target: targetPort});
+							cable.disconnect();
+							return true; // Disconnect cable or disallow connection
+						}
+					}
+				}
+				else if(this._enum === _InternalNodeEnum.BPEnvSet && rules.allowSet != null){
+					let Val = this.input.Val;
+					Val.onConnect = function(cable, targetPort){
+						if(!rules.allowSet.includes(targetPort.iface.namespace)){
+							Val._cableConnectError('cable.rule.disallowed', {cable, port: Val, target: targetPort});
+							cable.disconnect();
+							return true; // Disconnect cable or disallow connection
+						}
+					}
+				}
+			}
 		}
 		destroy(){
 			if(this._nameListener == null) return;
@@ -68,8 +95,9 @@ function BPEnvInit(){
 	class extends BPEnvGetSet {
 		imported(data){
 			super.imported(data);
+
 			this._listener = v => {
-				if(v.key !== this.data.name) return;
+				if(v.key !== this.data.name) return; // use full this.data.name
 				this.ref.Output.Val = v.value;
 			};
 

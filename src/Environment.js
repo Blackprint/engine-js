@@ -4,6 +4,7 @@ Blackprint.Environment = {
 	map: {}, // Use this instead
 	_map: {},
 	_list: [],
+	_rules: {},
 
 	loadFromURL: false,
 	isBrowser: false,
@@ -84,7 +85,23 @@ Blackprint.Environment = {
 		delete _map[key];
 		delete map[key];
 		Blackprint.emit('environment.deleted', {key});
-	}
+	},
+
+	/**
+	 * options = {allowGet: {}, allowSet: {}}
+	 */
+	rule(name, options){
+		if(this.map[name] == null)
+			throw new Error(`'${name}' was not found on Blackprint.Environment, maybe it haven't been added or imported`);
+
+		if(this._rules[name] != null)
+			throw new Error("'rule' only allow first registration");
+
+		if(options == null)
+			throw new Error("Second parameter is required");
+
+		this._rules[name] = options;
+	},
 };
 
 if(window.HTMLVideoElement !== void 0){
