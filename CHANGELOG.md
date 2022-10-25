@@ -1,3 +1,18 @@
+# 0.8.1
+
+### Features
+- Add experimental feature to lock the instance
+- Improve security for environment variable node by using connection rule
+
+### Bug Fix
+- Emit internal event when function port was renamed
+- Fix event to be emitted to root instance
+- Fix function node that was not being initialized if created manually at runtime
+- Fix route port connection and array input data
+- Immediate init interface for single node creation
+- Improve performance and fix execution order for with `StructOf` feature
+- Reset updated cable status when disconnected and minor changes
+
 # 0.8.0
 
 ### Features
@@ -33,21 +48,21 @@ instance.getNode(0); // Before
 instance.ifaceList[0]; // After
 ```
 
-- `.update` function will no longer receive parameter if `.partialUpdate` is not set to true
+- `.update` function will no longer receive cable parameter if `.partialUpdate` is not set to true
 
 ```js
 // Before
 class extends Blackprint.Node {
-	update(cable){...}
+    update(cable){...}
 }
 
 // After
 class extends Blackprint.Node {
-	constructor(){
-		this.partialUpdate = true;
-	}
+    constructor(){
+        this.partialUpdate = true;
+    }
 
-	update(cable){...}
+    update(cable){...}
 }
 ```
 
@@ -137,23 +152,23 @@ class extends Blackprint.Node {
 
 ```js
 class MyNode extends Blackprint.Node {
-	static input = {
-		// Before
-		AnyType: null,
+    static input = {
+        // Before
+        AnyType: null,
 
-		// After
-		AnyType: Blackprint.Types.Any,
-	}
+        // After
+        AnyType: Blackprint.Types.Any,
+    }
 
-	// Before
-	update(port, source, cable){}
-	// After
-	update(cable){} // port = cable.input, source = cable.output
+    // Before
+    update(port, source, cable){}
+    // After
+    update(cable){} // port = cable.input, source = cable.output
 
-	// Before
-	request(port, sourceIface){}
-	// After
-	request(cable){} // port = cable.output, sourceIface = cable.input.iface
+    // Before
+    request(port, sourceIface){}
+    // After
+    request(cable){} // port = cable.output, sourceIface = cable.input.iface
 }
 ```
 
@@ -243,17 +258,17 @@ class MyNode extends Blackprint.Node {
 
 ### Breaking Changes
 - Creating input/output port dynamically now become:
-	- After: `node.createPort("input" | "output", name, type)`
-	- Before: `node.input.add(name, type)`
+    - After: `node.createPort("input" | "output", name, type)`
+    - Before: `node.input.add(name, type)`
 - Deleting input/output port dynamically now become:
-	- After: `node.deletePort("input" | "output", name)`
-	- Before: `node.input.delete(name)`
+    - After: `node.deletePort("input" | "output", name)`
+    - Before: `node.input.delete(name)`
 - Input/output port name that start with `_` will be ignored
 - Rename some function and mark it as private
 - `node.input` and `node.output` construction now must be changed to static class variable
 
 <details>
-	<summary>Click here to open details</summary>
+    <summary>Click here to open details</summary>
 
 ```js
 class MyCustomNode extends Blackprint.Node {
@@ -342,8 +357,8 @@ Input.Port.Stuff.on('value', function(target){});
 
 // After
 Input.Port.Stuff.on('value', function({ target, cable }){
-	// cable.value === target.value
-	// cable.value: is more recommended than using `target.value`
+    // cable.value === target.value
+    // cable.value: is more recommended than using `target.value`
 });
 ```
 

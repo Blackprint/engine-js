@@ -60,7 +60,7 @@ instance.importJSON("{...}");
 ### Creating Custom Nodes
 You can use [this template](https://github.com/Blackprint/template-js) for creating new nodes, the template is designed for Browser/Node.js/Deno. By using `@blackprint/cli-tools` you can attach the compiler with the [Blackprint Editor](https://blackprint.github.io/) for fast development with hot reload for Browser. The template also contain some example + comment, and designed for URL module loader on Browser/Node.js/Deno.
 
-You can also use different build tools like Rollup/WebPack/etc.
+You can also use different build tools like Rollup/WebPack/etc in case you're more familiar with it for your project, but currently you will lose `.sf` extension compiler and hot reloading or documenting the nodes _may_ be more complicated.
 
 ### Defining Blackprint Node and Interface
 Because JavaScript does support class-based programming, we will create our custom nodes and interface by using `class`. Below is an example for plain JavaScript, in case your compiler does support for using decorator you can also use `@Blackprint.registerNode("...")` as class decorator.
