@@ -597,6 +597,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 	destroy(){
 		this._locked_ = false;
+		this._destroyed_ = true;
 		this.clearNodes();
 	}
 }
