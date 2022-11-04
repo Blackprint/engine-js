@@ -425,10 +425,10 @@ function BPFnInit(){
 			this._save = (ev, eventName, force) => {
 				clearTimeout(debounce);
 				debounce = setTimeout(() => {
-					if(this.bpInstance.exportJSON == null){
-						this.bpInstance._emit('_fn.structure.update', { iface: this });
+					this.bpInstance._emit('_fn.structure.update', { iface: this });
+
+					if(this.bpInstance.exportJSON == null)
 						return;
-					}
 
 					bpFunction.structure = this.bpInstance.exportJSON({
 						toRawObject: true,
