@@ -142,13 +142,11 @@ function determinePortType(val, that){
 			type = BP_Port.Route;
 			def = null;
 		}
-		else{
-			type = val.constructor;
-			def = val;
+		else if(val.virtualType != null){
+			// For engine-js only, as this only for Blackprint Sketch
+			virtualType = val.virtualType;
 		}
-
-		// For engine-js only, as this only for Blackprint Sketch
-		virtualType = val.virtualType;
+		else throw new Error("Unrecognized port type or port feature");
 
 		// Default must be null (because it's defined but don't have data)
 		if(def === void 0) def = null;
