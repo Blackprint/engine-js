@@ -142,12 +142,14 @@ function determinePortType(val, that){
 			type = BP_Port.Route;
 			def = null;
 		}
-		else if(val.portFeature === BP_Port.VirtualType){
-			haveFeature = BP_Port.VirtualType;
+		else if(val.portFeature === BP_Port.VirtualType){ } // pass
+		else throw new Error("Unrecognized port type or port feature");
+
+		if(val.virtualType != null){
+			haveFeature = val.portFeature;
 			virtualType = val.virtualType;
 			type = val.portType;
 		}
-		else throw new Error("Unrecognized port type or port feature");
 
 		// Default must be null (because it's defined but don't have data)
 		if(def === void 0) def = null;

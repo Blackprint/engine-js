@@ -1,4 +1,6 @@
 // This only exist on JavaScript, just like a typed string or other typed primitives
+// VirtualType does allow connection between different VirtualType
+// This feature is only supposed for node suggestion
 // Mostly can be useful for Blackprint Sketch as a helper/shortcut when creating nodes
 BP_Port.VirtualType = function(originalType, virtualName, context){
 	if(Blackprint.Sketch == null) return originalType;
@@ -10,9 +12,10 @@ BP_Port.VirtualType = function(originalType, virtualName, context){
 		virtualName[i] = (context.__virtualTypes[virtualName[i]] ??= {name: virtualName[i]});
 	}
 
-	if(originalType.portFeature){
-		originalType.virtualType = virtualName;
-		return originalType;
+	if(originalType.portFeature != null){
+		let temp = Object.create(originalType);
+		temp.virtualType = virtualName;
+		return temp;
 	}
 
 	return {
@@ -35,7 +38,7 @@ BP_Port.VirtualType.validate = function(types, target){
 		return false;
 
 	let A = types.virtualType;
-	let B = types.virtualType;
+	let B = target.virtualType;
 
 	for (let i=0; i < A.length; i++) {
 		if(B.includes(A[i])) return true;
