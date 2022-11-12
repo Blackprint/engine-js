@@ -1,3 +1,15 @@
+# 0.8.2
+
+### Features
+- Emit `destroy` event when the instance was destroyed
+
+### Bug Fix
+- Fix VirtualType validation
+- Fix error when using VirtualType
+- Fix VirtualType and throw error on unrecognized type
+- Emit internal event for engine-js
+- Add internal destroyed flag
+
 # 0.8.1
 
 ### Features
