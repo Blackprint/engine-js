@@ -1,3 +1,5 @@
+window.Blackprint ??= {};
+
 /**
  * This can be used to import Blackprint JSON without actually loading any nodes modules
  * Every nodes is generated at runtime, nodes will doing nothing even get connected
