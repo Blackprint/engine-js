@@ -1,4 +1,5 @@
-window.Blackprint ??= {};
+let exports = module.exports; // This will be 'window' object on browser
+let Blackprint = exports = module.exports = window.Blackprint ??= {};
 
 /**
  * This can be used to import Blackprint JSON without actually loading any nodes modules

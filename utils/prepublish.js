@@ -1,22 +1,28 @@
 let fs = require('fs');
-
-let compiled = fs.readFileSync('../dist/engine.min.js', 'utf8');
-
 fs.mkdirSync('./dist');
 
-// Copy file to dist folder
-fs.writeFileSync('./dist/engine.min.js', compiled);
-fs.writeFileSync('./dist/engine.min.js.map', fs.readFileSync('../dist/engine.min.js.map', 'utf8'));
+function fixDenoExports(distFile, prepend, append){
+	let compiled = fs.readFileSync(`../dist/${distFile}.min.js`, 'utf8');
 
-if(!compiled.includes(' MIT Licensed */'))
-	throw new Error("Can't find template when copying the compiled module for 'engine.es6.js'");
+	// Copy file to dist folder
+	fs.writeFileSync(`./dist/${distFile}.min.js`, compiled);
+	fs.writeFileSync(`./dist/${distFile}.min.js.map`, fs.readFileSync(`../dist/${distFile}.min.js.map`, 'utf8'));
 
-compiled = compiled.replace(' MIT Licensed */', ' MIT Licensed */ let module={exports:{}};');
+	if(!compiled.includes(' MIT Licensed */'))
+		throw new Error("Can't find template when copying the compiled module for '"+distFile+".es6.js'");
 
-if(!compiled.includes('//# sourceMappingURL=engine.min.js.map'))
-	throw new Error("Can't find template when copying the compiled module for 'engine.es6.js'");
+	compiled = compiled.replace(' MIT Licensed */', ' MIT Licensed */ ' + prepend);
 
-compiled = compiled.replace('//# sourceMappingURL=engine.min.js.map', `
+	if(!compiled.includes('//# sourceMappingURL='+distFile+'.min.js.map'))
+		throw new Error("Can't find template when copying the compiled module for '"+distFile+".es6.js'");
+
+	compiled = compiled.replace('//# sourceMappingURL='+distFile+'.min.js.map', `${append}\n//# sourceMappingURL=${distFile}.min.js.map`);
+
+	fs.writeFileSync(`./dist/${distFile}.mjs`, compiled);
+}
+
+//> ./dist/engine.min.js
+fixDenoExports('engine', 'let module={exports:{}};', `
 const {
 	settings,
 	createContext,
@@ -38,7 +44,7 @@ const {
 	InputPort,
 } = module.exports;
 
-export default window.Blackprint;
+export default globalThis.Blackprint;
 export {
 	settings,
 	createContext,
@@ -57,8 +63,15 @@ export {
 	Environment,
 	OutputPort,
 	InputPort,
-};
+};`);
 
-//# sourceMappingURL=engine.min.js.map`);
+//> ./dist/skeleton.min.js
+fixDenoExports('skeleton', 'let module={exports:{}};', `
+const {
+	Skeleton,
+} = module.exports;
 
-fs.writeFileSync('./dist/engine.es6.js', compiled);
+export default globalThis.Blackprint;
+export {
+	Skeleton,
+};`);

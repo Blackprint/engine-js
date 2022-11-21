@@ -2,8 +2,8 @@
 // Please use init.mjs instead of init.js
 
 // For Deno
-// import Blackprint from './../dist/engine.es6.js';
-// import Blackprint from 'https://cdn.skypack.dev/@blackprint/engine@0.6';
+// import Blackprint from './../dist/engine.mjs';
+// import Blackprint from 'https://cdn.skypack.dev/@blackprint/engine@0.8';
 
 // For Node
 require('source-map-support').install();
