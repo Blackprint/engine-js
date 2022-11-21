@@ -16,11 +16,8 @@
   "module": "dist/engine.mjs",
   "types": "src/index.d.ts",
   "exports": {
-    "default": "./dist/engine.min.js",
     "./es6-https-loader": "./es6-https-loader.mjs",
-    "./skeleton": "./dist/skeleton.mjs",
-    "module": "./dist/engine.mjs",
-    "deno": "./dist/engine.mjs"
+    "./skeleton": "./dist/skeleton.mjs"
   },
   "keywords": [
     "visual-programming",
