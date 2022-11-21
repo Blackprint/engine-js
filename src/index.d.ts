@@ -1,6 +1,5 @@
 // Type definitions for Blackprint Engine
 // Project: https://github.com/Blackprint/engine-js
-// Definitions by: StefansArya <https://github.com/stefansarya>
 
 export namespace Types {
 	/** Allow any type as port type */
