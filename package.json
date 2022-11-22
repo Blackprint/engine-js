@@ -16,10 +16,17 @@
   "module": "dist/engine.mjs",
   "types": "src/index.d.ts",
   "exports": {
-    ".": "./dist/engine.min.js",
+    ".": {
+      "types": "./src/index.d.ts",
+      "require": "./dist/engine.min.js",
+      "import": "./dist/engine.mjs"
+    },
     "./es6-https-loader": "./es6-https-loader.mjs",
-    "./skeleton.mjs": "./dist/skeleton.mjs",
-    "./skeleton.js": "./dist/skeleton.min.js"
+    "./skeleton": {
+      "types": "./src/skeleton/index.d.ts",
+      "require": "./dist/skeleton.min.js",
+      "import": "./dist/skeleton.mjs"
+    }
   },
   "keywords": [
     "visual-programming",
