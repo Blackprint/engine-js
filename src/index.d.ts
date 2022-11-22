@@ -130,17 +130,17 @@ export function onModuleConflict(map: Map<string, string>): Promise<any>;
 /**
  * Register nodes to Blackprint (For browser and non-browser).
  * @param namespace Node namespace
- * @param clazz Class that extends Blackprint.Node
+ * @param class_ Class that extends Blackprint.Node, keep this parameter empty if you want to use decorator
  */
-export function registerNode(namespace: String, clazz: Function): void;
+export function registerNode(namespace: String, class_?: Function): Function;
 
 /**
  * Register interface to Blackprint (For browser and non-browser).
  * If you're creating Sketch UI, you will need to register with Blackprint.Sketch.registerInterface too.
  * @param icNamespace Interface component's namespace, must be started with "BPIC/"
- * @param clazz Class that extends Blackprint.Interface
+ * @param class_ Class that extends Blackprint.Interface, keep this parameter empty if you want to use decorator
  */
-export function registerInterface(icNamespace: String, clazz: Function): void;
+export function registerInterface(icNamespace: String, class_?: Function): Function;
 
 export namespace Environment {
 	/**
