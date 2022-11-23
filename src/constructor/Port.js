@@ -57,7 +57,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 	// ex: linkedPort = node.output.portName
 	createLinker(){
 		// Only for output (type: trigger/function)
-		if(this.source === 'output' && (this.type === Function || this.type === BP_Port.Route)){
+		if(this.source === 'output' && (this.type === Function || this.type === Types.Route)){
 			// Disable sync
 			this.sync = false;
 
@@ -284,6 +284,30 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 		obj.message = msg;
 		this.iface.node.instance._emit(name, obj);
+	}
+
+	assignType(type){
+		if(type === undefined) throw new Error("Can't set type with undefined");
+
+		if(this.type !== Blackprint.Types.Any)
+			throw new Error("Can only assign type to port with 'Any' type");
+
+		// Skip if the assigned type is also Any type
+		if(this.type === Blackprint.Types.Any) return;
+
+		// Check current output value type
+		if(this.value != null && !(this.value instanceof type))
+			throw new Error(`The output value of this port is not instance of type that will be assigned: ${this.value.constructor.name} is not instance of ${type.name}`);
+
+		// Check connected cable's type
+		let cables = this.cables;
+		for (let i=0; i < cables.length; i++) {
+			if(cables[i].type.prototype instanceof type)
+				throw new Error(`The target port's connection of this port is not instance of type that will be assigned: ${this.value.constructor.name} is not instance of ${type.name}`);
+		}
+
+		this.type = type;
+		this.emit('type.assigned');
 	}
 
 	connectCable(cable){

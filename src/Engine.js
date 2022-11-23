@@ -259,7 +259,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 									targetNode.useType(linkPortA);
 									linkPortB = targetNode.input[target.name];
 								}
-								else if(linkPortA.type === Blackprint.Port.Route){
+								else if(linkPortA.type === Blackprint.Types.Route){
 									linkPortB = targetNode.node.routes;
 								}
 								else{

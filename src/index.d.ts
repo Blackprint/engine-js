@@ -5,6 +5,9 @@
 export namespace Types {
 	/** Allow any type as port type */
 	export let Any: Object;
+
+	/** Only can be passed to Output port as type */
+	export let Route: object;
 }
 
 /**
@@ -77,9 +80,6 @@ export namespace Port {
 	 * @param value default value when no cable was connected
 	 */
 	export function Default(type: any, value: any): any;
-
-	/** Only can be passed to Output port as type */
-	export let Route: object;
 
 	/**
 	 * This port will be used as a trigger or callable input port
@@ -377,6 +377,13 @@ export class IFacePort {
 	 * @param enable
 	 */
 	disableCables(enable: Boolean): void;
+
+	/**
+	 * Assign new type for this port
+	 * Can only be used if this port is using 'Any' type since created
+	 * @param type Type object that will be assigned for this port
+	 */
+	assignType(type: any): void;
 
 	/**
 	 * Connect this port with a cable
