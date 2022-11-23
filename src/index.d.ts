@@ -208,10 +208,10 @@ export namespace utils {
 	/**
 	 * Use this to make a class prototype enumerable.
 	 * For example you're creating a class with getter/setter that was not enumerable by default.
-	 * @param clazz class declaration that want to be modified
+	 * @param class_ class declaration that want to be modified
 	 * @param props property that want to be modified
 	 */
-	export function setEnumerablePrototype(clazz: Function, props: {[key: string]: Boolean}): void;
+	export function setEnumerablePrototype(class_: Function, props: {[key: string]: Boolean}): void;
 }
 
 type EventOptions = {
@@ -360,6 +360,25 @@ export type { Cable };
 
 /** Interface Port that contains connection data */
 export class IFacePort {
+	/** List of connected cables */
+	cables: Array<Cable>;
+	/** Node interface's reference */
+	iface: Interface;
+	/** Allow this port to trigger update of other node even the output value is similar */
+	allowResync: Boolean;
+	/** Port's name */
+	name: String;
+	/** Return true if this was route port */
+	isRoute: Boolean;
+	source: 'input' | 'output';
+	/** Port's type */
+	readonly type: object;
+	/** Return true if port from StructOf was splitted to multiple port */
+	readonly splitted: Boolean;
+
+	// sync: Boolean;
+	// disabled: Boolean;
+
 	/**
 	 * You mustn't use this class to manually construct interface port
 	 * But please use 'iface.node.createPort()' instead
@@ -406,6 +425,9 @@ export class Interface extends CustomEvent {
 	 * @param node
 	 */
 	constructor(node: Node);
+
+	/** Hide every port that doesn't have connected cable */
+	hideUnusedPort: Boolean;
 
 	/** Node's ID */
 	get id(): any;
@@ -561,7 +583,7 @@ export class OutputPort extends PortGhost {
 	 * Create fictional simple output port that can be connected to other input port
 	 * @param type port's data type
 	 */
-	constructor(type: Function);
+	constructor(type: any);
 }
 
 /** Create fictional simple input port that can be connected to other output port */
@@ -570,7 +592,7 @@ export class InputPort extends PortGhost {
 	 * Create fictional simple input port that can be connected to other output port
 	 * @param type port's data type
 	 */
-	constructor(type: Function);
+	constructor(type: any);
 }
 
 declare class RoutePort_1 {
