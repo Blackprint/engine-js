@@ -113,9 +113,8 @@ function determinePortType(val, that){
 			haveFeature = val.portFeature;
 			type = val.portType;
 
-			if(type === Types.Any || type === Types.Slot){
-				// type = {name:'Any', any:true};
-				type = type;
+			if(type === Types.Any){
+				// type = type;
 				def = null;
 			}
 			else def = [];
