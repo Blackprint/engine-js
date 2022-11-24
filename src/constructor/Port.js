@@ -166,6 +166,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 				// Data type validation
 				else if(val.constructor !== port.type){
 					if(port.type === Types.Any); // Pass
+					else if(port.type === Types.Slot) throw new Error("Port type need to be assigned before giving any value");
 					else if(port.type.union && port.type.includes(val.constructor)); // Pass
 					else if(!(val instanceof port.type))
 						throw new Error(port.iface.title+"> "+getDataType(val) + " is not instance of "+port.type.name);
@@ -289,11 +290,11 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 	assignType(type){
 		if(type === undefined) throw new Error("Can't set type with undefined");
 
-		if(this.type !== Blackprint.Types.Any)
-			throw new Error("Can only assign type to port with 'Any' type");
+		if(this.type !== Blackprint.Types.Slot)
+			throw new Error("Can only assign type to port with 'Slot' type");
 
-		// Skip if the assigned type is also Any type
-		if(this.type === Blackprint.Types.Any) return;
+		// Skip if the assigned type is also Slot type
+		if(type === Blackprint.Types.Slot) return;
 
 		// Check current output value type
 		if(this.value != null && !(this.value instanceof type))
@@ -302,11 +303,27 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		// Check connected cable's type
 		let cables = this.cables;
 		for (let i=0; i < cables.length; i++) {
-			if(cables[i].type.prototype instanceof type)
+			let inputPortType = cables[i].input.type;
+			if(inputPortType !== Blackprint.Types.Any
+			   && (inputPortType.prototype instanceof (type.portType == null ? type : type.portType)))
 				throw new Error(`The target port's connection of this port is not instance of type that will be assigned: ${this.value.constructor.name} is not instance of ${type.name}`);
 		}
 
-		this.type = type;
+		if(type.portFeature != null){
+			if(type.virtualType != null)
+				this.virtualType = type.virtualType;
+
+			this.feature = type.portFeature;
+			this.type = type.portType;
+
+			if(type.portFeature === BP_Port.StructOf){
+				this.struct = type.default;
+				this.classAdd += "BP-StructOf ";
+			}
+		}
+		else this.type = type;
+
+		// this._config = type;
 		this.emit('type.assigned');
 	}
 

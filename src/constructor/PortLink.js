@@ -45,6 +45,7 @@ class PortLink {
 		var linkedPort = this._iface._newPort(portName, type, def, this._which, haveFeature);
 		linkedPort.virtualType = virtualType; // For engine-js only
 		iPort[portName] = linkedPort;
+		// linkedPort._config = val;
 
 		if(iPort._portList !== undefined)
 			iPort._portList.push(linkedPort);
@@ -88,8 +89,8 @@ Blackprint.Engine.PortLink = PortLink;
 
 function determinePortType(val, that){
 	var type, def, haveFeature, virtualType;
-	if(val === void 0)
-		throw new Error("Port type can't be undefined, error when processing: "+that._iface.title+", "+that._which+' port');
+	if(val == null)
+		throw new Error("Port type can't be null or undefined, error when processing: "+that._iface.title+", "+that._which+' port');
 
 	if(typeof val === 'function'){
 		type = val;
@@ -103,8 +104,8 @@ function determinePortType(val, that){
 			def = '';
 		else def = null;
 	}
-	else if(val === Types.Any){
-		type = Types.Any;
+	else if(val === Types.Any || val === Types.Slot){
+		type = val;
 		def = null;
 	}
 	else{
@@ -112,9 +113,9 @@ function determinePortType(val, that){
 			haveFeature = val.portFeature;
 			type = val.portType;
 
-			if(type === Types.Any){
+			if(type === Types.Any || type === Types.Slot){
 				// type = {name:'Any', any:true};
-				type = Types.Any;
+				type = type;
 				def = null;
 			}
 			else def = [];
