@@ -157,12 +157,12 @@ class CustomEvent {
 
 		for (var i = 0; i < events.length; i++){
 			var ev = events[i];
-			ev(obj, eventName);
-
 			if(ev.once){
 				delete ev.once;
 				events.splice(i--, 1);
 			}
+
+			ev(obj, eventName);
 		}
 
 		if(eventName !== '*' && this._event['*'] !== void 0){
