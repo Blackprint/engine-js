@@ -80,12 +80,14 @@ class Cable{
 		let activate = arg => this.activation(arg);
 		this._refreshType();
 
-		this.input.emit('connecting', {target: this.output, activate});
-		this.output.emit('connecting', {target: this.input, activate});
+		let { input, output } = this;
 
-		if(this.disabled){
+		input.emit('connecting', {target: output, activate});
+		output.emit('connecting', {target: input, activate});
+
+		if(this.disabled || input.type === Types.Slot || output.type === Types.Slot){
 			// inp.iface.node.instance.emit('cable.connecting', {
-			// 	port: this.input, target: this.output
+			// 	port: input, target: output
 			// });
 			return;
 		}
