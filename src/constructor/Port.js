@@ -323,6 +323,13 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		}
 		else this.type = type;
 
+		// Trigger `connect` event for every connected cable
+		for (let i=0; i < cables.length; i++) {
+			let cable = cables[i];
+			cable.disabled = false;
+			cable._connected();
+		}
+
 		// this._config = type;
 		this.emit('type.assigned');
 	}
