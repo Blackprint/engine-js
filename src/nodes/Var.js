@@ -46,8 +46,6 @@ Blackprint.nodes.BP.Var = {
 	},
 };
 
-let typeNotSet = {typeNotSet: true}; // Flag that a port is not set
-
 // used for instance.createVariable
 class BPVariable extends CustomEvent {
 	constructor(id, options, instance){
@@ -58,7 +56,7 @@ class BPVariable extends CustomEvent {
 		this.id = this.title = id;
 
 		// The type need to be defined dynamically on first cable connect
-		this.type = typeNotSet;
+		this.type = Types.Slot;
 		this.used = new Set();
 
 		this.totalSet = 0;
@@ -131,12 +129,12 @@ function BPVarInit(){
 		}
 		useType(port){
 			let temp = this._bpVarRef;
-			if(temp.type !== typeNotSet){
-				if(port === undefined) temp.type = typeNotSet;
+			if(temp.type !== Types.Slot){
+				if(port == null) temp.type = Types.Slot;
 				return;
 			}
 
-			if(port === undefined) throw new Error("Can't set type with undefined");
+			if(port == null) throw new Error("Can't set type with null or undefined");
 
 			let cable;
 			if(port === true){
@@ -152,6 +150,10 @@ function BPVarInit(){
 
 			temp.type = port.type;
 
+			if(port.type === Types.Slot)
+				this.waitTypeChange(temp, port);
+			else temp.emit('type.assigned');
+
 			// Also create port for other node that using this variable
 			for (let item of temp.used){
 				let temp = item._reinitPort();
@@ -159,7 +161,25 @@ function BPVarInit(){
 					temp.connectCable(cable);
 			}
 		}
+		waitTypeChange(bpVar, port){
+			this._waitTypeChange = () => {
+				if(port != null) {
+					bpVar.type = port.type;
+					// bpVar._config = port._config;
+					bpVar.emit('type.assigned');
+				}
+				else {
+					let target = this.input.Val || this.output.Val;
+					target.assignType(bpVar.type);
+				}
+			};
+
+			this._destroyWaitType = () => { bpVar.off('type.assigned', this._waitTypeChange); };
+			(port || bpVar).once('type.assigned', this._waitTypeChange);
+		}
 		destroy(){
+			this._destroyWaitType?.();
+
 			let temp = this._bpVarRef;
 			if(temp === void 0) return;
 
@@ -187,7 +207,7 @@ function BPVarInit(){
 			this.title = 'Get '+name;
 
 			let temp = this._bpVarRef = scope[this.data.name];
-			if(temp.type === typeNotSet) return;
+			if(temp.type === Types.Slot) return;
 
 			this._reinitPort();
 		}
@@ -195,7 +215,9 @@ function BPVarInit(){
 		_reinitPort(){
 			let temp = this._bpVarRef;
 			let node = this.node;
-			
+
+			if(temp.type === Types.Slot) this.waitTypeChange(temp);
+
 			if(this.output.Val !== void 0)
 				node.deletePort('output', 'Val');
 
@@ -231,7 +253,7 @@ function BPVarInit(){
 			this.title = 'Set '+name;
 
 			let temp = this._bpVarRef = scope[this.data.name];
-			if(temp.type === typeNotSet) return;
+			if(temp.type === Types.Slot) return;
 
 			this._reinitPort();
 		}
@@ -239,6 +261,8 @@ function BPVarInit(){
 		_reinitPort(){
 			let {input, node} = this;
 			let temp = this._bpVarRef;
+
+			if(temp.type === Types.Slot) this.waitTypeChange(temp);
 
 			if(input.Val !== void 0)
 				node.deletePort('input', 'Val');
