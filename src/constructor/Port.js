@@ -10,6 +10,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		this._node = iface.node;
 		this.classAdd = '';
 		this.splitted = false;
+		this._isSlot = type === Types.Slot;
 		this.disabled = false; // for output port
 		this._hasUpdate = false;
 		this.allowResync = false; // Retrigger connected node's .update when the output value is similar

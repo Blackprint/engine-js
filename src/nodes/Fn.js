@@ -492,6 +492,9 @@ function BPFnInit(){
 			else if(port.feature === BP_Port.ArrayOf){
 				portType = port.type;
 			}
+			else if(port._isSlot){
+				throw new Error("Function node's input/output can't use port from an lazily assigned port type (Types.Slot)");
+			}
 			else portType = port.feature != null ? port.feature(port.type) : port.type;
 
 			let nodeA, nodeB; // Main (input) -> Input (output), Output (input) -> Main (output)
