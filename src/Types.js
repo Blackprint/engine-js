@@ -2,9 +2,12 @@ let Types = Blackprint.Types = {
 	// Port will accept any data type
 	Any: {name: 'Any', any: true},
 
-	// Port's type can be assigned and validated later
-	// This port will accept any port for initial connection
-	// Currently only for output port
+	/**
+	 * [Experimental] May get deleted/changed anytime
+	 * Port's type can be assigned and validated later
+	 * This port will accept any port for initial connection
+	 * Currently only for output port
+	 */
 	Slot: {name: 'Slot', slot: true, any: true},
 
 	// Can only be applicable for output port's type

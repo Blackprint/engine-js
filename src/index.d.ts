@@ -4,7 +4,15 @@
 
 export namespace Types {
 	/** Allow any type as port type */
-	export let Any: Object;
+	export let Any: object;
+	
+	/**
+	 * [Experimental] May get deleted/changed anytime
+	 * Port's type can be assigned and validated later
+	 * This port will accept any port for initial connection
+	 * Currently only for output port
+	 */
+	export let Slot: object;
 
 	/** Only can be passed to Output port as type */
 	export let Route: object;
@@ -398,6 +406,7 @@ export class IFacePort {
 	disableCables(enable: Boolean): void;
 
 	/**
+	 * [Experimental] May get deleted/changed anytime
 	 * Assign new type for this port
 	 * Can only be used if this port is using 'Any' type since created
 	 * @param type Type object that will be assigned for this port
