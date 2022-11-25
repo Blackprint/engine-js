@@ -55,7 +55,7 @@ class PortLink {
 		// Set on the this scope
 		if(type === Function || type === Types.Route){
 			if(this._which === 'output')
-				Object.defineProperty(this, portName, {configurable: true, enumerable:true, writable:false, value:linkValue});
+				Object.defineProperty(this, portName, linkValue);
 			else this[portName] = linkedPort.default;
 		}
 		else Object.defineProperty(this, portName, linkValue);

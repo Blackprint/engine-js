@@ -17,12 +17,8 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 		// this.value;
 		if(haveFeature === BP_Port.Trigger){
-			this.default = () => {
-				def(this);
-
-				if(iface._enum !== _InternalNodeEnum.BPFnMain)
-					iface.node.routes.routeOut();
-			};
+			this._callDef = def;
+			this.default = this._call.bind(this);
 		}
 		else if(haveFeature === BP_Port.StructOf){
 			if(Blackprint.Sketch != null)
@@ -54,6 +50,44 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		}
 	}
 
+	_call(){
+		let { iface, _callDef } = this;
+		_callDef(this);
+
+		if(iface._enum !== _InternalNodeEnum.BPFnMain)
+			iface.node.routes.routeOut();
+	}
+
+	async _callAll(){
+		if(this.type === Types.Route){
+			var cable = this.cables[0];
+			if(cable === void 0) return;
+	
+			await cable.input.routeIn();
+		}
+		else {
+			if(this.iface.node.disablePorts) return;
+
+			var cables = this.cables;
+			for (var i = 0; i < cables.length; i++) {
+				var cable = cables[i];
+	
+				var target = cable.input;
+				if(target === void 0)
+					continue;
+	
+				if(Blackprint.settings.visualizeFlow)
+					cable.visualizeFlow();
+	
+				if(target._name != null)
+					target.iface._funcMain.node.iface.output[target._name.name]._callAll();
+				else target.iface.input[target.name]._call();
+			}
+	
+			this.emit('call');
+		}
+	}
+
 	// Set for the linked port (Handle for ScarletsFrame)
 	// ex: linkedPort = node.output.portName
 	createLinker(){
@@ -62,10 +96,12 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			// Disable sync
 			this.sync = false;
 
-			if(this.type === Function)
-				return this._callAll = createCallablePort(this);
+			if(this.type !== Function){
+				this.isRoute = true;
+				this.iface.node.routes.disableOut = true;
+			}
 
-			else return this._callAll = createCallableRoutePort(this);
+			return {configurable: true, enumerable:true, writable:false, value: () => this._callAll()};
 		}
 
 		var port = this;
@@ -146,6 +182,10 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 					port.iface._requesting = false;
 					return port._cache = data;
 				}
+
+				// This may get called if the port is lazily assigned with Slot port feature
+				if(port.type === Function)
+					return port.__call ??= () => port._callAll();
 
 				// else type: output port, let's just return the value
 				return port.value;
@@ -304,9 +344,12 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		// Check connected cable's type
 		let cables = this.cables;
 		for (let i=0; i < cables.length; i++) {
-			let inputPortType = cables[i].input.type;
-			if(inputPortType !== Blackprint.Types.Any
-			   && (inputPortType.prototype instanceof (type.portType == null ? type : type.portType)))
+			let inputPort = cables[i].input;
+			if(inputPort == null) continue;
+
+			let portType = inputPort.type;
+			if(portType !== Blackprint.Types.Any
+			   && (portType.prototype instanceof (type.portType == null ? type : type.portType)))
 				throw new Error(`The target port's connection of this port is not instance of type that will be assigned: ${this.value.constructor.name} is not instance of ${type.name}`);
 		}
 
@@ -327,7 +370,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		// Trigger `connect` event for every connected cable
 		for (let i=0; i < cables.length; i++) {
 			let cable = cables[i];
-			cable.disabled = false;
+			if(cable.disabled || cable.target == null) continue;
 			cable._connected();
 		}
 
@@ -507,40 +550,4 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 function getDataType(which){
 	return which.constructor.name;
-}
-
-function createCallablePort(port){
-	return function(){ // Do not use arrow function
-		if(port.iface.node.disablePorts) return;
-
-		var cables = port.cables;
-		for (var i = 0; i < cables.length; i++) {
-			var cable = cables[i];
-
-			var target = cable.input;
-			if(target === void 0)
-				continue;
-
-			if(Blackprint.settings.visualizeFlow)
-				cable.visualizeFlow();
-
-			if(target._name != null)
-				target.iface._funcMain.node.output[target._name.name]();
-			else target.iface.input[target.name].default();
-		}
-
-		port.emit('call');
-	};
-}
-
-function createCallableRoutePort(port){
-	port.isRoute = true;
-	port.iface.node.routes.disableOut = true;
-
-	return async function(){
-		var cable = port.cables[0];
-		if(cable === void 0) return;
-
-		await cable.input.routeIn();
-	}
 }

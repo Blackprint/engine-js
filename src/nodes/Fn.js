@@ -486,7 +486,7 @@ function BPFnInit(){
 			let portType;
 
 			if(port.feature === BP_Port.Trigger){
-				portType = BP_Port.Trigger(function(){ nodeB.output[inputPort.name](); });
+				portType = BP_Port.Trigger(function(){ nodeB.iface.output[inputPort.name]._callAll(); });
 			}
 			// Skip port with feature: ArrayOf
 			else if(port.feature === BP_Port.ArrayOf){
