@@ -38,11 +38,22 @@ Blackprint.nodes.BP.FnVar = {
 			iface._dynamicPort = true; // Port is initialized dynamically
 		}
 		update(){
-			let id = this.iface.data.name;
+			let { iface } = this;
+			let id = iface.data.name;
 			this.refOutput[id] = this.ref.Input.Val;
 
+			let mainNodeIFace = iface._funcMain;
+			let proxyOutputNode = mainNodeIFace._proxyOutput;
+
 			// Also update the cache on the proxy node
-			this.iface._funcMain._proxyOutput.ref.IInput[id]._cache = this.ref.Input.Val;
+			proxyOutputNode.ref.IInput[id]._cache = this.ref.Input.Val;
+
+			// If main node has route and the output proxy doesn't have input route
+			// Then trigger out route on the main node
+			let mainNodeRoutes = mainNodeIFace.node.routes;
+			if(mainNodeRoutes.out != null && proxyOutputNode.routes.in.length === 0){
+				mainNodeRoutes.routeOut();
+			}
 		}
 	},
 };
@@ -234,7 +245,14 @@ function getFnPortType(port, which, parentNode, ref){
 			portType = Function;
 		else portType = BP_Port.Trigger(parentNode.output[ref.name]._callAll);
 	}
-	else portType = port.feature != null ? port.feature(port.type) : port.type;
+	// Skip ArrayOf port feature, and just use the type
+	else if(port.feature === BP_Port.ArrayOf){
+		portType = port.type;
+	}
+	else if(port._isSlot){
+		throw new Error("Function node's input/output can't use port from an lazily assigned port type (Types.Slot)");
+	}
+	else portType = port._config;
 
 	return portType;
 }
