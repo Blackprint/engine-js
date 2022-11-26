@@ -92,7 +92,8 @@ function BPFnVarInit(){
 					iPort._name = portName;
 
 					proxyIface.addPort(port, name);
-					iPort.connectCable(cable);
+					(cable.owner === iPort ? port : iPort).connectCable(cable);
+
 					this._addListener();
 					return true;
 				};
@@ -199,7 +200,8 @@ function BPFnVarInit(){
 					iPort._name = portName;
 
 					proxyIface.addPort(port, name);
-					iPort.connectCable(cable);
+					(cable.owner === iPort ? port : iPort).connectCable(cable);
+
 					return true;
 				};
 
