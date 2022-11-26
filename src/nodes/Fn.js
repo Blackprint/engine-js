@@ -488,14 +488,14 @@ function BPFnInit(){
 			if(port.feature === BP_Port.Trigger){
 				portType = BP_Port.Trigger(function(){ nodeB.iface.output[inputPort.name]._callAll(); });
 			}
-			// Skip port with feature: ArrayOf
+			// Skip ArrayOf port feature, and just use the type
 			else if(port.feature === BP_Port.ArrayOf){
 				portType = port.type;
 			}
 			else if(port._isSlot){
 				throw new Error("Function node's input/output can't use port from an lazily assigned port type (Types.Slot)");
 			}
-			else portType = port.feature != null ? port.feature(port.type) : port.type;
+			else portType = port._config;
 
 			let nodeA, nodeB; // Main (input) -> Input (output), Output (input) -> Main (output)
 			if(this.type === 'bp-fn-input'){ // Main (input) -> Input (output)

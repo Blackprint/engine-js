@@ -45,7 +45,7 @@ class PortLink {
 		var linkedPort = this._iface._newPort(portName, type, def, this._which, haveFeature);
 		linkedPort.virtualType = virtualType; // For engine-js only
 		iPort[portName] = linkedPort;
-		// linkedPort._config = val;
+		linkedPort._config = val;
 
 		if(iPort._portList !== undefined)
 			iPort._portList.push(linkedPort);

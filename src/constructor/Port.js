@@ -374,7 +374,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			cable._connected();
 		}
 
-		// this._config = type;
+		this._config = type;
 		this.emit('type.assigned');
 	}
 

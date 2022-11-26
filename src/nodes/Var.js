@@ -165,7 +165,7 @@ function BPVarInit(){
 			this._waitTypeChange = () => {
 				if(port != null) {
 					bpVar.type = port.type;
-					// bpVar._config = port._config;
+					bpVar._config = port._config;
 					bpVar.emit('type.assigned');
 				}
 				else {
