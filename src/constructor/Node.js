@@ -115,15 +115,15 @@ Blackprint.Node = class Node {
 	async _bpUpdate(){
 		let thisIface = this.iface;
 		let isMainFuncNode = thisIface._enum === _InternalNodeEnum.BPFnMain;
+		let ref = this.instance.executionOrder;
 
-		if(this.update != null && !(isMainFuncNode && this.routes.out != null)){
+		if(this.update != null){
 			this._bpUpdating = true;
 			await this.update();
 			this._bpUpdating = false;
 			this.iface.emit('updated');
 		}
 
-		let ref = this.instance.executionOrder;
 		if(this.routes.out == null){
 			if(isMainFuncNode && thisIface.node.routes.out != null){
 				await thisIface.node.routes.routeOut();
