@@ -305,6 +305,9 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 			var inp = cable.input;
 			if(inp === void 0) continue;
+			if(inp._cache != null && instance.executionOrder.stepMode)
+				inp._oldCache = inp._cache;
+
 			inp._cache = void 0;
 
 			let inpIface = inp.iface;
