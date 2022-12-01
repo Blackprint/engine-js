@@ -128,7 +128,7 @@ class Cable{
 			let node = inp.iface.node;
 			if(node.update !== void 0) {
 				if(node.instance._importing)
-					node.instance.executionOrder.add(node);
+					node.instance.executionOrder.add(node, this);
 				else node._bpUpdate();
 			}
 		}

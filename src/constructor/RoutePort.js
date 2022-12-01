@@ -66,9 +66,16 @@ Blackprint.RoutePort = class RoutePort extends CustomEvent {
 		return true;
 	}
 
-	async routeIn(){
+	async routeIn(_cable, _force){
 		let node = this.iface.node;
 		// console.log('routeIn', this.iface.id || this.iface.title);
+
+		// Add to execution list if the OrderedExecution is in Step Mode
+		let executionOrder = node.instance.executionOrder;
+		if(executionOrder.stepMode && _cable && !_force){
+			executionOrder._addStepPending(_cable, 1);
+			return;
+		}
 
 		if(this.iface._enum !== _InternalNodeEnum.BPFnInput)
 			await node._bpUpdate();
@@ -77,6 +84,8 @@ Blackprint.RoutePort = class RoutePort extends CustomEvent {
 
 	async routeOut(){
 		if(this.disableOut) return;
+
+		let node = this.iface.node;
 		if(this.out == null){
 			if(this.iface._enum === _InternalNodeEnum.BPFnOutput)
 				return await this.iface._funcMain.node.routes.routeIn();
@@ -84,23 +93,24 @@ Blackprint.RoutePort = class RoutePort extends CustomEvent {
 			return;
 		}
 
-		this.out.visualizeFlow();
+		if(!node.instance.executionOrder.stepMode)
+			this.out.visualizeFlow();
 
 		let targetRoute = this.out.input;
 		if(targetRoute == null) return;
 
 		let _enum = targetRoute.iface._enum;
 		if(_enum === void 0)
-			return await targetRoute.routeIn();
+			return await targetRoute.routeIn(this.out);
 
 		// if(_enum === _InternalNodeEnum.BPFnMain)
-		// 	return await targetRoute.iface._proxyInput.routes.routeIn();
+		// 	return await targetRoute.iface._proxyInput.routes.routeIn(this.out);
 
 		if(_enum === _InternalNodeEnum.BPFnOutput){
 			await targetRoute.iface.node.update();
 			return await targetRoute.iface._funcMain.node.routes.routeOut();
 		}
 
-		return await targetRoute.routeIn();
+		return await targetRoute.routeIn(this.out);
 	}
 }
