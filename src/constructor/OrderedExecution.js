@@ -10,6 +10,7 @@ class OrderedExecution {
 
 		// Pending because stepMode
 		this._pRequest = [];
+		this._pRequestLast = [];
 		this._pTrigger = [];
 		this._pRoute = [];
 		this._hasStepPending = false;
@@ -35,19 +36,20 @@ class OrderedExecution {
 
 		this.list[this.length++] = node;
 		if(this.stepMode) {
-			if(_cable != null){
-				let tCable = this._tCable; // Cable triggerer
-				let sets = tCable.get(node);
-				if(sets == null) {
-					sets = new Set();
-					tCable.set(node, sets);
-				}
-	
-				sets.add(_cable);
-			}
-
+			if(_cable != null) this._tCableAdd(node, _cable);
 			this._emitNextExecution();
 		}
+	}
+
+	_tCableAdd(node, cable){
+		let tCable = this._tCable; // Cable triggerer
+		let sets = tCable.get(node);
+		if(sets == null) {
+			sets = new Set();
+			tCable.set(node, sets);
+		}
+
+		sets.add(cable);
 	}
 
 	_isReachLimit(){
@@ -98,19 +100,26 @@ class OrderedExecution {
 			}
 
 			if(hasCable === false){
-				let portCall;
+				let cableCall;
 				let inputPorts = cable.input.iface.input;
 
 				for (let key in inputPorts) {
 					let port = inputPorts[key];
 					if(port._calling){
-						portCall = port;
+						let cables = port.cables;
+						for (let i=0; i < cables.length; i++) {
+							let _cable = cables[i];
+							if(_cable._calling){
+								cableCall = _cable;
+								break;
+							}
+						}
 						break;
 					}
 				}
 
 				list.push({
-					portCall,
+					cableCall,
 					cable,
 				});
 			}
@@ -122,13 +131,17 @@ class OrderedExecution {
 
 	// For step mode
 	_emitNextExecution(afterNode){
-		let { _pRequest, _pTrigger, _pRoute } = this;
-		let cable, triggerSource = 0;
+		let { _pRequest, _pRequestLast, _pTrigger, _pRoute } = this;
+		let cable, triggerSource = 0, beforeNode = null;
 		let inputNode, outputNode;
 
 		if(_pRequest.length !== 0){
 			triggerSource = 3;
 			cable = _pRequest[0].cable;
+		}
+		else if(_pRequestLast.length !== 0){
+			triggerSource = 0;
+			beforeNode = _pRequestLast[0].node;
 		}
 		else if(_pTrigger.length !== 0){
 			triggerSource = 2;
@@ -147,8 +160,10 @@ class OrderedExecution {
 		}
 
 		if(triggerSource === 0){
-			let beforeNode = this.list[this.index];
-			if(this._lastBeforeNode === beforeNode) return; // avoid duplicate event trigger
+			beforeNode ??= this.list[this.index];
+
+			// avoid duplicate event trigger
+			if(this._lastBeforeNode === beforeNode) return;
 
 			let cables = this._tCable.get(beforeNode); // Set<Cables>
 			if(cables) cables = Array.from(cables);
@@ -162,10 +177,10 @@ class OrderedExecution {
 
 	async _checkStepPending(){
 		if(!this._hasStepPending) return;
-		let { _pRequest, _pTrigger, _pRoute } = this;
+		let { _pRequest, _pRequestLast, _pTrigger, _pRoute } = this;
 
 		if(_pRequest.length !== 0){
-			let { cable, portCall } = _pRequest.shift();
+			let { cable, cableCall } = _pRequest.shift();
 			let currentIface = cable.output.iface;
 			let current = currentIface.node;
 
@@ -185,9 +200,22 @@ class OrderedExecution {
 			}
 
 			if(isLast){
-				await inpIface.node.update?.();
-				portCall._call();
+				this._pRequestLast.push({
+					node: inpIface.node,
+					cableCall,
+				});
+
+				this._tCableAdd(cableCall.input.iface.node, cableCall);
 			}
+
+			this._tCableAdd(inpIface.node, cable);
+			this._emitNextExecution();
+		}
+		else if(_pRequestLast.length !== 0){
+			let { node, cableCall } = _pRequestLast.pop();
+
+			await node.update?.();
+			cableCall.input._call(cableCall);
 
 			this._emitNextExecution();
 		}

@@ -13,6 +13,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		this._isSlot = type === Types.Slot;
 		this.disabled = false; // for output port
 		this._hasUpdate = false;
+		this._calling = false;
 		this.allowResync = false; // Retrigger connected node's .update when the output value is similar
 
 		// this.value;
@@ -53,14 +54,21 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 	_call(cable){
 		let { iface, _callDef } = this;
 
+		if(cable == null){
+			cable = this._cable ??= {
+				input: this,
+				output: this,
+			};
+		}
+
 		if(this._calling){
 			let { input, output } = cable;
 			throw new Error(`Circular call stack detected:\nFrom: ${output.iface.title}.${output.name}\nTo: ${input.iface.title}.${input.name})`);
 		}
 
-		this._calling = true;
+		this._calling = cable._calling = true;
 		_callDef(this);
-		this._calling = false;
+		this._calling = cable._calling = false;
 
 		if(iface._enum !== _InternalNodeEnum.BPFnMain)
 			iface.node.routes.routeOut();

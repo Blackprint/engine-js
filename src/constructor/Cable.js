@@ -10,6 +10,7 @@ class Cable{
 		this.disabled = false;
 		this.connected = false;
 		this.isRoute = false;
+		this._calling = false;
 	}
 
 	visualizeFlow(){
