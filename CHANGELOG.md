@@ -1,3 +1,27 @@
+# 0.8.3
+
+### Features
+- Improve module exports
+- Add Skeleton import feature
+- Add experimental `Blackprint.Types.Slot` for ports with lazy type assignment
+- Improve code for step mode execution
+
+### Bug Fix
+- Fix and improve TypeScript definition file
+- Improve import performance when using variable or function node
+- Save port configuration and use it for creating function port
+
+### Deprecated
+Deprecation below may breaking in v0.8.10, the other engine (`engine-python` and `engine-php`) will not have this breaking changes as it already correctly implemented. This changes was happen because I was forgot to move `Route` object reference from `Blackprint.Port.Route` to `Blackprint.Types.Route` when releasing this `engine-js` module, I'm sorry about that 😅.
+
+```js
+// Before (You will get deprecation notice on the console if still using this)
+Blackprint.Port.Route
+
+// After
+Blackprint.Types.Route
+```
+
 # 0.8.2
 
 ### Features
