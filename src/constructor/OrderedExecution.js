@@ -205,7 +205,8 @@ class OrderedExecution {
 					cableCall,
 				});
 
-				this._tCableAdd(cableCall.input.iface.node, cableCall);
+				if(cableCall != null)
+					this._tCableAdd(cableCall.input.iface.node, cableCall);
 			}
 
 			this._tCableAdd(inpIface.node, cable);
@@ -215,8 +216,11 @@ class OrderedExecution {
 			let { node, cableCall } = _pRequestLast.pop();
 
 			await node.update?.();
-			cableCall.input._call(cableCall);
 
+			if(cableCall != null)
+				cableCall.input._call(cableCall);
+
+			this._tCable.delete(node);
 			this._emitNextExecution();
 		}
 		else if(_pTrigger.length !== 0){
@@ -238,7 +242,7 @@ class OrderedExecution {
 		}
 		else return false;
 
-		if(_pRequest.length === 0 && _pTrigger.length === 0 && _pRoute.length === 0)
+		if(_pRequest.length === 0 && _pRequestLast.length === 0 && _pTrigger.length === 0 && _pRoute.length === 0)
 			this._hasStepPending = false;
 		
 		return true;
