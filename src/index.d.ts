@@ -426,8 +426,39 @@ export class IFacePort {
 	connectPort(port: IFacePort): Boolean;
 }
 
+declare type References = {
+	/** Input port's interfaces */
+	IInput: {[key: string]: IFacePort},
+	/** Output port's interfaces */
+	IOutput: {[key: string]: IFacePort},
+
+	/** Input port's values */
+	Input: {[key: string]: any},
+	/** Output port's values */
+	Output: {[key: string]: any},
+}
+
 /** Interface/IFace that can be used to control nodes */
 export class Interface extends CustomEvent {
+	/** Node's title */
+	title: String;
+	/** Node's namespace */
+	namespace: String;
+	/** Node reference */
+	node: Node;
+	/** Input port's interface */
+	input: IFacePort;
+	/** Output port's interface */
+	output: IFacePort;
+	/** This will return true if still importing the node */
+	importing: Boolean;
+
+	/** References */
+	ref: References;
+
+	/** Additional properties */
+	[key: string]: any;
+
 	/**
 	 * You mustn't use this class to manually construct nodes
 	 * But please use 'instance.createNode()' instead
@@ -499,6 +530,27 @@ export class Node {
 	 * Set this to true if you want .update function being called for every data changes from different input port
 	 */
 	partialUpdate: Boolean;
+
+	/** References */
+	ref: References;
+
+	/** Interface reference */
+	iface: Interface;
+	/** Input port's value */
+	input: {[key: string]: any};
+	/** Output port's value */
+	output: {[key: string]: any};
+
+	/** Engine instance */
+	instance: Engine;
+
+	// disablePorts: Boolean;
+	// partialUpdate: Boolean;
+	// syncThrottle: Boolean;
+	// routes: Boolean;
+
+	/** Additional properties */
+	[key: string]: any;
 	
 	/**
 	 * You mustn't use this class to manually construct Blackprint Node
