@@ -1,3 +1,9 @@
+# 0.8.4
+
+### Bug Fix
+- Improve and fix type definition that not published to NPM
+- Fix error when using stepMode
+
 # 0.8.3
 
 ### Features
