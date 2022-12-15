@@ -1,3 +1,8 @@
+# 0.8.5
+
+### Improvement
+- Improve TypeScript definitions
+
 # 0.8.4
 
 ### Bug Fix
