@@ -325,11 +325,35 @@ export class Engine extends CustomEvent {
 
 	/** Clean instance and mark as destroyed */
 	destroy(): void;
+
+	/** Node ID was added/changed/removed */
+	on(eventName: 'node.id.changed', callback: (data: { iface: Interface, from: String, to: String }) => void): void;
+	/** A cable was disconnected or deleted */
+	on(eventName: 'cable.disconnect', callback: (data: { port: IFacePort, target?: IFacePort, cable: Cable }) => void): void;
+	/** A cable was connected between two port */
+	on(eventName: 'cable.connect', callback: (data: { port: IFacePort, target: IFacePort, cable: Cable }) => void): void;
 }
 
 export namespace Engine {
 	export { CustomEvent };
 }
+
+/** New module registration */
+export function on(eventName: 'module.added', callback: (data: { url: String }) => void): void;
+/** A registered module was updated */
+export function on(eventName: 'module.update', callback: () => void): void;
+/** Module registration was deleted */
+export function on(eventName: 'module.delete', callback: (data: { url: String }) => void): void;
+/** Imported new environment variables */
+export function on(eventName: 'environment.imported', callback: () => void): void;
+/** New environment variable was added */
+export function on(eventName: 'environment.added', callback: (data: { key: String, value: String }) => void): void;
+/** Environment variable data was changed */
+export function on(eventName: 'environment.changed', callback: (data: { key: String, value: String }) => void): void;
+/** Environment variable data was renamed */
+export function on(eventName: 'environment.renamed', callback: (data: { old: String, now: String }) => void): void;
+/** Environment variable data was deleted */
+export function on(eventName: 'environment.deleted', callback: (data: { key: String }) => void): void;
 
 /** Cable that connect to node's input and output port */
 declare class Cable {
@@ -424,7 +448,21 @@ export class IFacePort {
 	 * @param port other port
 	 */
 	connectPort(port: IFacePort): Boolean;
+
+	/** There are value update on the port */
+	on(eventName: 'value', callback: (data: InputPort_EventValue | OutputPort_EventValue) => void): void;
+	/** The Port.Trigger or port with Function type was called */
+	on(eventName: 'call', callback: () => void): void;
+	/** A cable is trying to connect for the port */
+	on(eventName: 'connecting', callback: (data: { target: IFacePort, activate: (activate?: true | false) => void }) => void): void;
+	/** An cable was connected from the port */
+	on(eventName: 'connect', callback: (data: { port: IFacePort, target: IFacePort, cable: Cable }) => void): void;
+	/** An cable was disconnected from the port */
+	on(eventName: 'disconnect', callback: (data: { port: IFacePort, target?: IFacePort, cable: Cable }) => void): void;
 }
+
+declare type InputPort_EventValue = { port: IFacePort, target: IFacePort, cable: Cable };
+declare type OutputPort_EventValue = { port: IFacePort };
 
 declare type References = {
 	/** Input port's interfaces */
@@ -496,6 +534,13 @@ export class Interface extends CustomEvent {
 	  * @param data Data that was passed when importing JSON or creating new node
 	  */
 	imported(data: Object): void;
+
+	/** Two ports were connected with a cable */
+	on(eventName: 'cable.connect', callback: (data: { port: IFacePort, target: IFacePort, cable: Cable }) => void): void;
+	/** Two ports get disconnected each other */
+	on(eventName: 'cable.disconnect', callback: (data: { port: IFacePort, target: IFacePort, cable: Cable }) => void): void;
+	/** There's new value update coming from output port */
+	on(eventName: 'port.value', callback: (data: { port: IFacePort, target: IFacePort, cable: Cable }) => void): void;
 }
 
 /** Can be used to show information for nodes in Sketch */
@@ -657,14 +702,26 @@ export class OutputPort extends PortGhost {
 	 */
 	constructor(type: any);
 
-	/** Port's value */
+	/**
+	 * Port's value
+	 * Value need to be assigned before connected to other port
+	 * In case you lazily assigned the value, you will need to call .sync()
+	 */
 	value: any;
+
+	/** Sync value to all connected port */
+	sync(): void;
+	
+	/** There are value update on the port */
+	on(eventName: 'value', callback: (data: OutputPort_EventValue) => void): void;
+	/** The Port.Trigger or port with Function type was called */
+	on(eventName: 'call', callback: () => void): void;
 }
 
 /**
  * Create fictional simple input port that can be connected to other output port
  * To listen to new input value or port call please add an event listener
- * `.on('call', function(ev){})`
+ * `.on('call', function(){})`
  * `.on('value', function(ev){})`
  */
 export class InputPort extends PortGhost {
@@ -673,6 +730,11 @@ export class InputPort extends PortGhost {
 	 * @param type port's data type
 	 */
 	constructor(type: any);
+	
+	/** There are value update on the port */
+	on(eventName: 'value', callback: (data: InputPort_EventValue) => void): void;
+	/** The Port.Trigger or port with Function type was called */
+	on(eventName: 'call', callback: () => void): void;
 }
 
 declare class RoutePort_1 {
