@@ -5,7 +5,7 @@
 export namespace Types {
 	/** Allow any type as port type */
 	export let Any: object;
-	
+
 	/**
 	 * [Experimental] May get deleted/changed anytime
 	 * Port's type can be assigned and validated later
@@ -453,6 +453,9 @@ export class Interface extends CustomEvent {
 	/** This will return true if still importing the node */
 	importing: Boolean;
 
+	// /** Node's type */
+	// type: 'event' | 'function' | 'general';
+
 	/** References */
 	ref: References;
 
@@ -469,9 +472,17 @@ export class Interface extends CustomEvent {
 	/** Hide every port that doesn't have connected cable */
 	hideUnusedPort: Boolean;
 
-	/** Node's ID */
-	get id(): any;
-	set id(val: any);
+	/**
+	 * Node's ID
+	 * After assigned, you can get this node by using `instance.iface[ID]`
+	 */
+	id: string;
+
+	// /**
+	//  * Node's index (Assigned by engine since created)
+	//  * You can get this node by using `instance.ifaceList[index]`
+	//  */
+	// readonly i: number;
 
 	/**
 	 * This function will be called once the nodes has been created and the cables has been connected
@@ -551,7 +562,7 @@ export class Node {
 
 	/** Additional properties */
 	[key: string]: any;
-	
+
 	/**
 	 * You mustn't use this class to manually construct Blackprint Node
 	 * But please use 'instance.createNode()' instead
@@ -633,7 +644,7 @@ export class Node {
 }
 
 /** Fictional simple port that can be connected with other port */
-declare class PortGhost {
+declare class PortGhost extends CustomEvent {
 	/** Remove data and mark this port as destroyed */
 	destroy(): void;
 }
@@ -645,9 +656,17 @@ export class OutputPort extends PortGhost {
 	 * @param type port's data type
 	 */
 	constructor(type: any);
+
+	/** Port's value */
+	value: any;
 }
 
-/** Create fictional simple input port that can be connected to other output port */
+/**
+ * Create fictional simple input port that can be connected to other output port
+ * To listen to new input value or port call please add an event listener
+ * `.on('call', function(ev){})`
+ * `.on('value', function(ev){})`
+ */
 export class InputPort extends PortGhost {
 	/**
 	 * Create fictional simple input port that can be connected to other output port
