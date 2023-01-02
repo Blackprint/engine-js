@@ -18,6 +18,9 @@ export namespace Types {
 	export let Route: object;
 }
 
+type ClassConstructor = abstract new (...args: any) => any;
+type PortType<T> = { [P in keyof T]: T[P] extends ClassConstructor ? InstanceType<T[P]> : any };
+
 /**
  * Change global Blackprint settings
  * @param which setting name
@@ -295,7 +298,7 @@ export class Engine extends CustomEvent {
 	 * Get list of nodes that created from specific namespace
 	 * @param namespace Node namespace
 	 */
-	getNodes(namespace: string): Node;
+	getNodes(namespace: string): Node<any>;
 
 	/**
 	 * Create a node from a namespace
@@ -391,11 +394,11 @@ declare class Cable {
 export type { Cable };
 
 /** Interface Port that contains connection data */
-export class IFacePort {
+export class IFacePort<T extends Interface = any> {
 	/** List of connected cables */
 	cables: Array<Cable>;
 	/** Node interface's reference */
-	iface: Interface;
+	iface: T;
 	/** Allow this port to trigger update of other node even the output value is similar */
 	allowResync: Boolean;
 	/** Port's name */
@@ -450,44 +453,46 @@ export class IFacePort {
 	connectPort(port: IFacePort): Boolean;
 
 	/** There are value update on the port */
-	on(eventName: 'value', callback: (data: InputPort_EventValue | OutputPort_EventValue) => void): void;
+	on(eventName: 'value', callback: (data: InputPort_EventValue<T> | OutputPort_EventValue<T>) => void): void;
 	/** The Port.Trigger or port with Function type was called */
 	on(eventName: 'call', callback: () => void): void;
 	/** A cable is trying to connect for the port */
 	on(eventName: 'connecting', callback: (data: { target: IFacePort, activate: (activate?: true | false) => void }) => void): void;
 	/** An cable was connected from the port */
-	on(eventName: 'connect', callback: (data: { port: IFacePort, target: IFacePort, cable: Cable }) => void): void;
+	on(eventName: 'connect', callback: (data: { port: IFacePort<T>, target: IFacePort, cable: Cable }) => void): void;
 	/** An cable was disconnected from the port */
-	on(eventName: 'disconnect', callback: (data: { port: IFacePort, target?: IFacePort, cable: Cable }) => void): void;
+	on(eventName: 'disconnect', callback: (data: { port: IFacePort<T>, target?: IFacePort, cable: Cable }) => void): void;
 }
 
-declare type InputPort_EventValue = { port: IFacePort, target: IFacePort, cable: Cable };
-declare type OutputPort_EventValue = { port: IFacePort };
+declare type InputPort_EventValue<T extends Interface> = { port: IFacePort<T>, target: IFacePort, cable: Cable };
+declare type OutputPort_EventValue<T extends Interface> = { port: IFacePort<T> };
 
-declare type References = {
+type PropType<T, P extends keyof T> = T[P];
+type PortIFace<T, A extends Node<A>> = { [P in keyof T]: IFacePort<Interface<A>> };
+export type PortReferences<T extends Node<T>> = {
 	/** Input port's interfaces */
-	IInput: {[key: string]: IFacePort},
+	IInput: PortIFace<T['input'], T>,
 	/** Output port's interfaces */
-	IOutput: {[key: string]: IFacePort},
+	IOutput: PortIFace<T['output'], T>,
 
 	/** Input port's values */
-	Input: {[key: string]: any},
+	Input: PropType<T, 'input'>,
 	/** Output port's values */
-	Output: {[key: string]: any},
-}
+	Output: PropType<T, 'output'>,
+};
 
 /** Interface/IFace that can be used to control nodes */
-export class Interface extends CustomEvent {
+export class Interface<T extends Node<T> = any> extends CustomEvent {
 	/** Node's title */
 	title: String;
 	/** Node's namespace */
 	namespace: String;
 	/** Node reference */
-	node: Node;
+	node: Node<any>;
 	/** Input port's interface */
-	input: IFacePort;
+	input: PortIFace<T['input'], T>;
 	/** Output port's interface */
-	output: IFacePort;
+	output: PortIFace<T['output'], T>;
 	/** This will return true if still importing the node */
 	importing: Boolean;
 
@@ -495,7 +500,7 @@ export class Interface extends CustomEvent {
 	// type: 'event' | 'function' | 'general';
 
 	/** References */
-	ref: References;
+	ref: PortReferences<T>;
 
 	/** Additional properties */
 	[key: string]: any;
@@ -505,7 +510,7 @@ export class Interface extends CustomEvent {
 	 * But please use 'instance.createNode()' instead
 	 * @param node
 	 */
-	constructor(node: Node);
+	constructor(node: Node<any>);
 
 	/** Hide every port that doesn't have connected cable */
 	hideUnusedPort: Boolean;
@@ -536,11 +541,11 @@ export class Interface extends CustomEvent {
 	imported(data: Object): void;
 
 	/** Two ports were connected with a cable */
-	on(eventName: 'cable.connect', callback: (data: { port: IFacePort, target: IFacePort, cable: Cable }) => void): void;
+	on(eventName: 'cable.connect', callback: (data: { port: IFacePort<T['iface']>, target: IFacePort, cable: Cable }) => void): void;
 	/** Two ports get disconnected each other */
-	on(eventName: 'cable.disconnect', callback: (data: { port: IFacePort, target: IFacePort, cable: Cable }) => void): void;
+	on(eventName: 'cable.disconnect', callback: (data: { port: IFacePort<T['iface']>, target: IFacePort, cable: Cable }) => void): void;
 	/** There's new value update coming from output port */
-	on(eventName: 'port.value', callback: (data: { port: IFacePort, target: IFacePort, cable: Cable }) => void): void;
+	on(eventName: 'port.value', callback: (data: { port: IFacePort<T['iface']>, target: IFacePort, cable: Cable }) => void): void;
 }
 
 /** Can be used to show information for nodes in Sketch */
@@ -580,22 +585,24 @@ declare class Decoration {
 
 export type { Decoration };
 
+type NodeStaticProps = {output?: {}, input?: {}};
+
 /** Blackprint Node */
-export class Node {
+export class Node<T extends NodeStaticProps> {
 	/**
 	 * Set this to true if you want .update function being called for every data changes from different input port
 	 */
 	partialUpdate: Boolean;
 
-	/** References */
-	ref: References;
-
 	/** Interface reference */
-	iface: Interface;
+	iface: Interface<Node<T>>;
 	/** Input port's value */
-	input: {[key: string]: any};
+	input: PortType<T['input']>;
 	/** Output port's value */
-	output: {[key: string]: any};
+	output: PortType<T['output']>;
+
+	/** References */
+	ref: PortReferences<Node<T>>;
 
 	/** Engine instance */
 	instance: Engine;
@@ -619,7 +626,7 @@ export class Node {
 	 * This must be called once to attach interface to this node
 	 * @param icNamespace interface component's namespace that was declared with instance.registerInterface(), must be started with "BPIC/"
 	 */
-	setInterface(icNamespace?: string): Interface;
+	setInterface(icNamespace?: string): Interface<Node<T>>;
 
 	/**
 	 * This function will be called once the nodes has been created and the cables has been connected
@@ -654,7 +661,7 @@ export class Node {
 	 * @param name unique port name
 	 * @param type data type (class)
 	 */
-	createPort(which: 'input' | 'output', name: string, type: Function): IFacePort;
+	createPort(which: 'input' | 'output', name: string, type: Function): IFacePort<Interface<Node<T>>>;
 
 	/**
 	 * Dynamically rename port to this node
@@ -713,7 +720,7 @@ export class OutputPort extends PortGhost {
 	sync(): void;
 	
 	/** There are value update on the port */
-	on(eventName: 'value', callback: (data: OutputPort_EventValue) => void): void;
+	on(eventName: 'value', callback: (data: OutputPort_EventValue<any>) => void): void;
 	/** The Port.Trigger or port with Function type was called */
 	on(eventName: 'call', callback: () => void): void;
 }
@@ -732,7 +739,7 @@ export class InputPort extends PortGhost {
 	constructor(type: any);
 	
 	/** There are value update on the port */
-	on(eventName: 'value', callback: (data: InputPort_EventValue) => void): void;
+	on(eventName: 'value', callback: (data: InputPort_EventValue<any>) => void): void;
 	/** The Port.Trigger or port with Function type was called */
 	on(eventName: 'call', callback: () => void): void;
 }
