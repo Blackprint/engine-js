@@ -50,7 +50,12 @@ export function getContext(name: String): Promise<ModuleContext>;
  * Create an object that extend Blackprint object with additional options.
  * @param options desc
  */
-export function loadScope(options: {url: String, css?: Boolean}): any;
+export function loadScope(options: {
+	url: String,
+	hasInterface?: boolean,
+	hasDocs?: boolean,
+	css?: Boolean
+}): any;
 
 /**
  * Block module loading that are not from the list
@@ -83,7 +88,7 @@ export namespace Port {
  	 * for union port, please split it to different port to handle it
 	 * @param type Type Data that allowed for the Port 
 	 */
-	export function ArrayOf(type: Array<any>): any;
+	export function ArrayOf(type: any): any;
 
 	/**
 	 * This port can have default value if no cable was connected
@@ -149,7 +154,7 @@ export function registerNode(namespace: String, class_?: Function): Function;
 /**
  * Register interface to Blackprint (For browser and non-browser).
  * If you're creating Sketch UI, you will need to register with Blackprint.Sketch.registerInterface too.
- * @param icNamespace Interface component's namespace, must be started with "BPIC/"
+ * @param icNamespace Interface component's namespace, must be prefixed with "BPIC/"
  * @param class_ Class that extends Blackprint.Interface, leave this parameter empty if you want to use decorator
  */
 export function registerInterface(icNamespace: String, class_?: Function): Function;
@@ -410,6 +415,8 @@ export class IFacePort<T extends Interface = any> {
 	readonly type: object;
 	/** Return true if port from StructOf was splitted to multiple port */
 	readonly splitted: Boolean;
+	/** Access output value, this will only available on output port */
+	readonly value: any;
 
 	// sync: Boolean;
 	// disabled: Boolean;
@@ -453,7 +460,7 @@ export class IFacePort<T extends Interface = any> {
 	connectPort(port: IFacePort): Boolean;
 
 	/** There are value update on the port */
-	on(eventName: 'value', callback: (data: InputPort_EventValue<T> | OutputPort_EventValue<T>) => void): void;
+	on(eventName: 'value', callback: (data: IOPort_EventValue<T>) => void): void;
 	/** The Port.Trigger or port with Function type was called */
 	on(eventName: 'call', callback: () => void): void;
 	/** A cable is trying to connect for the port */
@@ -464,7 +471,13 @@ export class IFacePort<T extends Interface = any> {
 	on(eventName: 'disconnect', callback: (data: { port: IFacePort<T>, target?: IFacePort, cable: Cable }) => void): void;
 }
 
-declare type InputPort_EventValue<T extends Interface> = { port: IFacePort<T>, target: IFacePort, cable: Cable };
+declare type IOPort_EventValue<T extends Interface> = {
+	port: IFacePort<T>,
+	/** Only exist on output port */
+	target?: IFacePort,
+	/** Only exist on output port */
+	cable?: Cable
+};
 declare type OutputPort_EventValue<T extends Interface> = { port: IFacePort<T> };
 
 type PropType<T, P extends keyof T> = T[P];
@@ -624,7 +637,7 @@ export class Node<T extends NodeStaticProps> {
 
 	/**
 	 * This must be called once to attach interface to this node
-	 * @param icNamespace interface component's namespace that was declared with instance.registerInterface(), must be started with "BPIC/"
+	 * @param icNamespace interface component's namespace that was declared with instance.registerInterface(), must be prefixed with "BPIC/"
 	 */
 	setInterface(icNamespace?: string): Interface<Node<T>>;
 
@@ -739,7 +752,7 @@ export class InputPort extends PortGhost {
 	constructor(type: any);
 	
 	/** There are value update on the port */
-	on(eventName: 'value', callback: (data: InputPort_EventValue<any>) => void): void;
+	on(eventName: 'value', callback: (data: IOPort_EventValue<any>) => void): void;
 	/** The Port.Trigger or port with Function type was called */
 	on(eventName: 'call', callback: () => void): void;
 }
