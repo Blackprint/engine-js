@@ -8,6 +8,7 @@ var Blackprint = window.Blackprint || {
 			window.ResizeObserver ??= class{};
 		}
 
+		which = which.split('.').join('_');
 		Blackprint.settings[which] = val;
 	}
 };
