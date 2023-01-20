@@ -1,7 +1,7 @@
 {
   "name": "@blackprint/engine",
   "description": "Blackprint engine for JavaScript environment",
-  "version": "0.8.5",
+  "version": "0.8.6",
   "author": "Blackprint",
   "license": "MIT",
   "repository": {

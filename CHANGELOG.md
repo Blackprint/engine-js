@@ -1,3 +1,11 @@
+# 0.8.6
+
+### Improvement
+- Improve typings to make implementation more easier
+
+### Bug Fix
+- Replace dot settings's internal save name with underscore
+
 # 0.8.5
 
 ### Improvement
