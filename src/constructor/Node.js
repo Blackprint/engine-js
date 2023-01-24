@@ -64,7 +64,9 @@ Blackprint.Node = class Node {
 		if(type == null)
 			throw new Error("Type is required for creating new port");
 
-		if(type.any || type.constructor === Function
+		if(name.constructor !== String) name = String(name);
+
+		if(type.any || type.constructor === Function || type.isRoute
 		   || (type.constructor === Object && type.portFeature !== void 0)){
 			return this[which]._add(name, type);
 		}
@@ -75,6 +77,8 @@ Blackprint.Node = class Node {
 
 	renamePort(which, name, to){
 		let iPort = this.iface[which];
+		if(name.constructor !== String) name = String(name);
+		if(to.constructor !== String) to = String(to);
 
 		if(!(name in iPort))
 			throw new Error(which+" port with name '"+name+"' was not found");
@@ -98,6 +102,7 @@ Blackprint.Node = class Node {
 		if(which !== 'input' && which !== 'output')
 			throw new Error("Can only delete port for 'input' and 'output'");
 
+		if(name.constructor !== String) name = String(name);
 		return this[which]._delete(name);
 	}
 
