@@ -130,7 +130,9 @@ class Cable{
 			if(node.update !== void 0) {
 				if(node.instance._importing)
 					node.instance.executionOrder.add(node, this);
-				else node._bpUpdate();
+				else if(node.routes.in.length === 0) {
+					node._bpUpdate();
+				}
 			}
 		}
 	}
