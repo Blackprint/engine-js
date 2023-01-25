@@ -10,6 +10,7 @@ Blackprint.RoutePort = class RoutePort extends CustomEvent {
 
 		this.in = []; // Allow incoming route from multiple path
 		this.out = null; // Only one route/path
+		this._outTrunk = null; // If have branch
 		this.disableOut = false;
 		this.disabled = false;
 		this._isPaused = false;
@@ -33,6 +34,9 @@ Blackprint.RoutePort = class RoutePort extends CustomEvent {
 	// For creating output cable
 	createCable(cable){
 		this.out?.disconnect();
+		this._outTrunk?.disconnect();
+		this._outTrunk = null;
+
 		cable = this.out = cable || new Cable(this);
 		cable.isRoute = true;
 		cable.output = this;
