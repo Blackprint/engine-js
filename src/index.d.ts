@@ -642,6 +642,14 @@ export class Node<T extends NodeStaticProps> {
 	setInterface(icNamespace?: string): Interface<Node<T>>;
 
 	/**
+	 * This will be called when initializing node's port
+	 * In case you need to create a dynamic port, you will need to override this function
+	 * @override you can override/replace this functionality on your class
+	 * @param data Data that was passed when importing JSON or creating new node
+	 */
+	initPorts(data: Object): void;
+
+	/**
 	 * This function will be called once the nodes has been created and the cables has been connected
 	 * @override you can override/replace this functionality on your class
 	 */
@@ -649,6 +657,7 @@ export class Node<T extends NodeStaticProps> {
 
 	/**
 	 * This function will be called before init, where this node still not connected to any cables
+	 * You need to manually save the data to interface if it's needed
 	 * @override you can override/replace this functionality on your class
 	 * @param data Data that was passed when importing JSON or creating new node
 	 */
@@ -657,6 +666,7 @@ export class Node<T extends NodeStaticProps> {
 	/**
 	 * This function will be called everytime there's an update or new value from output port from other nodes
 	 * But if this node has route cable, this update function will be called until this node has turn to be executed
+	 * @override you can override/replace this functionality on your class
 	 * @param cable Related cable where the data flow happen, `this.partialUpdate` must be set to true to have this parameter
 	 */
 	update(cable: Cable): void;
@@ -664,6 +674,7 @@ export class Node<T extends NodeStaticProps> {
 	/**
 	 * This function will be called if this node has a null value in output port
 	 * The other node that need an input will requesting a output value from this node
+	 * @override you can override/replace this functionality on your class
 	 * @param cable Related cable that calling this function
 	 */
 	request(cable: Cable): void;

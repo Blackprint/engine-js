@@ -442,6 +442,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 			this.ifaceList[iface.i] = iface;
 		else this.ifaceList.push(iface);
 
+		node.initPorts?.(savedData);
+
 		if(defaultInputData != null)
 			iface._importInputs(defaultInputData);
 
