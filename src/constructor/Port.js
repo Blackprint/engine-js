@@ -76,7 +76,10 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 	async _callAll(){
 		if(this.type === Types.Route){
-			var cable = this.cables[0];
+			let cables = this.cables;
+			var cable = cables[0];
+
+			if(cable?.hasBranch) cable = cables[1];
 			if(cable === void 0) return;
 
 			if(Blackprint.settings.visualizeFlow)
