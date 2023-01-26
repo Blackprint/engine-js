@@ -33,6 +33,12 @@
 	ifaceList: Array<SkeletonInterface>;
 
 	constructor(json: string | object);
+
+	/**
+	 * Get list of nodes that created from specific namespace
+	 * @param namespace Node namespace
+	 */
+	getNodes(namespace: string): SkeletonNode;
 }
 
 declare class SkeletonPort {
@@ -49,13 +55,18 @@ declare class SkeletonPort {
 	 */
 	cables: Array<SkeletonCable>;
 }
+declare class SkeletonNode {
+	instance: Skeleton;
+	routes: SkeletonRoutePort;
+	iface: SkeletonInterface;
+}
 declare class SkeletonInterface {
 	/** Node namespace */
 	namespace: string;
 	/** Input ports */
-	input: {[key: string]: SkeletonPort};
+	input: {[key: string]: SkeletonPort | SkeletonRoutePort};
 	/** Output ports */
-	output: {[key: string]: SkeletonPort};
+	output: {[key: string]: SkeletonPort | SkeletonRoutePort};
 	/** Ports References */
 	ref: {
 		IInput: {[key: string]: SkeletonPort},
@@ -72,10 +83,7 @@ declare class SkeletonInterface {
 	/** Node Interface's saved data */
 	data: object;
 	/** Node reference */
-	node: {
-		instance: Skeleton;
-		routes: SkeletonRoutePort;
-	};
+	node: SkeletonNode;
 }
 declare class SkeletonRoutePort {
 	/** Node Interface who own this port */

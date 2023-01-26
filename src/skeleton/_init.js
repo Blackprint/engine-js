@@ -99,9 +99,15 @@ Blackprint.Skeleton = class {
 							target.i += appendLength;
 			
 							var targetNode = inserted[target.i];
-
+							var linkPortB;
+							
 							// Output can only meet input port
-							var linkPortB = targetNode.input[target.name] ??= new SkeletonPort(targetNode, 'input', target.name);
+							if(target.name == null){
+								linkPortB = targetNode.node.routes;
+							}
+							else {
+								linkPortB = targetNode.input[target.name] ??= new SkeletonPort(targetNode, 'input', target.name);
+							}
 
 							cableConnects.push({
 								output: iface.output,
@@ -120,8 +126,7 @@ Blackprint.Skeleton = class {
 		let branchMap = new Map();
 		function deepCreate(temp, cable, linkPortA) {
 			if(temp.branch !== void 0){
-				cable.head2[0] = temp.x;
-				cable.head2[1] = temp.y;
+				cable.head2 = [temp.x, temp.y];
 
 				if(temp.overRot != null)
 					cable.overrideRot = temp.overRot;
@@ -171,10 +176,8 @@ Blackprint.Skeleton = class {
 			if(target.overRot != null)
 				cable.overrideRot = target.overRot;
 
-			if(linkPortA.isRoute){
-				linkPortB._connectCable(cable);
-				continue;
-			}
+			if(linkPortA.isRoute || linkPortB.isRoute)
+				cable.isRoute = true;
 
 			// Connect cables.currentCable to target port on NodeB
 			linkPortB._connectCable(cable);
@@ -211,5 +214,17 @@ Blackprint.Skeleton = class {
 				port.cables = temp;
 			}
 		}
+	}
+
+	getNodes(namespace){
+		var ifaces = this.ifaceList;
+		var got = [];
+
+		for (var i = 0; i < ifaces.length; i++) {
+			if(ifaces[i].namespace === namespace)
+				got.push(ifaces[i].node);
+		}
+
+		return got;
 	}
 }

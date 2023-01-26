@@ -25,7 +25,8 @@ class SkeletonInterface {
 
 		this.node = {
 			instance: instance,
-			routes: new SkeletonRoutePort(this)
+			routes: new SkeletonRoutePort(this),
+			iface: this,
 		};
 	}
 };
