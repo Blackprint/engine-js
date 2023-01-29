@@ -1,3 +1,20 @@
+# 0.8.8
+
+### Features
+- Handle namespaced variable or nodes
+- Add support for branched cable on route cable
+- Add `initPorts` for dynamically initializing ports
+
+### Bug Fix
+- Disable port manipulation on locked instance
+- Put id as title if doesn't have custom title
+- Fix route port call on branched cable
+- Avoid calling update on cable connection when the node having input route
+- Show cable flow on route cable
+- Cast port name to string
+
+v0.8.7 is skipped
+
 # 0.8.6
 
 ### Improvement
