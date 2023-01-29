@@ -25,7 +25,11 @@ function deepProperty(obj, path, value, onCreate){
 		return;
 	}
 
-	for(var i = 0; i < path.length; i++){
+	return getDeepProperty(obj, path);
+}
+
+function getDeepProperty(obj, path, reduceLen=0){
+	for(var i = 0, n = path.length-reduceLen; i < n; i++){
 		if((obj = obj[path[i]]) === void 0)
 			return;
 	}

@@ -233,6 +233,9 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 		if(id in this.variables)
 			throw new Error("Variable id already exist: "+id);
 
+		if(id.includes('/'))
+			throw new Error("Slash symbol is reserved character and currently can't be used for creating path");
+
 		// deepProperty
 
 		// BPVariable = ./Var.js
@@ -253,6 +256,9 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 	}
 
 	addPrivateVars(id){
+		if(id.includes('/'))
+			throw new Error("Slash symbol is reserved character and currently can't be used for creating path");
+
 		if(!this.privateVars.includes(id)){
 			this.privateVars.push(id);
 			this.emit('variable.new', {scope: VarScope.Private, id});

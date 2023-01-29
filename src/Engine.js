@@ -483,15 +483,19 @@ Blackprint.Engine = class Engine extends CustomEvent {
 	createVariable(id, options){
 		if(this._locked_) throw new Error("This instance was locked");
 
-		if(id in this.variables){
-			this.variables[id].destroy();
-			delete this.variables[id];
+		let ids = id.split('/');
+		let lastId = ids[ids.length - 1];
+		let parentObj = getDeepProperty(this.variables, ids, 1);
+
+		if(parentObj != null && lastId in parentObj){
+			parentObj[lastId].destroy();
+			delete parentObj[lastId];
 		}
 
-		// deepProperty
-
 		// BPVariable = ./nodes/Var.js
-		let temp = this.variables[id] = new BPVariable(id, options);
+		let temp = new BPVariable(id, options);
+		deepProperty(this.variables, ids, temp);
+
 		temp._scope = VarScope.Public;
 		this._emit('variable.new', temp);
 
@@ -501,13 +505,18 @@ Blackprint.Engine = class Engine extends CustomEvent {
 	createFunction(id, options){
 		if(this._locked_) throw new Error("This instance was locked");
 
-		if(id in this.functions){
-			this.functions[id].destroy();
-			delete this.functions[id];
+		let ids = id.split('/');
+		let lastId = ids[ids.length - 1];
+		let parentObj = getDeepProperty(this.functions, ids, 1);
+
+		if(parentObj != null && lastId in parentObj){
+			parentObj[lastId].destroy();
+			delete parentObj[lastId];
 		}
 
 		// BPFunction = ./nodes/Fn.js
-		let temp = this.functions[id] = new BPFunction(id, options, this);
+		let temp = new BPFunction(id, options, this);
+		deepProperty(this.functions, ids, temp);
 
 		if(options.vars != null){
 			let vars = options.vars;

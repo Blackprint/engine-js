@@ -122,11 +122,11 @@ function BPVarInit(){
 			else // private
 				scope = this.node.instance.variables;
 
-			if(!(name in scope)){
+			let construct = deepProperty(scope, name.split('/'));
+			if(construct == null)
 				throw new Error(`'${name}' variable was not defined on the '${_scopeName}' instance`);
-			}
 
-			return scope;
+			return construct;
 		}
 		useType(port){
 			let temp = this._bpVarRef;
@@ -204,10 +204,10 @@ function BPVarInit(){
 			if(this._onChanged != null)
 				this._bpVarRef?.off('value', this._onChanged);
 
-			let scope = super.changeVar(name, scopeId);
-			this.title = 'Get '+name;
+			let varRef = super.changeVar(name, scopeId);
+			this.title = name.split('/').join(' / ');;
 
-			let temp = this._bpVarRef = scope[this.data.name];
+			let temp = this._bpVarRef = varRef;
 			if(temp.type === Types.Slot) return;
 
 			this._reinitPort();
@@ -251,10 +251,10 @@ function BPVarInit(){
 	Blackprint.registerInterface('BPIC/BP/Var/Set',
 	class extends BPVarGetSet {
 		changeVar(name, scopeId){
-			let scope = super.changeVar(name, scopeId);
-			this.title = 'Set '+name;
+			let varRef = super.changeVar(name, scopeId);
+			this.title = name.split('/').join(' / ');
 
-			let temp = this._bpVarRef = scope[this.data.name];
+			let temp = this._bpVarRef = varRef;
 			if(temp.type === Types.Slot) return;
 
 			this._reinitPort();
