@@ -21,7 +21,7 @@ Blackprint.nodes.BP.Env = {
 			super(instance);
 
 			let iface = this.setInterface('BPIC/BP/Env/Set');
-			
+
 			// Specify data field from here to make it enumerable and exportable
 			iface.data = {name: ''};
 			iface.title = 'EnvSet';
@@ -41,7 +41,7 @@ function BPEnvInit(){
 	class BPEnvGetSet extends Blackprint.Interface {
 		imported(data){
 			if(!data.name) throw new Error("Parameter 'name' is required");
-			this.data.name = data.name;
+			this.title = this.data.name = data.name;
 
 			// Create new environment if not exist
 			if(!(data.name in Blackprint.Environment._map)){

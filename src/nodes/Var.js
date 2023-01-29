@@ -52,8 +52,9 @@ class BPVariable extends CustomEvent {
 		super();
 		// this.rootInstance = instance;
 
-		id = id.replace(/[`~!@#$%^&*()\-_+={}\[\]:"|;'\\,./<>?]+/g, '_');
-		this.id = this.title = id;
+		id = id.replace(/^\/|\/$/gm, '');
+		this.id = id.replace(/[`~!@#$%^&*()\-_+={}\[\]:"|;'\\,.<>?]+/g, '_');
+		this.title = options?.title || id;
 
 		// The type need to be defined dynamically on first cable connect
 		this.type = Types.Slot;
