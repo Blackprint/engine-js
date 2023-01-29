@@ -58,6 +58,8 @@ Blackprint.Node = class Node {
 	}
 
 	createPort(which, name, type){
+		if(this.instance._locked_) throw new Error("This instance was locked");
+
 		if(which !== 'input' && which !== 'output')
 			throw new Error("Can only create port for 'input' and 'output'");
 
@@ -76,6 +78,8 @@ Blackprint.Node = class Node {
 	}
 
 	renamePort(which, name, to){
+		if(this.instance._locked_) throw new Error("This instance was locked");
+
 		let iPort = this.iface[which];
 		if(name.constructor !== String) name = String(name);
 		if(to.constructor !== String) to = String(to);
@@ -99,6 +103,8 @@ Blackprint.Node = class Node {
 	}
 
 	deletePort(which, name){
+		if(this.instance._locked_) throw new Error("This instance was locked");
+
 		if(which !== 'input' && which !== 'output')
 			throw new Error("Can only delete port for 'input' and 'output'");
 
