@@ -149,7 +149,7 @@ function BPVarInit(){
 			if(cable != null)
 				port = cable.owner;
 
-			temp.type = port.type;
+			temp.type = port._config || port.type;
 
 			if(port.type === Types.Slot)
 				this.waitTypeChange(temp, port);
@@ -165,8 +165,7 @@ function BPVarInit(){
 		waitTypeChange(bpVar, port){
 			this._waitTypeChange = () => {
 				if(port != null) {
-					bpVar.type = port.type;
-					bpVar._config = port._config;
+					bpVar.type = port._config || port.type;
 					bpVar.emit('type.assigned');
 				}
 				else {
