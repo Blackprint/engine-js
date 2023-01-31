@@ -5,12 +5,16 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 		this.variables = {}; // { category => { name, value, type, childs:{ category } } }
 		this.functions = {}; // { category => { name, variables, input, output, used: [], node, description, childs:{ category } } }
+		this.events = new InstanceEvents(this);
 
 		this.iface = {}; // { id => IFace }
 		this.ref = {}; // { id => Port references }
 
 		this.executionOrder = new OrderedExecution(this);
 		this._importing = false;
+
+		this._eventsInsNew = ev => this.events._updateTreeList();
+		Blackprint.on('_eventInstance.register', this._eventsInsNew);
 	}
 
 	deleteNode(iface){
@@ -610,7 +614,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		this._locked_ = false;
 		this._destroyed_ = true;
 		this.clearNodes();
-
+		
+		Blackprint.off('_eventInstance.new', this._eventsInsNew);
 		this.emit('destroy');
 	}
 }
@@ -782,6 +787,27 @@ Blackprint.registerInterface = function(templatePath, options, func){
 		throw new Error(_classIfaceError);
 
 	Blackprint._iface[templatePath] = func;
+}
+
+Blackprint._events = {};
+Blackprint.registerEvent = function(namespace, options){
+	let { schema } = options;
+
+	if(schema == null)
+		throw new Error("Registering an event must have a schema. If the event doesn't have a schema or dynamically created from an instance you may not need to do this registration.");
+
+	for (let key in schema) {
+		let obj = schema[key];
+
+		// Must be a data type (class constructor)
+		// or type from Blackprint.Port.{Feature}
+		if(!isClass(obj) && obj !== Blackprint.Types.Any && obj.portFeature == null){
+			throw new Error(`Unsupported schema type for field '${key}' in '${namespace}'`);
+		}
+	}
+
+	Blackprint._events[namespace] = new InstanceEvent(options);
+	Blackprint.emit('_eventInstance.register', { namespace });
 }
 
 var Engine = Blackprint.Engine;

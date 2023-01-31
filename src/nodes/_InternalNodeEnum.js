@@ -8,4 +8,6 @@ let _InternalNodeEnum = Blackprint._InternalNodeEnum = {
 	BPFnInput: 6,
 	BPFnOutput: 7,
 	BPFnMain: 8,
+	BPEventListen: 9,
+	BPEventEmit: 10,
 };

@@ -408,8 +408,11 @@ function BPFnInit(){
 			newInstance.variables = {}; // private for one function
 			newInstance.sharedVariables = bpFunction.variables; // shared between function
 			newInstance.functions = node.instance.functions;
+			newInstance.events = node.instance.events;
 			newInstance._funcMain = this;
 			newInstance._mainInstance = bpFunction.rootInstance;
+
+			Blackprint.off('_eventInstance.new', newInstance._eventsInsNew);
 
 			bpFunction.refreshPrivateVars(newInstance);
 
