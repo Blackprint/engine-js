@@ -23,7 +23,7 @@ Blackprint.Node = class Node {
 		// Get the requested iface after initialize the node
 		let ifaceFunc = (isSketch ? Blackprint.Sketch._iface : Blackprint._iface)[path];
 		if(ifaceFunc === void 0)
-			throw new Error('Node interface for '+path+" was not found, maybe .registerInterface() haven't being called?" + (isSketch ? " (for Sketch Interface)" : ""));
+			throw new Error('Node interface for '+path+" was not found, maybe .registerInterface() haven't being called?" + (isSketch ? " (missing for Sketch Interface)" : ""));
 
 		// Initialize for interface
 		let iface;
@@ -132,7 +132,6 @@ Blackprint.Node = class Node {
 			this._bpUpdating = true;
 			await this.update();
 			this._bpUpdating = false;
-			this.iface.emit('updated');
 		}
 
 		if(this.routes.out == null){
