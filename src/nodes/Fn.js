@@ -31,7 +31,6 @@ Blackprint.nodes.BP.Fn = {
 
 			let iface = this.setInterface('BPIC/BP/Fn/Output');
 			iface._enum = _InternalNodeEnum.BPFnOutput;
-			iface._dynamicPort = true; // Port is initialized dynamically
 
 			let funcMain = iface._funcMain = this.instance._funcMain;
 			funcMain._proxyOutput = this;
@@ -388,6 +387,10 @@ class BPFunctionNode extends Blackprint.Node {
 function BPFnInit(){
 	Blackprint.registerInterface('BPIC/BP/Fn/Main',
 	class extends Blackprint.Interface {
+		constructor(node){
+			super(node);
+			this._dynamicPort = true; // Port is initialized dynamically
+		}
 		async _BpFnInit(){
 			if(this._importOnce)
 				throw new Error("Can't import function more than once");
@@ -471,8 +474,12 @@ function BPFnInit(){
 	});
 
 	class BPFnInOut extends Blackprint.Interface {
+		constructor(node){
+			super(node);
+			this._dynamicPort = true; // Port is initialized dynamically
+		}
 		addPort(port, customName){
-			if(port === undefined) throw new Error("Can't set type with undefined");
+			if(port === undefined) return;
 
 			let cable;
 			if(port === true){
@@ -496,7 +503,8 @@ function BPFnInit(){
 			let portType;
 
 			if(port.feature === BP_Port.Trigger){
-				portType = BP_Port.Trigger(function(){ nodeB.iface.output[inputPort.name]._callAll(); });
+				let targetPort = nodeB.iface.output[inputPort.name];
+				portType = BP_Port.Trigger(()=> targetPort._callAll());
 			}
 			// Skip ArrayOf port feature, and just use the type
 			else if(port.feature === BP_Port.ArrayOf){
@@ -541,7 +549,7 @@ function BPFnInit(){
 
 			let inputPort;
 			if(portType === Function || portType.prototype instanceof Function)
-				inputPort = nodeA.createPort('input', name, Blackprint.Port.Trigger(outputPort._callAll));
+				inputPort = nodeA.createPort('input', name, Blackprint.Port.Trigger(()=> outputPort._callAll()));
 			else inputPort = nodeA.createPort('input', name, portType);
 
 			// When using Blackprint.Sketch we need to reconnect the cable

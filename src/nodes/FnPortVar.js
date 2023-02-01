@@ -11,7 +11,6 @@ Blackprint.nodes.BP.FnVar = {
 			iface.title = 'FnInput';
 
 			iface._enum = _InternalNodeEnum.BPFnVarInput;
-			iface._dynamicPort = true; // Port is initialized dynamically
 		}
 		imported(){
 			this.routes.disabled = true;
@@ -35,7 +34,6 @@ Blackprint.nodes.BP.FnVar = {
 			iface.title = 'FnOutput';
 
 			iface._enum = _InternalNodeEnum.BPFnVarOutput;
-			iface._dynamicPort = true; // Port is initialized dynamically
 		}
 		update(){
 			let { iface } = this;
@@ -62,6 +60,10 @@ Blackprint.nodes.BP.FnVar = {
 // Register when ready
 function BPFnVarInit(){
 	class BPFnVarInOut extends Blackprint.Interface {
+		constructor(node){
+			super(node);
+			this._dynamicPort = true; // Port is initialized dynamically
+		}
 		imported(data){
 			if(!data.name) throw new Error("Parameter 'name' is required");
 			this.data.name = data.name;
@@ -243,7 +245,10 @@ function getFnPortType(port, which, parentNode, ref){
 	if(port.feature === BP_Port.Trigger){
 		if(which === 'input') // Function Input (has output port inside, and input port on main node)
 			portType = Function;
-		else portType = BP_Port.Trigger(parentNode.output[ref.name]._callAll);
+		else {
+			let port = parentNode.output[ref.name];
+			portType = BP_Port.Trigger(()=> port._callAll());
+		}
 	}
 	// Skip ArrayOf port feature, and just use the type
 	else if(port.feature === BP_Port.ArrayOf){

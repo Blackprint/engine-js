@@ -17,7 +17,6 @@ Blackprint.nodes.BP.Var = {
 			iface.type = 'bp-var-set';
 
 			iface._enum = _InternalNodeEnum.BPVarSet;
-			iface._dynamicPort = true; // Port is initialized dynamically
 		}
 		update(){
 			this.iface._bpVarRef.value = this.input.Val;
@@ -41,7 +40,6 @@ Blackprint.nodes.BP.Var = {
 			iface.type = 'bp-var-get';
 
 			iface._enum = _InternalNodeEnum.BPVarGet;
-			iface._dynamicPort = true; // Port is initialized dynamically
 		}
 	},
 };
@@ -88,6 +86,10 @@ let BPVarEventSlot = {slot: "bp-engine-var"};
 // Register when ready
 function BPVarInit(){
 	class BPVarGetSet extends Blackprint.Interface {
+		constructor(node){
+			super(node);
+			this._dynamicPort = true; // Port is initialized dynamically
+		}
 		imported(data){
 			if(data.scope == null || data.name == null)
 				throw new Error("'scope' and 'name' options is required for creating variable node");
