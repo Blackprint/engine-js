@@ -66,10 +66,17 @@ Blackprint.Node = class Node {
 		if(type == null)
 			throw new Error("Type is required for creating new port");
 
+		if(which === 'output' && type.portFeature === BP_Port.Union){
+			type = Types.Any;
+		}
+
 		if(name.constructor !== String) name = String(name);
 
-		if(type.any || type.constructor === Function || type.isRoute
-		   || (type.constructor === Object && type.portFeature !== void 0)){
+		if(type.any
+			|| type.constructor === Function
+			|| type.isRoute
+			|| type.portFeature !== void 0
+		){
 			return this[which]._add(name, type);
 		}
 

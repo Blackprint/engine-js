@@ -1,5 +1,10 @@
 // This port can allow multiple different types
 // like an 'any' port, but can only contain one value
+//
+// Note:
+// Output port mustn't use union, it must only output one type
+// and one port can't output multiple possible type
+// In this case, Types.Any will be used you may want to cast the type with a node
 BP_Port.Union = function(types){
 	if(types.constructor !== Array)
 		throw new Error("Blackprint.Port.Union parameter must be an array of types");
@@ -20,16 +25,5 @@ BP_Port.Union = function(types){
 }
 
 BP_Port.Union.validate = function(types, target){
-	if(types.union && target.union){
-		if(types.length !== target.length) return false;
-
-		for (let i=0; i < types.length; i++) {
-			if(!target.includes(types[i]))
-				return false;
-		}
-
-		return true;
-	}
-
 	return target.any || types.includes(target);
 }
