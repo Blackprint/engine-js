@@ -27,6 +27,26 @@ class InstanceEvents extends CustomEvent {
 		treeList.refresh?.();
 	}
 
+	emit(eventName, obj){
+		if(this._event === void 0)
+			return false;
+
+		if(arguments.length > 2)
+			throw new Error(".emit only accept 2 parameter, please wrap the others on a object");
+
+		for (var i = 0; i < events.length; i++){
+			var ev = events[i];
+			if(ev.once){
+				delete ev.once;
+				events.splice(i--, 1);
+			}
+
+			ev(obj, eventName);
+		}
+
+		return true;
+	}
+
 	createEvent(namespace){
 		if(namespace in this.list) return;
 		this.list[namespace] = new InstanceEvent({schema: {}});
