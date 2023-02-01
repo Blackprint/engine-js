@@ -18,6 +18,8 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 		// this.value;
 		if(haveFeature === BP_Port.Trigger){
+			if(def === this._callAll) throw new Error("Logic error");
+
 			this._callDef = def;
 			this.default = this._call.bind(this);
 		}
@@ -52,7 +54,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 	}
 
 	_call(cable){
-		let { iface, _callDef } = this;
+		let iface = this.iface;
 
 		if(cable == null){
 			cable = this._cable ??= {
@@ -67,7 +69,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		}
 
 		this._calling = cable._calling = true;
-		_callDef(this);
+		this._callDef(this);
 		this._calling = cable._calling = false;
 
 		if(iface._enum !== _InternalNodeEnum.BPFnMain)
