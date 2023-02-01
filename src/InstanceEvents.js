@@ -33,13 +33,29 @@ class InstanceEvents extends CustomEvent {
 		this._updateTreeList();
 	}
 
-	refreshFields(namespace){
+	_renameFields(namespace, name, to){
+		let schema = this.list[namespace]?.schema;
+		if(schema == null) return;
+
+		schema[to] = schema[name];
+		delete schema[name];
+
+		this.refreshFields(namespace, name, to);
+	}
+
+	// second and third parameter is only be used for renaming field
+	refreshFields(namespace, _name, _to){
 		let schema = this.list[namespace]?.schema;
 		if(schema == null) return;
 
 		function refreshPorts(iface, target){
 			let ports = iface[target];
 			let node = iface.node;
+
+			if(_name != null){
+				node.renamePort(target, _name, _to);
+				return;
+			}
 
 			// Delete port that not exist or different type first
 			let isEmitPort = true;

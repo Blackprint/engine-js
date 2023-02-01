@@ -118,6 +118,12 @@ function BPEventInit(){
 			schema[name] = type;
 			this._insEventsRef.refreshFields(this.data.namespace);
 		}
+		renameField(name, to){
+			let { schema } = this._eventRef;
+			if(schema[name] == null || schema[to] != null) return;
+
+			this._insEventsRef._renameFields(this.data.namespace, name, to);
+		}
 		deleteField(name, type=Blackprint.Types.Any){
 			let { schema } = this._eventRef;
 			if(schema[name] == null) return;
