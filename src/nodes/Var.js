@@ -221,7 +221,7 @@ function BPVarInit(){
 			if(this.output.Val !== void 0)
 				node.deletePort('output', 'Val');
 
-			let ref = this.node.output;
+			let ref = node.output;
 			node.createPort('output', 'Val', temp.type);
 
 			if(temp.type === Function || temp.type.prototype instanceof Function){
