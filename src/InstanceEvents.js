@@ -32,6 +32,50 @@ class InstanceEvents extends CustomEvent {
 		this.list[namespace] = new InstanceEvent({schema: {}});
 		this._updateTreeList();
 	}
+
+	refreshFields(namespace){
+		let schema = this.list[namespace]?.schema;
+		if(schema == null) return;
+
+		function refreshPorts(iface, target){
+			let ports = iface[target];
+			let node = iface.node;
+
+			// Delete port that not exist or different type first
+			let isEmitPort = true;
+			for (let name in ports) {
+				if(isEmitPort) { isEmitPort = false; continue; }
+				if(schema[name] != ports[name]._config){
+					node.deletePort(target, name);
+				}
+			}
+
+			// Create port that not exist
+			for (let name in schema) {
+				if(ports[target] == null)
+					node.createPort(target, name, schema[name]);
+			}
+		}
+
+		function iterateList(ifaceList){
+			for (let i=0; i < ifaceList.length; i++) {
+				let iface = ifaceList[i];
+				if(iface._enum === _InternalNodeEnum.BPEventListen){
+					if(iface.data.namespace === namespace)
+						refreshPorts(iface, 'output');
+				}
+				else if(iface._enum === _InternalNodeEnum.BPEventEmit){
+					if(iface.data.namespace === namespace)
+						refreshPorts(iface, 'input');
+				}
+				else if(iface._enum === _InternalNodeEnum.BPFnMain){
+					iterateList(iface.bpInstance.ifaceList);
+				}
+			}
+		}
+
+		iterateList(this.instance.ifaceList);
+	}
 }
 
 class InstanceEvent {

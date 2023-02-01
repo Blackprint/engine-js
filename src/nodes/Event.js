@@ -4,7 +4,7 @@ Blackprint.nodes.BP.Event = {
 		static input = {
 			Limit: Blackprint.Port.Default(Number, 0),
 			Reset: Blackprint.Port.Trigger(port => port.iface.node.resetLimit()),
-			Off: Blackprint.Port.Trigger(port => port.iface.node.trigger()),
+			Off: Blackprint.Port.Trigger(port => port.iface.node.offEvent()),
 		};
 
 		constructor(instance){
@@ -21,10 +21,17 @@ Blackprint.nodes.BP.Event = {
 			iface._enum = _InternalNodeEnum.BPEventListen;
 
 			this._limit = -1; // -1 = no limit
+			this._off = false;
 		}
+		initPorts(data){ this.iface.initPorts(data) }
 		resetLimit(){
 			let limit = this.input.Limit;
 			this._limit = limit === 0 ? -1 : limit;
+
+			if(this._off){
+				let iface = this.iface;
+				this.instance.events.on(iface.data.namespace, iface._listener);
+			}
 		}
 		eventUpdate(obj){
 			if(this._off || this._limit === 0) return;
@@ -32,6 +39,14 @@ Blackprint.nodes.BP.Event = {
 
 			Object.assign(this.output, obj);
 			this.routes.routeOut();
+		}
+		offEvent(){
+			if(this._off === false){
+				let iface = this.iface;
+				this.instance.events.off(iface.data.namespace, iface._listener);
+
+				this._off = true;
+			}
 		}
 	},
 	Emit: class extends Blackprint.Node {
@@ -52,6 +67,7 @@ Blackprint.nodes.BP.Event = {
 
 			iface._enum = _InternalNodeEnum.BPEventEmit;
 		}
+		initPorts(data){ this.iface.initPorts(data) }
 		trigger(){
 			let data = Object.assign({}, this.input);
 			delete data.Emit;
@@ -65,26 +81,56 @@ Blackprint.nodes.BP.Event = {
 // We need interface because we want to register Sketch interface later
 function BPEventInit(){
 	class BPEventListenEmit extends Blackprint.Interface {
-		imported(data){
+		constructor(node){
+			super(node);
+			this._insEventsRef = this.node.instance.events;
+		}
+		initPorts(data){
 			let namespace = data.namespace;
 			if(!namespace) throw new Error("Parameter 'namespace' is required");
+
 			this.data.namespace = namespace;
-			this.title = namespace.split('/').pop();
+			this.title = namespace.split('/').splice(-2).join(' ');
 
 			let eventIns = this.node.instance.events;
-			if(eventIns[namespace] == null){
+			if(eventIns.list[namespace] == null){
 				// create if not exist
 				eventIns.createEvent(namespace);
 				this._eventRef = eventIns.list[namespace];
 			}
 			else this._eventRef = eventIns.list[namespace];
+
+			let { schema } = this._eventRef;
+			let createPortTarget;
+			if(this._enum === _InternalNodeEnum.BPEventListen){
+				createPortTarget = 'output';
+			}
+			else createPortTarget = 'input';
+
+			for (let key in schema) {
+				this.node.createPort(createPortTarget, key, schema[key]);
+			}
+		}
+		createField(name, type=Blackprint.Types.Any){
+			let { schema } = this._eventRef;
+			if(schema[name] != null) return;
+
+			schema[name] = type;
+			this._insEventsRef.refreshFields(this.data.namespace);
+		}
+		deleteField(name, type=Blackprint.Types.Any){
+			let { schema } = this._eventRef;
+			if(schema[name] == null) return;
+
+			delete schema[name];
+			this._insEventsRef.refreshFields(this.data.namespace);
 		}
 	};
 
 	Blackprint.registerInterface('BPIC/BP/Event/Listen',
 	class extends BPEventListenEmit {
-		imported(data){
-			super.imported(data);
+		initPorts(data){
+			super.initPorts(data);
 
 			if(this._listener) throw new Error("This node already listen to an event");
 			this._listener = ev => {
@@ -92,11 +138,11 @@ function BPEventInit(){
 				this.node.eventUpdate(ev);
 			}
 
-			this.node.instance.events.on(data.namespace, this._listener);
+			this._insEventsRef.on(data.namespace, this._listener);
 		}
 		destroy(){
 			if(this._listener == null) return;
-			this.node.instance.events.off(this.data.namespace, this._listener);
+			this._insEventsRef.off(this.data.namespace, this._listener);
 		}
 	});
 
