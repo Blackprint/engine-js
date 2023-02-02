@@ -51,9 +51,15 @@ class InstanceEvents extends CustomEvent {
 		return true;
 	}
 
-	createEvent(namespace){
+	createEvent(namespace, options={}){
 		if(namespace in this.list) return;
-		this.list[namespace] = new InstanceEvent({schema: {}});
+		if(/\s/.test(namespace))
+			throw new Error("Namespace can't have space character");
+
+		this.list[namespace] = new InstanceEvent({
+			schema: options.schema || {},
+		});
+
 		this._updateTreeList();
 	}
 

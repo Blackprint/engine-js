@@ -486,6 +486,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 	createVariable(id, options){
 		if(this._locked_) throw new Error("This instance was locked");
+		if(/\s/.test(id))
+			throw new Error("Id can't have space character");
 
 		let ids = id.split('/');
 		let lastId = ids[ids.length - 1];
@@ -508,6 +510,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 	createFunction(id, options){
 		if(this._locked_) throw new Error("This instance was locked");
+		if(/\s/.test(id))
+			throw new Error("Id can't have space character");
 
 		let ids = id.split('/');
 		let lastId = ids[ids.length - 1];
@@ -791,8 +795,10 @@ Blackprint.registerInterface = function(templatePath, options, func){
 
 Blackprint._events = {};
 Blackprint.registerEvent = function(namespace, options){
-	let { schema } = options;
+	if(/\s/.test(namespace))
+		throw new Error("Namespace can't have space character");
 
+	let { schema } = options;
 	if(schema == null)
 		throw new Error("Registering an event must have a schema. If the event doesn't have a schema or dynamically created from an instance you may not need to do this registration.");
 

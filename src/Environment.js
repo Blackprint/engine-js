@@ -61,6 +61,9 @@ Blackprint.Environment = {
 	_rename(keyA, keyB){
 		if(!keyB) return;
 
+		if(/[^A-Z_][^A-Z0-9_]/.test(keyB))
+			throw new Error("Environment must be uppercase and not contain any symbol except underscore, and not started by a number. But got: "+keyB);
+
 		let { _map, map } = this;
 		let temp = _map[keyA];
 		if(temp == null) throw new Error(`${keyA} was not defined in the environment`);
