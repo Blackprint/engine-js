@@ -32,7 +32,7 @@ class InstanceEvents extends CustomEvent {
 			return false;
 
 		let events = this._event[eventName];
-		if(this._event === void 0)
+		if(events === void 0)
 			return false;
 
 		if(arguments.length > 2)
