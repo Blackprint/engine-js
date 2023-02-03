@@ -92,13 +92,8 @@ function BPEventInit(){
 			this.data.namespace = namespace;
 			this.title = namespace.split('/').splice(-2).join(' ');
 
-			let eventIns = this.node.instance.events;
-			if(eventIns.list[namespace] == null){
-				// create if not exist
-				eventIns.createEvent(namespace);
-				this._eventRef = eventIns.list[namespace];
-			}
-			else this._eventRef = eventIns.list[namespace];
+			this._eventRef = this.node.instance.events.list[namespace];
+			if(this._eventRef == null) throw new Error("Events ("+namespace+") is not defined");
 
 			let { schema } = this._eventRef;
 			let createPortTarget;
@@ -139,10 +134,7 @@ function BPEventInit(){
 			super.initPorts(data);
 
 			if(this._listener) throw new Error("This node already listen to an event");
-			this._listener = ev => {
-				if(ev == null) return;
-				this.node.eventUpdate(ev);
-			}
+			this._listener = ev => this.node.eventUpdate(ev);
 
 			this._insEventsRef.on(data.namespace, this._listener);
 		}
