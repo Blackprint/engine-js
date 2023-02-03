@@ -206,7 +206,7 @@ function BPVarInit(){
 				this._bpVarRef?.off('value', this._onChanged);
 
 			let varRef = super.changeVar(name, scopeId);
-			this.title = name.split('/').join(' / ');;
+			this.title = name.split('/').join(' / ');
 
 			let temp = this._bpVarRef = varRef;
 			if(temp.type === Types.Slot) return;

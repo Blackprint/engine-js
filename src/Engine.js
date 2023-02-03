@@ -3,8 +3,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		super();
 		this.ifaceList = []; // IFace
 
-		this.variables = {}; // { category => { name, value, type, childs:{ category } } }
-		this.functions = {}; // { category => { name, variables, input, output, used: [], node, description, childs:{ category } } }
+		this.variables = {}; // { category => BPVariable{ name, value, type }, category => { category } }
+		this.functions = {}; // { category => BPFunction{ name, variables, input, output, used: [], node, description }, category => { category } }
 		this.events = new InstanceEvents(this);
 
 		this.iface = {}; // { id => IFace }
@@ -152,6 +152,14 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 				for (let key in variables)
 					this.createVariable(key, variables[key]);
+			}
+
+			if(metadata.events != null){
+				let events = metadata.events;
+
+				for (let path in events){
+					this.createEvent(path, events[path]);
+				}
 			}
 		}
 
