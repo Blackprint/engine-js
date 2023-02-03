@@ -411,6 +411,17 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 				throw new Error(`The target port's connection of this port is not instance of type that will be assigned: ${this.value.constructor.name} is not instance of ${type.name}`);
 		}
 
+		if(this.source === 'output' && type.portFeature != null){
+			if(type.portFeature === BP_Port.Union)
+				type = Types.Any;
+			else if(type.portFeature === BP_Port.Trigger)
+				type = Function;
+			else if(type.portFeature === BP_Port.ArrayOf)
+				type = Array;
+			else if(type.portFeature === BP_Port.Default)
+				type = type.portType;
+		}
+
 		if(type.portFeature != null){
 			if(type.virtualType != null)
 				this.virtualType = type.virtualType;

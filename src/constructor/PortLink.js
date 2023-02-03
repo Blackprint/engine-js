@@ -33,6 +33,17 @@ class PortLink {
 	_add(portName, val){
 		portName = ''+portName;
 
+		if(this._which === 'output' && val.portFeature != null){
+			if(val.portFeature === BP_Port.Union)
+				val = Types.Any;
+			else if(val.portFeature === BP_Port.Trigger)
+				val = Function;
+			else if(val.portFeature === BP_Port.ArrayOf)
+				val = Array;
+			else if(val.portFeature === BP_Port.Default)
+				val = val.portType;
+		}
+
 		var iPort = this._iface[this._which];
 		let exist = iPort[portName];
 
