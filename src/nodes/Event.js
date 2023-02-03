@@ -37,7 +37,12 @@ Blackprint.nodes.BP.Event = {
 			if(this._off || this._limit === 0) return;
 			if(this._limit > 0) this._limit--;
 
-			Object.assign(this.output, obj);
+			// Don't use object assign as we need to re-assign null/undefined field
+			let output = this.output;
+			for (let key in output) {
+				output[key] = obj[key];
+			}
+
 			this.routes.routeOut();
 		}
 		offEvent(){
