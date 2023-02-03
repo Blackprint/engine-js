@@ -465,7 +465,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 				let ref = iface.output[key];
 	
 				if((temp | 1) === 1)
-					Blackprint.Port.StructOf.split(ref);
+					BP_Port.StructOf.split(ref);
 	
 				if((temp | 2) === 2)
 					ref.allowResync = true;

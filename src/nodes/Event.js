@@ -2,9 +2,9 @@ Blackprint.nodes.BP.Event = {
 	Listen: class extends Blackprint.Node {
 		static output = {};
 		static input = {
-			Limit: Blackprint.Port.Default(Number, 0),
-			Reset: Blackprint.Port.Trigger(port => port.iface.node.resetLimit()),
-			Off: Blackprint.Port.Trigger(port => port.iface.node.offEvent()),
+			Limit: BP_Port.Default(Number, 0),
+			Reset: BP_Port.Trigger(port => port.iface.node.resetLimit()),
+			Off: BP_Port.Trigger(port => port.iface.node.offEvent()),
 		};
 
 		constructor(instance){
@@ -56,7 +56,7 @@ Blackprint.nodes.BP.Event = {
 	},
 	Emit: class extends Blackprint.Node {
 		static input = {
-			Emit: Blackprint.Port.Trigger(port => port.iface.node.trigger()),
+			Emit: BP_Port.Trigger(port => port.iface.node.trigger()),
 		};
 
 		constructor(instance){

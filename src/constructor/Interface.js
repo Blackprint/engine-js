@@ -103,7 +103,7 @@ Blackprint.Interface = class Interface extends Blackprint.Engine.CustomEvent{
 			let ref = this.output[key];
 
 			if((temp | 1) === 1)
-				Blackprint.Port.StructOf.split(ref);
+				BP_Port.StructOf.split(ref);
 
 			if((temp | 2) === 2){
 				ref.allowResync = true;

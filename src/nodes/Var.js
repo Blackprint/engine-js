@@ -271,7 +271,7 @@ function BPVarInit(){
 				node.deletePort('input', 'Val');
 
 			if(temp.type === Function || temp.type.prototype instanceof Function){
-				node.createPort('input', 'Val', Blackprint.Port.Trigger(function(){
+				node.createPort('input', 'Val', BP_Port.Trigger(function(){
 					temp.emit('call');
 				}));
 			}
