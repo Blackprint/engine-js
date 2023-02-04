@@ -21,6 +21,7 @@ Blackprint.nodes.BP.Var = {
 		update(){
 			this.iface._bpVarRef.value = this.input.Val;
 		}
+		destroy(){ this.iface.destroyIface() }
 	},
 	Get: class extends Blackprint.Node {
 		static output = {};
@@ -41,6 +42,7 @@ Blackprint.nodes.BP.Var = {
 
 			iface._enum = _InternalNodeEnum.BPVarGet;
 		}
+		destroy(){ this.iface.destroyIface() }
 	},
 };
 
@@ -179,7 +181,7 @@ function BPVarInit(){
 			this._destroyWaitType = () => { bpVar.off('type.assigned', this._waitTypeChange); };
 			(port || bpVar).once('type.assigned', this._waitTypeChange);
 		}
-		destroy(){
+		destroyIface(){
 			this._destroyWaitType?.();
 
 			let temp = this._bpVarRef;
@@ -241,11 +243,11 @@ function BPVarInit(){
 			temp.on(this._eventListen, this._onChanged);
 			return this.output.Val;
 		}
-		destroy(){
+		destroyIface(){
 			if(this._eventListen != null)
 				this._bpVarRef.off(this._eventListen, this._onChanged);
 
-			super.destroy();
+			super.destroyIface();
 		}
 	});
 

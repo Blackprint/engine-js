@@ -14,6 +14,7 @@ Blackprint.nodes.BP.Env = {
 
 			iface._enum = _InternalNodeEnum.BPEnvGet;
 		}
+		destroy(){ this.node.destroyListener() }
 	},
 	Set: class extends Blackprint.Node {
 		static input = {Val: String};
@@ -32,6 +33,7 @@ Blackprint.nodes.BP.Env = {
 		update(){
 			Blackprint.Environment.set(this.iface.data.name, this.input.Val);
 		}
+		destroy(){ this.node.destroyListener() }
 	},
 };
 
@@ -85,7 +87,7 @@ function BPEnvInit(){
 				}
 			}
 		}
-		destroy(){
+		destroyListener(){
 			if(this._nameListener == null) return;
 			Blackprint.off('environment.renamed', this._nameListener);
 		}
@@ -104,8 +106,8 @@ function BPEnvInit(){
 			Blackprint.on('environment.changed environment.added', this._listener);
 			this.ref.Output.Val = Blackprint.Environment.map[this.data.name];
 		}
-		destroy(){
-			super.destroy();
+		destroyListener(){
+			this.destroyListener();
 
 			if(this._listener == null) return;
 			Blackprint.off('environment.changed environment.added', this._listener);

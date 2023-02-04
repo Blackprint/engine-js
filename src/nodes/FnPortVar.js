@@ -21,6 +21,15 @@ Blackprint.nodes.BP.FnVar = {
 			// This will trigger the port to request from outside and assign to this node's port
 			this.output.Val = iface._funcMain.node.input[iface.data.name];
 		}
+		destroy(){
+			let iface = this.iface;
+			if(iface._listener == null) return;
+
+			let port = iface._proxyIface.output[iface.data.name];
+			if(port.feature === BP_Port.Trigger)
+				port.off('call', iface._listener);
+			else port.off('value', iface._listener);
+		}
 	},
 	Output: class extends Blackprint.Node {
 		static input = {};
@@ -167,15 +176,6 @@ function BPFnVarInit(){
 
 				port.on('value', this._listener);
 			}
-		}
-		destroy(){
-			// super.destroy();
-			if(this._listener == null) return;
-
-			let port = this._proxyIface.output[this.data.name];
-			if(port.feature === BP_Port.Trigger)
-				port.off('call', this._listener);
-			else port.off('value', this._listener);
 		}
 	});
 

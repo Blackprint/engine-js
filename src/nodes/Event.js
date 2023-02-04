@@ -53,6 +53,12 @@ Blackprint.nodes.BP.Event = {
 				this._off = true;
 			}
 		}
+		destroy(){
+			let iface = this.iface;
+
+			if(iface._listener == null) return;
+			iface._insEventsRef.off(iface.data.namespace, iface._listener);
+		}
 	},
 	Emit: class extends Blackprint.Node {
 		static input = {
@@ -142,10 +148,6 @@ function BPEventInit(){
 			this._listener = ev => this.node.eventUpdate(ev);
 
 			this._insEventsRef.on(data.namespace, this._listener);
-		}
-		destroy(){
-			if(this._listener == null) return;
-			this._insEventsRef.off(this.data.namespace, this._listener);
 		}
 	});
 
