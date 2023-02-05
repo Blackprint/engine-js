@@ -387,7 +387,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 	}
 
 	assignType(type){
-		if(type === undefined) throw new Error("Can't set type with undefined");
+		if(type == null) throw new Error("Can't set type with undefined");
 
 		if(this.type !== Blackprint.Types.Slot)
 			throw new Error("Can only assign type to port with 'Slot' type");
@@ -425,6 +425,8 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		if(type.portFeature != null){
 			if(type.virtualType != null)
 				this.virtualType = type.virtualType;
+
+			if(type.portType == null) throw new Error("Missing type for port feature");
 
 			this.feature = type.portFeature;
 			this.type = type.portType;

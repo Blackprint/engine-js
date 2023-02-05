@@ -3,6 +3,7 @@
 BP_Port.Trigger = function(func){
 	return {
 		portFeature: BP_Port.Trigger,
+		portType: Function,
 		default: func
 	};
 }

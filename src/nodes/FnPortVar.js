@@ -137,9 +137,11 @@ function BPFnVarInit(){
 			}
 			else{
 				if(this.output.Val === void 0){
-					let port = ports[name];
+					let port = this._funcMain._proxyInput.iface.output[name];
 					let portType = getFnPortType(port, 'input', this._funcMain, port._name);
-					node.createPort('output', 'Val', portType);
+
+					let newPort = node.createPort('output', 'Val', portType);
+					newPort._name = port._name;
 				}
 
 				this._addListener();
@@ -147,7 +149,7 @@ function BPFnVarInit(){
 		}
 		_addListener(){
 			let port = this._proxyIface.output[this.data.name];
-			if(port.feature === BP_Port.Trigger){
+			if(port.type === Function){
 				this._listener = () => {
 					this.ref.Output.Val();
 				};
@@ -232,9 +234,10 @@ function BPFnVarInit(){
 				proxyIface.once(`_add.${name}`, this._waitPortInit);
 			}
 			else {
-				let port = ports[name];
+				let port = this._funcMain._proxyOutput.iface.input[name];
 				let portType = getFnPortType(port, 'output', this._funcMain, port._name);
-				node.createPort('input', 'Val', portType);
+				let newPort = node.createPort('input', 'Val', portType);
+				newPort._name = port._name;
 			}
 		}
 	});
@@ -249,6 +252,10 @@ function getFnPortType(port, which, parentNode, ref){
 			let port = parentNode.output[ref.name];
 			portType = BP_Port.Trigger(()=> port._callAll());
 		}
+	}
+	else if(port.type === Function) {
+		let port = parentNode.output[ref.name];
+		portType = BP_Port.Trigger(()=> port._callAll());
 	}
 	// Skip ArrayOf port feature, and just use the type
 	else if(port.feature === BP_Port.ArrayOf){
