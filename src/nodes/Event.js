@@ -123,12 +123,20 @@ function BPEventInit(){
 
 			schema[name] = type;
 			this._insEventsRef.refreshFields(this.data.namespace);
+			this.node.instance.emit('eventfield.create', {
+				name, 
+				namespace: this.data.namespace,
+			});
 		}
 		renameField(name, to){
 			let { schema } = this._eventRef;
 			if(schema[name] == null || schema[to] != null) return;
 
 			this._insEventsRef._renameFields(this.data.namespace, name, to);
+			this.node.instance.emit('eventfield.rename', {
+				name, to,
+				namespace: this.data.namespace,
+			});
 		}
 		deleteField(name, type=Blackprint.Types.Any){
 			let { schema } = this._eventRef;
@@ -136,6 +144,10 @@ function BPEventInit(){
 
 			delete schema[name];
 			this._insEventsRef.refreshFields(this.data.namespace);
+			this.node.instance.emit('eventfield.delete', {
+				name, 
+				namespace: this.data.namespace,
+			});
 		}
 	};
 

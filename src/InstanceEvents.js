@@ -88,7 +88,7 @@ class InstanceEvents extends CustomEvent {
 			}
 
 			// Delete port that not exist or different type first
-			let isEmitPort = true;
+			let isEmitPort = target === 'input' ? true : false;
 			for (let name in ports) {
 				if(isEmitPort) { isEmitPort = false; continue; }
 				if(schema[name] != ports[name]._config){
