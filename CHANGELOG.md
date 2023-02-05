@@ -1,3 +1,19 @@
+# 0.8.9
+
+### Features
+- Add custom event nodes
+- Add event nodes feature
+
+### Bug Fix
+- Fix removed event listener when sketch container was removed
+- Fix dynamic port marker on internal interface
+- Fix type assigned on variable node
+- Force output port that use union to be Any type
+- Move port type re-assigment for output port
+- Improve output port's type when using port feature
+- Update error message and remove unused event emit
+- Validate namespace name
+
 # 0.8.8
 
 ### Features
