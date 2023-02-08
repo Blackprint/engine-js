@@ -158,7 +158,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 				let events = metadata.events;
 
 				for (let path in events){
-					this.createEvent(path, events[path]);
+					this.events.createEvent(path, events[path]);
 				}
 			}
 		}
