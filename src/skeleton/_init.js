@@ -14,26 +14,27 @@ Blackprint.Skeleton = class {
 		var inserted = this.ifaceList = [];
 
 		if(json.constructor === String)
-			json = JSON.parse(json);
+		json = JSON.parse(json);
 		else json = JSON.parse(JSON.stringify(json)); // deep copy
+		
+		if(json.instance == null)
+			throw new Error("Blackprint Skeleton only accept newest exported JSON format");
 
-		let metadata = json._;
-		delete json._;
-
-		let functions = metadata.functions;
+		let functions = json.functions;
 		if(functions != null){
 			for (let key in functions) this.functions[key] = functions[key];
 		}
 
-		let variables = metadata.variables;
+		let variables = json.variables;
 		if(variables != null){
 			for (let key in variables) this.variables[key] = variables[key];
 		}
 
+		let instance = json.instance;
 		let reorderInputPort = [];
 		let appendLength = 0; // reserved, if we want to add feature for append nodes in the future
-		for(var namespace in json){
-			var nodes = json[namespace];
+		for(var namespace in instance){
+			var nodes = instance[namespace];
 
 			// Every nodes that using this namespace name
 			for (var a = 0; a < nodes.length; a++){
@@ -69,8 +70,8 @@ Blackprint.Skeleton = class {
 
 		// Create cable only from output and property
 		// > Important to be separated from above, so the cable can reference to loaded nodes
-		for(var namespace in json){
-			var nodes = json[namespace];
+		for(var namespace in instance){
+			var nodes = instance[namespace];
 
 			// Every nodes that using this namespace name
 			for (var a = 0; a < nodes.length; a++){

@@ -97,6 +97,14 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		if(json.constructor !== Object)
 			json = JSON.parse(json);
 
+		// ToDo: remove this after v1.0 released
+		if(json.instance == null)
+			json = this._jsonToNew(json);
+
+		// Throw if no instance data in the JSON
+		if(json.instance == null)
+			throw new Error("Instance was not found in the JSON data");
+
 		let oldIfaces = this.iface;
 
 		if(options === void 0) options = {};
@@ -105,61 +113,55 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		this._importing = true;
 		this.emit("json.importing", {appendMode: options.appendMode, raw: json});
 
-		var metadata = json._;
-		delete json._;
-
-		if(metadata !== void 0){
-			if(metadata.env !== void 0 && !options.noEnv){
-				let Env = Blackprint.Environment;
-				let temp = metadata.env;
-				
-				for (let key in temp) {
-					Env.set(key, temp[key]);
-				}
+		if(json.environments !== void 0 && !options.noEnv){
+			let Env = Blackprint.Environment;
+			let temp = json.environments;
+			
+			for (let key in temp) {
+				Env.set(key, temp[key]);
 			}
+		}
 
-			let mjs;
-			if(metadata.functions != null) mjs = metadata.moduleJS.slice(0) || [];
+		let mjs;
+		if(json.functions != null) mjs = json.moduleJS.slice(0) || [];
 
-			if(metadata.moduleJS !== void 0 && !options.noModuleJS){
-				// wait for .min.mjs
-				await Blackprint.loadModuleFromURL(metadata.moduleJS, {
-					loadBrowserInterface: false
-				});
+		if(json.moduleJS !== void 0 && !options.noModuleJS){
+			// wait for .min.mjs
+			await Blackprint.loadModuleFromURL(json.moduleJS, {
+				loadBrowserInterface: false
+			});
 
-				// wait for .sf.mjs and .sf.css if being loaded from code above
-				if(window.sf && window.sf.loader){
-					await sf.loader.task;
-					await Promise.resolve();
-				}
+			// wait for .sf.mjs and .sf.css if being loaded from code above
+			if(window.sf && window.sf.loader){
+				await sf.loader.task;
+				await Promise.resolve();
 			}
+		}
 
-			if(metadata.functions != null){
-				let functions = metadata.functions;
+		if(json.functions != null){
+			let functions = json.functions;
 
-				for (let key in functions){
-					let temp = this.createFunction(key, functions[key]);
+			for (let key in functions){
+				let temp = this.createFunction(key, functions[key]);
 
-					// Required to be included on JSON export if this function isn't modified
-					// ToDo: use better mapping for moduleJS
-					let other = temp.structure._ = {};
-					other.moduleJS = mjs;
-				}
+				// Required to be included on JSON export if this function isn't modified
+				// ToDo: use better mapping for moduleJS
+				temp.structure.moduleJS = mjs;
 			}
+		}
 
-			if(metadata.variables != null){
-				let variables = metadata.variables;
+		if(json.variables != null){
+			let variables = json.variables;
 
-				for (let key in variables)
-					this.createVariable(key, variables[key]);
-			}
+			for (let key in variables)
+				this.createVariable(key, variables[key]);
+		}
 
-			if(metadata.events != null){
-				let events = metadata.events;
+		if(json.events != null){
+			let events = json.events;
 
-				for (let path in events){
-					this.events.createEvent(path, events[path]);
-				}
+			for (let path in events){
+				this.events.createEvent(path, events[path]);
 			}
 		}
 
@@ -167,11 +169,12 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		var handlers = []; // nodes
 		let appendLength = options.appendMode ? inserted.length : 0;
 		let reorderInputPort = [];
+		let instance = json.instance;
 
 		// Prepare all nodes depend on the namespace
 		// before we create cables for them
-		for(var namespace in json){
-			var nodes = json[namespace];
+		for(var namespace in instance){
+			var nodes = instance[namespace];
 
 			// Every nodes that using this namespace name
 			for (var a = 0; a < nodes.length; a++){
@@ -201,8 +204,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 		// Create cable only from output and property
 		// > Important to be separated from above, so the cable can reference to loaded nodes
-		for(var namespace in json){
-			var nodes = json[namespace];
+		for(var namespace in instance){
+			var nodes = instance[namespace];
 
 			// Every nodes that using this namespace name
 			for (var a = 0; a < nodes.length; a++){
@@ -530,6 +533,11 @@ Blackprint.Engine = class Engine extends CustomEvent {
 			delete parentObj[lastId];
 		}
 
+		// ToDo: remove this after v1.0 released
+		if(options.structure.instance == null){
+			options.structure = this._jsonToNew(options.structure);
+		}
+
 		// BPFunction = ./nodes/Fn.js
 		let temp = new BPFunction(id, options, this);
 		deepProperty(this.functions, ids, temp);
@@ -570,6 +578,23 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		data ??= {};
 		data.bpFunction = rootInstance._funcInstance;
 		rootInstance.emit(evName, data);
+	}
+
+	_jsonToNew(obj){
+		console.error("The exported instance (JSON) format was deprecated, please re-export the JSON by importing your JSON to the editor and export it. Your current JSON format may not work after version v1.0. Other engine than JavaScript may also not support the old format.");
+
+		let newData = { instance: obj };
+
+		let metadata = obj._;
+		if(metadata){
+			newData.moduleJS = metadata.moduleJS;
+			newData.functions = metadata.functions;
+			newData.variables = metadata.variables;
+			newData.events = metadata.events;
+			newData.environments = metadata.env;
+		}
+	
+		return newData;
 	}
 
 	/*
