@@ -175,12 +175,14 @@ class Cable{
 			let defaultVal = inputPort.default;
 			if(defaultVal != null && defaultVal !== oldVal){
 				let iface = inputPort.iface;
+				let node = iface.node;
+				let routes = node.routes; // PortGhost's node may not have routes
 
-				if(iface._bpDestroy !== true && iface.node.routes.in.length === 0){
+				if(iface._bpDestroy !== true && routes != null && routes.in.length === 0){
 					let temp = { port: inputPort, target: this.output, cable: this };
 					inputPort.emit('value', temp);
 					iface.emit('port.value', temp);
-					iface.node._bpUpdate();
+					node.instance.executionOrder.add(node);
 				}
 			}
 
