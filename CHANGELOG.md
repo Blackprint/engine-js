@@ -1,3 +1,12 @@
+# 0.8.10
+
+### Deprecation
+- Instance's exported JSON schema was updated, please import and re-export your old exported JSON before v1.0. The old schema will still importable on `engine-js`, but it will show a deprecation notice.
+
+### Bug Fix
+- Fix instance's createEvent call when importing JSON
+- Fix node update using default input value when cable was disconnected
+
 # 0.8.9
 
 ### Features
