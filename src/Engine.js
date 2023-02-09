@@ -584,8 +584,9 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		console.error("The exported instance (JSON) format was deprecated, please re-export the JSON by importing your JSON to the editor and export it. Your current JSON format may not work after version v1.0. Other engine than JavaScript may also not support the old format.");
 
 		let newData = { instance: obj };
-
 		let metadata = obj._;
+		delete obj._;
+
 		if(metadata){
 			newData.moduleJS = metadata.moduleJS;
 			newData.functions = metadata.functions;
@@ -593,7 +594,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 			newData.events = metadata.events;
 			newData.environments = metadata.env;
 		}
-	
+
 		return newData;
 	}
 
