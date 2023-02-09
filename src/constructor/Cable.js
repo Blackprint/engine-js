@@ -11,6 +11,7 @@ class Cable{
 		this.connected = false;
 		this.isRoute = false;
 		this._calling = false;
+		this._disconnecting = false;
 	}
 
 	visualizeFlow(){
@@ -21,6 +22,7 @@ class Cable{
 		if(Blackprint.settings.visualizeFlow)
 			this.visualizeFlow();
 
+		if(this._disconnecting) return this.input.default;
 		return this.output.value;
 	}
 
@@ -163,10 +165,24 @@ class Cable{
 		let hasOwner = false;
 		let hasTarget = false;
 		let alreadyEmitToInstance = false;
+		this._disconnecting = true;
 
 		let inputPort = this.input;
 		if(inputPort !== void 0){
+			let oldVal = this.output.value;
 			inputPort._cache = void 0;
+
+			let defaultVal = inputPort.default;
+			if(defaultVal != null && defaultVal !== oldVal){
+				let iface = inputPort.iface;
+
+				if(iface._bpDestroy !== true && iface.node.routes.in.length === 0){
+					let temp = { port: inputPort, target: this.output, cable: this };
+					inputPort.emit('value', temp);
+					iface.emit('port.value', temp);
+					iface.node._bpUpdate();
+				}
+			}
 
 			if(inputPort._hasUpdateCable === this)
 				inputPort._hasUpdateCable = null;
@@ -222,6 +238,7 @@ class Cable{
 		}
 
 		if(hasOwner || hasTarget) this.connected = false;
+		this._disconnecting = false;
 	}
 }
 
