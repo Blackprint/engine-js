@@ -387,10 +387,9 @@ class BPFunctionNode extends Blackprint.Node {
 function BPFnInit(){
 	Blackprint.registerInterface('BPIC/BP/Fn/Main',
 	class extends Blackprint.Interface {
-		constructor(node){
-			super(node);
-			this._dynamicPort = true; // Port is initialized dynamically
-		}
+		// We won't internally mark this node for having dynamic port
+		// The port was defined after the node is imported, the outer port
+		// will already have a type
 		async _BpFnInit(){
 			if(this._importOnce)
 				throw new Error("Can't import function more than once");
