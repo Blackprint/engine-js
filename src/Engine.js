@@ -108,7 +108,22 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		let oldIfaces = this.iface;
 
 		if(options === void 0) options = {};
-		if(!options.appendMode) this.clearNodes();
+		if(options.clean !== false && !options.appendMode){
+			this.clearNodes();
+
+			let list = this.functions;
+			for (let key in list)
+				delete list[key];
+
+			list = this.variables;
+			for (let key in list)
+				delete list[key];
+
+			list = this.events.list;
+			for (let key in list)
+				delete list[key];
+		}
+		else if(!options.appendMode) this.clearNodes();
 
 		this._importing = true;
 		this.emit("json.importing", {appendMode: options.appendMode, raw: json});
