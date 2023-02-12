@@ -1,3 +1,12 @@
+# 0.8.11
+
+### Feature
+- Add options to disable cleaning the instance when importing JSON
+
+### Bug Fix
+- Fix incorrect reference that cause error when removing environment node
+- Remove internal marker to avoid dynamic port connection on outer function port
+
 # 0.8.10
 
 ### Deprecation
