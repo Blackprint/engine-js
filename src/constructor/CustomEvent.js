@@ -32,6 +32,7 @@ class CustomEvent {
 
 			return this;
 		}
+		else if(eventName === '*') eventName = '$_all'; // For optimize performance for JS
 
 		if(options && options.asFallback){
 			let fallback = this._event.$_fallback;
@@ -96,6 +97,7 @@ class CustomEvent {
 
 			return this;
 		}
+		else if(eventName === '*') eventName = '$_all'; // For optimize performance for JS
 
 		if(options && options.asFallback){
 			delete this._event.$_fallback[eventName];
@@ -128,11 +130,7 @@ class CustomEvent {
 	}
 
 	emit(eventName, obj){
-		if(this._event === void 0)
-			return false;
-
-		if(arguments.length > 2)
-			throw new Error(".emit only accept 2 parameter, please wrap the others on a object");
+		if(this._event === void 0) return false;
 
 		var events = this._event[eventName];
 		if(events === void 0 || events.length === 0){
@@ -146,10 +144,10 @@ class CustomEvent {
 					delete events.$_fallback[eventName];
 			}
 
-			if(eventName !== '*' && this._event['*'] !== void 0){
+			if(this._event.$_all !== void 0 && eventName !== '$_all'){
 				obj ??= {};
-				obj.eventName = eventName;
-				return this.emit('*', obj);
+				obj.eventName = '*';
+				return this.emit('$_all', obj);
 			}
 
 			return hasFallback !== void 0;
@@ -165,10 +163,10 @@ class CustomEvent {
 			ev(obj, eventName);
 		}
 
-		if(eventName !== '*' && this._event['*'] !== void 0){
+		if(this._event.$_all !== void 0 && eventName !== '$_all'){
 			obj ??= {};
-			obj.eventName = eventName;
-			return this.emit('*', obj);
+			obj.eventName = '*';
+			return this.emit('$_all', obj);
 		}
 
 		return true;
