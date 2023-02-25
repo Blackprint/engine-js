@@ -135,6 +135,7 @@ Blackprint.Node = class Node {
 			this._bpUpdating = true;
 			await this.update();
 			this._bpUpdating = false;
+			this.iface.emit('updated');
 		}
 
 		if(this.routes.out == null){
