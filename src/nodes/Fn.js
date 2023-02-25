@@ -235,7 +235,7 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 		if(id.includes('/'))
 			throw new Error("Slash symbol is reserved character and currently can't be used for creating path");
 
-		// deepProperty
+		// setDeepProperty
 
 		// BPVariable = ./Var.js
 		let temp = new BPVariable(id, options);
@@ -415,11 +415,10 @@ function BPFnInit(){
 			newInstance._mainInstance = bpFunction.rootInstance;
 
 			Blackprint.off('_eventInstance.new', newInstance._eventsInsNew);
-
 			bpFunction.refreshPrivateVars(newInstance);
 
 			let swallowCopy = Object.assign({}, bpFunction.structure);
-			await this.bpInstance.importJSON(swallowCopy, {pendingRender: true});
+			await newInstance.importJSON(swallowCopy, {clean: false, pendingRender: true});
 
 			// Init port switches
 			if(this._portSw_ != null){
@@ -499,7 +498,7 @@ function BPFnInit(){
 
 			let name = port._name?.name || customName || port.name;
 			let outputPort;
-			let portType;
+			let portType, refName;
 
 			let nodeA, nodeB; // Main (input) -> Input (output), Output (input) -> Main (output)
 			if(this.type === 'bp-fn-input'){ // Main (input) -> Input (output)
@@ -514,8 +513,9 @@ function BPFnInit(){
 
 				nodeA = this._funcMain.node;
 				nodeB = this.node;
+				refName = {name};
 
-				portType = getFnPortType(port, 'input', this._funcMain, name);
+				portType = getFnPortType(port, 'input', this._funcMain, refName);
 				nodeA._funcInstance.input[name] = portType;
 			}
 			else { // Output (input) -> Main (output)
@@ -530,8 +530,9 @@ function BPFnInit(){
 
 				nodeA = this.node;
 				nodeB = this._funcMain.node;
+				refName = {name};
 
-				portType = getFnPortType(port, 'output', this._funcMain, name);
+				portType = getFnPortType(port, 'output', this._funcMain, refName);
 				nodeB._funcInstance.output[name] = portType;
 			}
 
@@ -550,8 +551,8 @@ function BPFnInit(){
 			}
 
 			if(this.type === 'bp-fn-input'){
-				outputPort._name = {name}; // When renaming port, this also need to be changed
-				this.emit(`_add.${name}`, outputPort);
+				outputPort._name = refName; // When renaming port, this also need to be changed
+				this.emit(`_add.$refName`, outputPort);
 				return outputPort;
 			}
 
