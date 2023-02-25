@@ -13,6 +13,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		this.executionOrder = new OrderedExecution(this);
 		this._importing = false;
 
+		// This is only for Sketch, other engine than JS doesn't need this
 		this._eventsInsNew = ev => this.events._updateTreeList();
 		Blackprint.on('_eventInstance.register', this._eventsInsNew);
 	}
@@ -404,11 +405,11 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 		var node, func;
 		if(!(namespace.prototype instanceof Blackprint.Node)){
-			func = deepProperty(Blackprint.nodes, namespace.split('/'));
+			func = getDeepProperty(Blackprint.nodes, namespace.split('/'));
 
 			if(func === void 0){
 				if(namespace.startsWith("BPI/F/")){
-					func = deepProperty(this.functions, namespace.slice(6).split('/'));
+					func = getDeepProperty(this.functions, namespace.slice(6).split('/'));
 
 					if(func != null){
 						func = func.node;
@@ -513,7 +514,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 	createVariable(id, options){
 		if(this._locked_) throw new Error("This instance was locked");
 		if(/\s/.test(id))
-			throw new Error("Id can't have space character");
+			throw new Error("Id can't have space character: " + `'${id}'`);
 
 		let ids = id.split('/');
 		let lastId = ids[ids.length - 1];
@@ -526,7 +527,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 		// BPVariable = ./nodes/Var.js
 		let temp = new BPVariable(id, options);
-		deepProperty(this.variables, ids, temp);
+		setDeepProperty(this.variables, ids, temp);
 
 		temp._scope = VarScope.Public;
 		this._emit('variable.new', temp);
@@ -537,7 +538,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 	createFunction(id, options){
 		if(this._locked_) throw new Error("This instance was locked");
 		if(/\s/.test(id))
-			throw new Error("Id can't have space character");
+			throw new Error("Id can't have space character: " + `'${id}'`);
 
 		let ids = id.split('/');
 		let lastId = ids[ids.length - 1];
@@ -555,7 +556,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 		// BPFunction = ./nodes/Fn.js
 		let temp = new BPFunction(id, options, this);
-		deepProperty(this.functions, ids, temp);
+		setDeepProperty(this.functions, ids, temp);
 
 		if(options.vars != null){
 			let vars = options.vars;
@@ -785,7 +786,7 @@ Blackprint.registerNode = function(namespace, func){
 
 	namespace = namespace.split('/');
 
-	let isExist = deepProperty(Blackprint.nodes, namespace);
+	let isExist = getDeepProperty(Blackprint.nodes, namespace);
 	if(isExist){
 		if(this._scopeURL && isExist._scopeURL !== this._scopeURL){
 			let _call = ()=> this.registerNode.apply(this, arguments);
@@ -801,7 +802,7 @@ Blackprint.registerNode = function(namespace, func){
 	}
 
 	func._scopeURL = this._scopeURL;
-	deepProperty(Blackprint.nodes, namespace, func);
+	setDeepProperty(Blackprint.nodes, namespace, func);
 }
 
 let _classIfaceError = ".registerInterface: Class must be instance of Blackprint.Interface";
@@ -845,7 +846,7 @@ Blackprint.registerInterface = function(templatePath, options, func){
 Blackprint._events = {};
 Blackprint.registerEvent = function(namespace, options){
 	if(/\s/.test(namespace))
-		throw new Error("Namespace can't have space character");
+		throw new Error("Namespace can't have space character: " + `'${namespace}'`);
 
 	let { schema } = options;
 	if(schema == null)

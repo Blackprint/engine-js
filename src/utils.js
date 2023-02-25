@@ -1,31 +1,28 @@
-Blackprint._utils.deepProperty = deepProperty;
-function deepProperty(obj, path, value, onCreate){
+Blackprint._utils.setDeepProperty = setDeepProperty;
+Blackprint._utils.getDeepProperty = getDeepProperty;
+function setDeepProperty(obj, path, value, onCreate){
 	var temp;
-	if(value !== void 0){
-		for(var i = 0, n = path.length-1; i < n; i++){
-			temp = path[i];
-
-			// Disallow diving into internal JavaScript property
-			if(temp === "constructor" || temp === "__proto__" || temp === "prototype")
-				return;
-
-			if(obj[temp] === void 0){
-				obj[temp] = {};
-				onCreate && onCreate(obj[temp]);
-			}
-
-			obj = obj[temp];
-		}
-
+	for(var i = 0, n = path.length-1; i < n; i++){
 		temp = path[i];
+
+		// Disallow diving into internal JavaScript property
 		if(temp === "constructor" || temp === "__proto__" || temp === "prototype")
 			return;
 
-		obj[temp] = value;
-		return;
+		if(obj[temp] === void 0){
+			obj[temp] = {};
+			onCreate && onCreate(obj[temp]);
+		}
+
+		obj = obj[temp];
 	}
 
-	return getDeepProperty(obj, path);
+	temp = path[i];
+	if(temp === "constructor" || temp === "__proto__" || temp === "prototype")
+		return;
+
+	obj[temp] = value;
+	return;
 }
 
 function getDeepProperty(obj, path, reduceLen=0){

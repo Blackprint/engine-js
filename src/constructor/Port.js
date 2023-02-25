@@ -81,8 +81,8 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			let cables = this.cables;
 			var cable = cables[0];
 
-			if(cable?.hasBranch) cable = cables[1];
 			if(cable === void 0) return;
+			if(cable.hasBranch) cable = cables[1];
 
 			if(Blackprint.settings.visualizeFlow)
 				cable.visualizeFlow();

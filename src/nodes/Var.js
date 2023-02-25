@@ -126,7 +126,7 @@ function BPVarInit(){
 			else // private
 				scope = this.node.instance.variables;
 
-			let construct = deepProperty(scope, name.split('/'));
+			let construct = getDeepProperty(scope, name.split('/'));
 			if(construct == null)
 				throw new Error(`'${name}' variable was not defined on the '${_scopeName}' instance`);
 

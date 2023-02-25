@@ -19,7 +19,7 @@ class InstanceEvents extends CustomEvent {
 		let list = this.list;
 		Object.assign(list, Blackprint._events);
 		for (let key in list) {
-			deepProperty(this.treeList, key.split('/'), list[key]);
+			setDeepProperty(this.treeList, key.split('/'), list[key]);
 			this.totalEvent++;
 		}
 
@@ -54,7 +54,7 @@ class InstanceEvents extends CustomEvent {
 	createEvent(namespace, options={}){
 		if(namespace in this.list) return;
 		if(/\s/.test(namespace))
-			throw new Error("Namespace can't have space character");
+			throw new Error("Namespace can't have space character: " + `'${namespace}'`);
 
 		this.list[namespace] = new InstanceEvent({
 			schema: options.schema || {},
