@@ -146,7 +146,7 @@ class CustomEvent {
 
 			if(this._event.$_all !== void 0 && eventName !== '$_all'){
 				obj ??= {};
-				obj.eventName = '*';
+				obj.eventName = eventName;
 				return this.emit('$_all', obj);
 			}
 
@@ -165,7 +165,7 @@ class CustomEvent {
 
 		if(this._event.$_all !== void 0 && eventName !== '$_all'){
 			obj ??= {};
-			obj.eventName = '*';
+			obj.eventName = eventName;
 			return this.emit('$_all', obj);
 		}
 
