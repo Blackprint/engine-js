@@ -1,3 +1,10 @@
+# 0.8.12
+
+### Bug Fix
+- Emit `updated` event when the node was updated
+- Fix error when having private variable on function node
+- Optimize code for improving the performance
+
 # 0.8.11
 
 ### Feature
