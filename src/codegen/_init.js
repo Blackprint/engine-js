@@ -14,9 +14,10 @@ Blackprint.Code.prototype._generateFor = function(fnName, language, routes, ifac
 	let data = this[language](routes);
 	let ret = {};
 
+	data.code = tidyLines(data.code);
 	if(language === 'js'){
 		if(data.type === Blackprint.CodeType.Callback){
-			ret.code = `function ${fnName}(Input, Output, Route){ ${data.code} }`;
+			ret.code = `function ${fnName}(Input, Output, Route){\n\t${data.code.replace(/\n/g, '\n\t')}\n}`;
 			ret.selfRun = data.selfRun;
 
 			if(ret.selfRun && this.constructor.routeIn === Blackprint.CodeRoute.MustHave)
@@ -64,21 +65,21 @@ Blackprint.Code.generateFrom = function(node, language, exportName){
 	else if(node instanceof Blackprint.Interface){
 		// Scan for input node that was event node type
 		let stopUntil = null;
-		// ToDo: scan for branching input
+		// ToDo: scan for branching input and separate to different route for simplify the generated code
 		generated = fromNode(node, language, sharedData, stopUntil);
-		sharedData.currentRoute++;
 	}
 	else throw new Error("First parameter must be instance of Engine or Interface");
 
 	if(language === 'js'){
 		if(/(^[^a-zA-Z]|\W)/m.test(exportName)) throw new Error("Export name is a invalid variable name for JavaScript");
 
-		let inits = `
-			let ${exportName} = (function(){
-				let exports = {};
-				${[...sharedData.varInits.values()].join('\n')};
-		`.replace(/^\t+/gm, '').trim();
-		return inits + '\n\n' + (Object.values(sharedData.code).join('\n') + '\n\n' + generated).trim() + `\nreturn exports;\n})();`;
+		let inits = `let ${exportName} = (function(){`;
+		inits += `\n\tlet exports = {};`;
+		inits += `\n\t${[...sharedData.varInits.values()].join('\n\t')};`;
+
+		let body = ((Object.values(sharedData.code).join('\n') + '\n\n' + generated).trim()).replace(/\n/g, '\n\t');
+
+		return inits + '\n\n\t' + body + `\n\treturn exports;\n})();`;
 	}
 	else throw new Error(`Code generation for '${language}' language is not implemented yet`);
 }
@@ -137,6 +138,7 @@ function fromNode(iface, language, sharedData, stopUntil){
 	// 	if(stopUntil == scanner) break;
 	// }
 
+	sharedData.currentRoute++;
 	let wrapper = `function bp_route_${sharedData.currentRoute}(){\n{{+bp wrap_code_here }}\n}`;
 	let selfRun = '';
 
@@ -216,12 +218,12 @@ function fromNode(iface, language, sharedData, stopUntil){
 							let propAccessName = /(^[^a-zA-Z]|\W)/m.test(inp.name) ? JSON.stringify(inp.name) : inp.name;
 
 							propAccessName = propAccessName.slice(0, 1) === '"' ? '['+propAccessName+']' : '.'+propAccessName;
-							resyncer.push(`bp_input_${targetIndex + propAccessName} = val;`);
+							resyncer.push(`bp_input_${targetIndex + propAccessName}`);
 						}
 
 						portIndex++;
 						if(resyncer.length !== 0)
-							outputs.push(`set ${portName}(val){ this._${portIndex} = val; ${resyncer.join('\n')} }`);
+							outputs.push(`set ${portName}(val){ ${resyncer.join('\n')} = this._${portIndex} = val; }`);
 
 						outputs.push(`get ${portName}(){ return this._${portIndex}; }`);
 					}
@@ -253,4 +255,11 @@ function fromNode(iface, language, sharedData, stopUntil){
 	}
 
 	return selfRun + '\n' + wrapper.replace('{{+bp wrap_code_here }}', '\t'+codes.join('\n\t'));
+}
+
+function tidyLines(str){
+	str = str.trim();
+	let pad = str.split('\n').pop().match(/^[\t ]+/m);
+	if(pad == null || pad.index !== 0) return str;
+	return str.replace(RegExp('^'+pad[0], 'gm'), '');
 }
