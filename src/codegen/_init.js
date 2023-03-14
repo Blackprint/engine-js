@@ -207,29 +207,29 @@ function fromNode(iface, language, sharedData, stopUntil){
 					let portName = /(^[^a-zA-Z]|\W)/m.test(key) ? JSON.stringify(key) : key;
 					let port = IOutput[key];
 
-					if(port.feature !== Blackprint.Port.Trigger){
-						let resyncer = [];
-						let cables = port.cables;
-						for (let i=0; i < cables.length; i++) {
-							let inp = cables[i].input;
-							if(inp == null) continue;
+					let targets = [];
+					let cables = port.cables;
+					for (let i=0; i < cables.length; i++) {
+						let inp = cables[i].input;
+						if(inp == null) continue;
 
-							let targetIndex = ifaceList.indexOf(inp.iface);
-							let propAccessName = /(^[^a-zA-Z]|\W)/m.test(inp.name) ? JSON.stringify(inp.name) : inp.name;
+						let targetIndex = ifaceList.indexOf(inp.iface);
+						let propAccessName = /(^[^a-zA-Z]|\W)/m.test(inp.name) ? JSON.stringify(inp.name) : inp.name;
 
-							propAccessName = propAccessName.slice(0, 1) === '"' ? '['+propAccessName+']' : '.'+propAccessName;
-							resyncer.push(`bp_input_${targetIndex + propAccessName}`);
-						}
+						propAccessName = propAccessName.slice(0, 1) === '"' ? '['+propAccessName+']' : '.'+propAccessName;
+						targets.push(`bp_input_${targetIndex + propAccessName}`);
+					}
 
+					if(port.type !== Function){
 						portIndex++;
-						if(resyncer.length !== 0)
-							outputs.push(`set ${portName}(val){ ${resyncer.join('\n')} = this._${portIndex} = val; }`);
+						if(targets.length !== 0)
+							outputs.push(`set ${portName}(val){ ${targets.join('\n')} = this._${portIndex} = val; }`);
 
 						outputs.push(`get ${portName}(){ return this._${portIndex}; }`);
 					}
 					else {
 						outputs.push(`${portName}(){
-							throw "ToDo: call other node";
+							${targets.join('();\t\n')}();
 						}`.replace(/^					/gm, ''));
 					}
 				}
