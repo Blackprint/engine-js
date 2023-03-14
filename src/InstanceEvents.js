@@ -56,10 +56,15 @@ class InstanceEvents extends CustomEvent {
 		if(/\s/.test(namespace))
 			throw new Error("Namespace can't have space character: " + `'${namespace}'`);
 
-		this.list[namespace] = new InstanceEvent({
-			schema: options.schema || {},
-		});
+		let schema = {};
+		let list = options.schema;
+		if(list != null){
+			for (let i=0; i < list.length; i++) {
+				schema[list[i]] = Blackprint.Types.Any;
+			}
+		}
 
+		this.list[namespace] = new InstanceEvent({ schema });
 		this._updateTreeList();
 	}
 
