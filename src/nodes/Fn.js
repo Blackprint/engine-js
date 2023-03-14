@@ -89,8 +89,10 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 
 		// This will be updated if the function sketch was modified
 		this.structure = options.structure || {
-			'BP/Fn/Input':[{i: 0, x: 400, y: 100}],
-			'BP/Fn/Output':[{i: 1, x: 600, y: 100}],
+			instance: {
+				'BP/Fn/Input':[{i: 0, x: 400, y: 100}],
+				'BP/Fn/Output':[{i: 1, x: 600, y: 100}],
+			}
 		};
 
 		let temp = this;

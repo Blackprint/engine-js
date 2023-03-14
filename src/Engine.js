@@ -550,7 +550,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		}
 
 		// ToDo: remove this after v1.0 released
-		if(options.structure.instance == null){
+		if(options.structure != null && options.structure.instance == null){
 			options.structure = this._jsonToNew(options.structure);
 		}
 
