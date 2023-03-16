@@ -75,3 +75,14 @@ export default globalThis.Blackprint;
 export {
 	Skeleton,
 };`);
+
+//> ./dist/codegen.min.js
+fixDenoExports('codegen', 'let module={exports:{}};', `
+const {
+	Code, CodeType, CodeRoute, registerCode,
+} = module.exports;
+
+export default globalThis.Blackprint;
+export {
+	Code, CodeType, CodeRoute, registerCode,
+};`);
