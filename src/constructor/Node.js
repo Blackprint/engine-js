@@ -8,7 +8,7 @@ Blackprint.Node = class Node {
 		// super();
 		this.instance = instance;
 		this._scope = instance.scope; // Only in Blackprint.Sketch
-		this.syncThrottle = 250; // One syncOut per 250ms, last state will be synced
+		this.syncThrottle = 0; // One syncOut per 0ms, last state will be synced
 		this.disablePorts = false; // Disable output port from synchronizing data to other nodes
 
 		this.partialUpdate = false;
@@ -133,8 +133,12 @@ Blackprint.Node = class Node {
 
 		if(this.update != null){
 			this._bpUpdating = true;
-			await this.update();
-			this._bpUpdating = false;
+			try {
+				await this.update();
+			}
+			finally {
+				this._bpUpdating = false;
+			}
 			this.iface.emit('updated');
 		}
 

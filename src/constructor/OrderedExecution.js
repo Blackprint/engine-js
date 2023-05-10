@@ -186,8 +186,12 @@ class OrderedExecution {
 
 			// cable.visualizeFlow();
 			currentIface._requesting = true;
-			current.request(cable);
-			currentIface._requesting = false;
+			try{
+				current.request(cable);
+			}
+			finally{
+				currentIface._requesting = false;
+			}
 
 			let inpIface = cable.input.iface;
 

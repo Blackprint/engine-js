@@ -69,8 +69,12 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		}
 
 		this._calling = cable._calling = true;
-		this._callDef(this);
-		this._calling = cable._calling = false;
+		try {
+			this._callDef(this);
+		}
+		finally {
+			this._calling = cable._calling = false;
+		}
 
 		if(iface._enum !== _InternalNodeEnum.BPFnMain)
 			iface.node.routes.routeOut();

@@ -456,8 +456,12 @@ function BPFnInit(){
 				newInstance._mainInstance.emit(eventName, ev);
 
 				bpFunction._syncing = true;
-				bpFunction._onFuncChanges(eventName, ev, node);
-				bpFunction._syncing = false;
+				try {
+					bpFunction._onFuncChanges(eventName, ev, node);
+				}
+				finally {
+					bpFunction._syncing = false;
+				}
 			};
 
 			this.bpInstance.on('cable.connect cable.disconnect node.created node.delete node.move node.id.changed port.default.changed _port.split _port.unsplit _port.resync.allow _port.resync.disallow', this._save);
