@@ -1,10 +1,20 @@
 // Reserved for future
-Blackprint.Code ??= class Code {
+Blackprint.Code = class Code {
 	constructor(iface){
 		this.iface = iface;
 		this.node = iface.node;
 	}
 };
+
+let handlers = Blackprint.Code.handlers = {};
+Blackprint.Code.registerHandler = function(handler){
+	if(window.sf?.Obj != null){
+		sf.Obj.set(handlers, handler.languageId, handler);
+	}
+	else handlers[handler.languageId] = handler;
+
+	EntryPointNode.prototype[handler.languageId] = handler.entryPointNode;
+}
 
 // Declare function by assigning from the prototype to enjoy hot reload
 Blackprint.Code.prototype._generateFor = function(fnName, language, routes, ifaceIndex){
@@ -15,20 +25,9 @@ Blackprint.Code.prototype._generateFor = function(fnName, language, routes, ifac
 	let ret = {};
 
 	data.code = tidyLines(data.code);
-	if(language === 'js'){
-		if(data.type === Blackprint.CodeType.Callback){
-			ret.code = `function ${fnName}(Input, Output, Route){\n\t${data.code.replace(/\n/g, '\n\t')}\n}`;
-			ret.selfRun = data.selfRun;
-
-			if(ret.selfRun && this.constructor.routeIn === Blackprint.CodeRoute.MustHave)
-				throw new Error(`'selfRun' code can't be used for node that using "CodeRoute.MustHave" for input route`);
-		}
-		else if(data.type === Blackprint.CodeType.Wrapper)
-			ret.code = `${data.begin}\n\tbp_output_${ifaceIndex} = Input;\n{{+bp wrap_code_here }}\n${data.end}`;
-
-		// Default
-		else ret.code = `function ${fnName}(Input, Output){ ${data.code} }`;
-	}
+	handlers[language].onNodeCodeGenerated(ret, {
+		data, functionName, routes, ifaceIndex
+	});
 
 	return ret;
 }
@@ -57,7 +56,10 @@ Blackprint.Code.generateFrom = function(node, language, exportName){
 	if(!exportName) throw new Error("Export name is required to be specified on parameter 3");
 	codesCache = new Map();
 
-	let sharedData = {code: {}, nodes: [], varInits: new Map(), currentRoute: 0};
+	if(handlers[language] == null)
+		throw new Error(`Code generation for '${language}' language is not implemented yet`);
+
+	let sharedData = {code: {}, nodes: [], variabels: new Map(), currentRoute: 0};
 	let generated;
 
 	if(node instanceof Blackprint.Engine)
@@ -70,18 +72,7 @@ Blackprint.Code.generateFrom = function(node, language, exportName){
 	}
 	else throw new Error("First parameter must be instance of Engine or Interface");
 
-	if(language === 'js'){
-		if(/(^[^a-zA-Z]|\W)/m.test(exportName)) throw new Error("Export name is a invalid variable name for JavaScript");
-
-		let inits = `let ${exportName} = (function(){`;
-		inits += `\n\tlet exports = {};`;
-		inits += `\n\t${[...sharedData.varInits.values()].join('\n\t')};`;
-
-		let body = ((Object.values(sharedData.code).join('\n') + '\n\n' + generated).trim()).replace(/\n/g, '\n\t');
-
-		return inits + '\n\n\t' + body + `\n\treturn exports;\n})();`;
-	}
-	else throw new Error(`Code generation for '${language}' language is not implemented yet`);
+	return handlers[language].finalCodeResult(exportName, sharedData, generated);
 }
 
 // This method will scan for nodes that was event node type as the entrypoint
@@ -139,11 +130,12 @@ function fromNode(iface, language, sharedData, stopUntil){
 	// }
 
 	sharedData.currentRoute++;
-	let wrapper = `function bp_route_${sharedData.currentRoute}(){\n{{+bp wrap_code_here }}\n}`;
 	let selfRun = '';
+	let wrapper = handlers[language].routeFunction || '';
+	wrapper = wrapper.replace(/{{\+bp current_route_name }}/g, sharedData.currentRoute);
 
 	let codes = [];
-	let varInits = sharedData.varInits;
+	let variabels = sharedData.variabels;
 	while(iface != null){
 		let namespace = iface.namespace;
 		let code = codesCache.get(iface);
@@ -176,76 +168,13 @@ function fromNode(iface, language, sharedData, stopUntil){
 
 		// All input data will be available after a value was outputted by a node at the end of execution
 		// 'bp_input' is raw Object, 'bp_output' also raw Object that may have property of callable function
-		if(language === 'js'){
-			let inputs = [], outputs = [];
-			let { IInput, IOutput } = iface.ref;
+		let result = {codes, selfRun: ''};
+		generatePortsStorage({
+			functionName: fnName, iface, ifaceIndex,
+			ifaceList, variabels, selfRun, sharedData, result,
+		});
 
-			if(IInput != null){
-				for (let key in IInput) {
-					let def = IInput[key].default;
-					let portName = /(^[^a-zA-Z]|\W)/m.test(key) ? JSON.stringify(key) : key;
-
-					if(def == null)
-						inputs.push(`${portName}: null`);
-					else {
-						let typed = typeof def;
-						let feature = IInput[key].feature;
-
-						if(feature === Blackprint.Port.Trigger) def = null;
-						else if(feature === Blackprint.Port.ArrayOf) def = [];
-						else if(typed !== 'string' && typed !== 'number' && typed !== 'boolean')
-							throw new Error(`Can't use default type of non-primitive type for "${key}" input port in "${iface.namespace}"`);
-
-						inputs.push(`${portName}: ${JSON.stringify(def)}`);
-					}
-				}
-			}
-
-			if(IOutput != null){
-				let portIndex = 0;
-				for (let key in IOutput) {
-					let portName = /(^[^a-zA-Z]|\W)/m.test(key) ? JSON.stringify(key) : key;
-					let port = IOutput[key];
-
-					let targets = [];
-					let cables = port.cables;
-					for (let i=0; i < cables.length; i++) {
-						let inp = cables[i].input;
-						if(inp == null) continue;
-
-						let targetIndex = ifaceList.indexOf(inp.iface);
-						let propAccessName = /(^[^a-zA-Z]|\W)/m.test(inp.name) ? JSON.stringify(inp.name) : inp.name;
-
-						propAccessName = propAccessName.slice(0, 1) === '"' ? '['+propAccessName+']' : '.'+propAccessName;
-						targets.push(`bp_input_${targetIndex + propAccessName}`);
-					}
-
-					if(port.type !== Function){
-						portIndex++;
-						if(targets.length !== 0)
-							outputs.push(`set ${portName}(val){ ${targets.join('\n')} = this._${portIndex} = val; }`);
-
-						outputs.push(`get ${portName}(){ return this._${portIndex}; }`);
-					}
-					else {
-						outputs.push(`${portName}(){
-							${targets.join('();\t\n')}();
-						}`.replace(/^					/gm, ''));
-					}
-				}
-			}
-
-			if(!varInits.has(ifaceIndex))
-				varInits.set(ifaceIndex, `let bp_input_${ifaceIndex} = {${inputs.join(', ')}}; let bp_output_${ifaceIndex} = {${outputs.join(', ')}};`);
-
-			if(temp.selfRun){
-				selfRun += `${fnName}(bp_input_${ifaceIndex}, bp_output_${ifaceIndex}, {Out(){ bp_route_${sharedData.currentRoute}(); }});`;
-			}
-			else if(iface.type !== 'event'){
-				codes.push(`${fnName}(bp_input_${ifaceIndex}, bp_output_${ifaceIndex});`.replace(/^			/gm, ''));
-			}
-		}
-		else throw new Error(`Code generation for '${language}' language is not implemented yet`);
+		selfRun += result.selfRun;
 
 		routes.routeIn = iface;
 		routes.traceRoute.push(iface);

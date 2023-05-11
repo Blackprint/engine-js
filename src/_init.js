@@ -30,6 +30,11 @@ if(Blackprint.Engine !== void 0) return;
 
 Object.setPrototypeOf(Blackprint, CustomEvent.prototype);
 
+// Do nothing, this will be replaced by codegen module
+Blackprint.Code = class Code {};
+Blackprint.registerCode = ()=>{};
+Blackprint.CodeRoute = {};
+
 // Will  be used for `Blackprint.registerNode`
 Blackprint.modulesURL = {};
 Blackprint._modulesURL = [];
