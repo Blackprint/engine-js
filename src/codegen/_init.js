@@ -24,9 +24,10 @@ Blackprint.Code.prototype._generateFor = function(fnName, language, routes, ifac
 	let data = this[language](routes);
 	let ret = {};
 
-	data.code = tidyLines(data.code);
+	if(data.code) data.code = tidyLines(data.code);
+
 	handlers[language].onNodeCodeGenerated(ret, {
-		data, functionName, routes, ifaceIndex
+		data, functionName: fnName, routes, ifaceIndex
 	});
 
 	return ret;
@@ -129,9 +130,11 @@ function fromNode(iface, language, sharedData, stopUntil){
 	// 	if(stopUntil == scanner) break;
 	// }
 
+	let handler = handlers[language];
+
 	sharedData.currentRoute++;
 	let selfRun = '';
-	let wrapper = handlers[language].routeFunction || '';
+	let wrapper = handler.routeFunction || '';
 	wrapper = wrapper.replace(/{{\+bp current_route_name }}/g, sharedData.currentRoute);
 
 	let codes = [];
@@ -169,9 +172,10 @@ function fromNode(iface, language, sharedData, stopUntil){
 		// All input data will be available after a value was outputted by a node at the end of execution
 		// 'bp_input' is raw Object, 'bp_output' also raw Object that may have property of callable function
 		let result = {codes, selfRun: ''};
-		generatePortsStorage({
+		handler.generatePortsStorage({
 			functionName: fnName, iface, ifaceIndex,
-			ifaceList, variabels, selfRun, sharedData, result,
+			ifaceList, variabels, selfRun, routeIndex: sharedData.currentRoute, result,
+			codeClass: codesHandler[namespace]
 		});
 
 		selfRun += result.selfRun;
