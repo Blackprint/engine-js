@@ -16,13 +16,15 @@ Blackprint.Code.registerHandler({
 
 		return {
 			type: Blackprint.CodeType.Wrapper,
-			begin: `exports.${name} = function(Input){`,
+			begin: `exports.${name} = async function(Input){`,
 			end: `}`,
 		};
 	},
 
 	generatePortsStorage({
-		functionName, iface, ifaceIndex, ifaceList, variabels, selfRun, sharedData, result
+		functionName, iface, ifaceIndex, ifaceList,
+		variabels, selfRun, routeIndex, result,
+		codeClass
 	}){
 		let inputs = [], outputs = [];
 		let { IInput, IOutput } = iface.ref;
@@ -82,14 +84,16 @@ Blackprint.Code.registerHandler({
 			}
 		}
 
+		let prefix = `${codeClass.isReturn ? 'return ' : ''}${codeClass.isAsync ? 'await ' : ''}`;
+
 		if(!variabels.has(ifaceIndex))
 			variabels.set(ifaceIndex, `let bp_input_${ifaceIndex} = {${inputs.join(', ')}}; let bp_output_${ifaceIndex} = {${outputs.join(', ')}};`);
 
 		if(selfRun){
-			result.selfRun += `${functionName}(bp_input_${ifaceIndex}, bp_output_${ifaceIndex}, {Out(){ bp_route_${sharedData.currentRoute}(); }});`;
+			result.selfRun += `${prefix}${functionName}(bp_input_${ifaceIndex}, bp_output_${ifaceIndex}, {Out(){ bp_route_${routeIndex}(); }});`;
 		}
 		else if(iface.type !== 'event'){
-			result.codes.push(`${functionName}(bp_input_${ifaceIndex}, bp_output_${ifaceIndex});`.replace(/^			/gm, ''));
+			result.codes.push(`${prefix}${functionName}(bp_input_${ifaceIndex}, bp_output_${ifaceIndex});`.replace(/^			/gm, ''));
 		}
 	},
 
@@ -102,9 +106,9 @@ Blackprint.Code.registerHandler({
 			if(result.selfRun && this.constructor.routeIn === Blackprint.CodeRoute.MustHave)
 				throw new Error(`'selfRun' code can't be used for node that using "CodeRoute.MustHave" for input route`);
 		}
-		else if(data.type === Blackprint.CodeType.Wrapper)
-			result.code = `${data.begin}\n\tbp_output_${ifaceIndex} = Input;\n{{+bp wrap_code_here }}\n${data.end}`;
-
+		else if(data.type === Blackprint.CodeType.Wrapper){
+			result.code = `${data.begin}\n\t// To trigger getter and setter\nlet temp = bp_output_${ifaceIndex}; for(x in temp) temp[x] = Input[x];\n\n{{+bp wrap_code_here }}\n${data.end}`;
+		}
 		// Default
 		else result.code = `function ${functionName}(Input, Output){ ${data.code} }`;
 	},
