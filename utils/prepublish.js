@@ -76,13 +76,13 @@ export {
 	Skeleton,
 };`);
 
-//> ./dist/codegen.min.js
-fixDenoExports('codegen', 'let module={exports:{}};', `
+//> ./dist/code-generation.min.js
+fixDenoExports('code-generation', 'let module={exports:{}};', `
 const {
-	Code, CodeType, CodeRoute, registerCode,
+	Code, CodeType, CodeRoute, registerCode, PuppetNode,
 } = module.exports;
 
 export default globalThis.Blackprint;
 export {
-	Code, CodeType, CodeRoute, registerCode,
+	Code, CodeType, CodeRoute, registerCode, PuppetNode,
 };`);
