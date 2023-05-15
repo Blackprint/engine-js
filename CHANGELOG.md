@@ -1,3 +1,11 @@
+# 0.8.15
+
+### Bug Fix
+- Fix internal status reset
+
+### Changes
+- Experimental code generation was migrated to [other repository](https://github.com/Blackprint/code-generation)
+
 # 0.8.13
 
 ### Bug Fix

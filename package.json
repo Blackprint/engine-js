@@ -1,7 +1,7 @@
 {
   "name": "@blackprint/engine",
   "description": "Blackprint engine for JavaScript environment",
-  "version": "0.8.13",
+  "version": "0.8.15",
   "author": "Blackprint",
   "license": "MIT",
   "repository": {
@@ -22,7 +22,6 @@
       "import": "./dist/engine.mjs"
     },
     "./es6-https-loader": "./es6-https-loader.mjs",
-    "./codegen": "./dist/codegen.min.js",
     "./skeleton": {
       "types": "./src/skeleton/index.d.ts",
       "require": "./dist/skeleton.min.js",
