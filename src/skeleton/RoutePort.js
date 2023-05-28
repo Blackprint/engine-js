@@ -10,7 +10,7 @@ class SkeletonRoutePort {
 		let cable = this.out = new SkeletonCable();
 		cable.isRoute = true;
 		cable.output = this;
-		cable.input = iface;
+		cable.input = iface.node.routes;
 		iface.node.routes.in.push(cable);
 	}
 
