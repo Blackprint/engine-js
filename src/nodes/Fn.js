@@ -558,7 +558,7 @@ function BPFnInit(){
 
 			if(this.type === 'bp-fn-input'){
 				outputPort._name = refName; // When renaming port, this also need to be changed
-				this.emit(`_add.$refName`, outputPort);
+				this.emit(`_add.${refName.name}`, outputPort);
 				return outputPort;
 			}
 
