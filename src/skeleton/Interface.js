@@ -20,7 +20,7 @@ class SkeletonInterface {
 		if(this.id != null)
 			instance.iface[this.id] = this;
 
-		this._input_d = options.input_d || null;
+		let inputD = this._input_d = options.input_d || null;
 		this._output_sw = options.output_sw || null;
 
 		this.node = {
@@ -28,5 +28,10 @@ class SkeletonInterface {
 			routes: new SkeletonRoutePort(this),
 			iface: this,
 		};
+
+		for (let key in inputD) {
+			let temp = this.input[key] = new SkeletonPort(this, 'input', key);
+			temp.default = inputD[key];
+		}
 	}
 };
