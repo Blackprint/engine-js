@@ -13,10 +13,9 @@ Blackprint.Skeleton = class {
 		this.iface = {};
 		var inserted = this.ifaceList = [];
 
-		if(json.constructor === String)
-		json = JSON.parse(json);
+		if(json.constructor === String) json = JSON.parse(json);
 		else json = JSON.parse(JSON.stringify(json)); // deep copy
-		
+
 		if(json.instance == null)
 			throw new Error("Blackprint Skeleton only accept newest exported JSON format");
 
