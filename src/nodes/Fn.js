@@ -401,12 +401,13 @@ function BPFnInit(){
 
 			if(node.instance.constructor === Blackprint.Engine)
 				this.bpInstance = new Blackprint.Engine();
-			else{
+			else
 				this.bpInstance = new Blackprint.Sketch();
-				this.bpInstance.pendingRender = true;
-			}
 
+			this.bpInstance.pendingRender = true;
 			let bpFunction = node._funcInstance;
+
+			if(this.data?.pause) this.bpInstance.executionOrder.pause = true;
 
 			let newInstance = this.bpInstance;
 			newInstance.variables = {}; // private for one function
@@ -466,6 +467,7 @@ function BPFnInit(){
 
 			this.bpInstance.on('cable.connect cable.disconnect node.created node.delete node.move node.id.changed port.default.changed _port.split _port.unsplit _port.resync.allow _port.resync.disallow', this._save);
 		}
+		imported(data){ this.data = data; }
 		renamePort(which, fromName, toName){
 			this.node._funcInstance.renamePort(which, fromName, toName);
 			this._save(false, false, true);
