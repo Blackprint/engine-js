@@ -237,7 +237,7 @@ function BPVarInit(){
 				this._onChanged = () => { ref.Val = temp._value };
 			}
 
-			if(temp.type !== Function)
+			if(temp.type !== Function && temp.type.portFeature !== BP_Port.Trigger)
 				node.output.Val = temp._value;
 
 			temp.on(this._eventListen, this._onChanged);
