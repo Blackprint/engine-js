@@ -158,7 +158,10 @@ function BPVarInit(){
 
 			if(port.type === Types.Slot)
 				this.waitTypeChange(temp, port);
-			else temp.emit('type.assigned');
+			else {
+				this._recheckRoute();
+				temp.emit('type.assigned');
+			}
 
 			// Also create port for other node that using this variable
 			for (let item of temp.used){
@@ -178,6 +181,8 @@ function BPVarInit(){
 					let target = this.input.Val || this.output.Val;
 					target.assignType(bpVar.type);
 				}
+
+				this._recheckRoute();
 			};
 
 			this._destroyWaitType = () => { bpVar.off('type.assigned', this._waitTypeChange); };
@@ -196,6 +201,14 @@ function BPVarInit(){
 
 			let i = listener.indexOf(this);
 			if(i !== -1) listener.splice(i, 1)
+		}
+		_recheckRoute(){
+			if(this.input.Val?.type === Types.Trigger
+			|| this.output.Val?.type === Types.Trigger){
+				let routes = this.node.routes;
+				routes.disableOut = true;
+				routes.noUpdate = true;
+			}
 		}
 	}
 	Blackprint._utils.BPVarGetSet = BPVarGetSet;
@@ -216,6 +229,7 @@ function BPVarInit(){
 			if(temp.type === Types.Slot) return;
 
 			this._reinitPort();
+			this._recheckRoute();
 		}
 
 		_reinitPort(){
@@ -263,6 +277,7 @@ function BPVarInit(){
 			if(temp.type === Types.Slot) return;
 
 			this._reinitPort();
+			this._recheckRoute();
 		}
 
 		_reinitPort(){
