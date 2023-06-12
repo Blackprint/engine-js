@@ -129,12 +129,12 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 	// Set for the linked port (Handle for ScarletsFrame)
 	// ex: linkedPort = node.output.portName
 	createLinker(){
-		// Only for output (type: trigger/function)
-		if(this.source === 'output' && (this.type === Function || this.type === Types.Route)){
+		// Only for output (type: trigger)
+		if(this.source === 'output' && (this.type === Types.Trigger || this.type === Types.Route)){
 			// Disable sync
 			this.sync = false;
 
-			if(this.type !== Function){
+			if(this.type !== Types.Trigger){
 				this.isRoute = true;
 				this.iface.node.routes.disableOut = true;
 			}
@@ -242,7 +242,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 				}
 
 				// This may get called if the port is lazily assigned with Slot port feature
-				if(port.type === Function)
+				if(port.type === Types.Trigger)
 					return port.__call ??= () => port._callAll();
 
 				// else type: output port, let's just return the value
@@ -419,7 +419,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			if(type.portFeature === BP_Port.Union)
 				type = Types.Any;
 			else if(type.portFeature === BP_Port.Trigger)
-				type = Function;
+				type = type.portType;
 			else if(type.portFeature === BP_Port.ArrayOf)
 				type = Array;
 			else if(type.portFeature === BP_Port.Default)
@@ -517,8 +517,8 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 		// Remove cable if type restriction
 		if(!isInstance || (
-			   cableOwner.type === Function && this.type !== Function
-			|| cableOwner.type !== Function && this.type === Function
+			   cableOwner.type === Types.Trigger && this.type !== Types.Trigger
+			|| cableOwner.type !== Types.Trigger && this.type === Types.Trigger
 		)){
 			this._cableConnectError('cable.wrong_type_pair', {cable, port: this, target: cableOwner});
 			cable.disconnect();
@@ -567,7 +567,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		}
 
 		// Remove old cable if the port not support array
-		if(inp.feature !== BP_Port.ArrayOf && inp.type !== Function){
+		if(inp.feature !== BP_Port.ArrayOf && inp.type !== Types.Trigger){
 			let cables = inp.cables; // Cables in input port
 
 			if(cables.length !== 0){

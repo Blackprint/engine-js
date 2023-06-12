@@ -42,7 +42,7 @@ class PortLink {
 			if(val.portFeature === BP_Port.Union)
 				val = Types.Any;
 			else if(val.portFeature === BP_Port.Trigger)
-				val = Function;
+				val = Types.Trigger;
 			else if(val.portFeature === BP_Port.ArrayOf)
 				val = Array;
 			else if(val.portFeature === BP_Port.Default)
@@ -69,7 +69,7 @@ class PortLink {
 		var linkValue = linkedPort.createLinker();
 
 		// Set on the this scope
-		if(type === Function || type === Types.Route){
+		if(type === Types.Trigger || type === Types.Route){
 			if(this._which === 'output')
 				Object.defineProperty(this, portName, linkValue);
 			else this[portName] = linkedPort.default;
@@ -120,7 +120,7 @@ function determinePortType(val, that){
 			def = '';
 		else def = null;
 	}
-	else if(val === Types.Any || val === Types.Slot){
+	else if(val === Types.Any || val === Types.Slot || val === Types.Trigger){
 		type = val;
 		def = null;
 	}
@@ -137,7 +137,7 @@ function determinePortType(val, that){
 		}
 		else if(val.portFeature === BP_Port.Trigger){
 			haveFeature = val.portFeature;
-			type = Function;
+			type = val.portType;
 			def = val.default;
 		}
 		else if(val.portFeature === BP_Port.Default){
@@ -159,7 +159,10 @@ function determinePortType(val, that){
 			def = null;
 		}
 		else if(val.portFeature === BP_Port.VirtualType){ } // pass
-		else throw new Error("Unrecognized port type or port feature");
+		else {
+			console.error("Type:", val, "From:", that);
+			throw new Error("Unrecognized port type or port feature");
+		}
 
 		if(val.virtualType != null){
 			haveFeature = val.portFeature;

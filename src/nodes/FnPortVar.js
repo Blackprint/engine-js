@@ -149,7 +149,7 @@ function BPFnVarInit(){
 		}
 		_addListener(){
 			let port = this._proxyIface.output[this.data.name];
-			if(port.type === Function){
+			if(port.type === Types.Trigger){
 				this._listener = () => {
 					this.ref.Output.Val();
 				};
@@ -246,9 +246,9 @@ function BPFnVarInit(){
 let PortTriggerDummy = BP_Port.Trigger(()=> { throw new Error("This can't be called"); });
 function getFnPortType(port, which, parentNode, ref){
 	let portType;
-	if(port.feature === BP_Port.Trigger || port.type === Function){
+	if(port.feature === BP_Port.Trigger || port.type === Types.Trigger){
 		if(which === 'input') // Function Input (has output port inside, and input port on main node)
-			portType = Function;
+			portType = Types.Trigger;
 		else 
 			portType = PortTriggerDummy;
 	}

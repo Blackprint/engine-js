@@ -71,6 +71,7 @@ Blackprint.Node = class Node {
 		if(type.any
 			|| type.constructor === Function
 			|| type.isRoute
+			|| type.isTrigger
 			|| type.portFeature !== void 0
 		){
 			return this[which]._add(name, type);

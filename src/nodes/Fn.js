@@ -52,7 +52,7 @@ Blackprint.nodes.BP.Fn = {
 
 				// Sync all port value
 				for (let key in IOutput){
-					if(IOutput[key].type === Function) continue;
+					if(IOutput[key].type === Types.Trigger) continue;
 					Output[key] = thisInput[key];
 				}
 	
@@ -362,7 +362,7 @@ class BPFunctionNode extends Blackprint.Node {
 
 			// Sync all port value
 			for (let key in IOutput){
-				if(IOutput[key].type === Function) continue;
+				if(IOutput[key].type === Types.Trigger) continue;
 				Output[key] = thisInput[key];
 			}
 
@@ -547,7 +547,7 @@ function BPFnInit(){
 			outputPort = nodeB.createPort('output', name, portType);
 
 			let inputPort;
-			if(portType === Function || portType.prototype instanceof Function)
+			if(portType === Types.Trigger)
 				inputPort = nodeA.createPort('input', name, BP_Port.Trigger(()=> outputPort._callAll()));
 			else inputPort = nodeA.createPort('input', name, portType);
 

@@ -154,7 +154,7 @@ function BPVarInit(){
 				port = cable.owner;
 
 			temp.type = port._config || port.type;
-			if(temp.type.portFeature === BP_Port.Trigger) temp.type = Function;
+			if(temp.type.portFeature === BP_Port.Trigger) temp.type = Types.Trigger;
 
 			if(port.type === Types.Slot)
 				this.waitTypeChange(temp, port);
@@ -171,7 +171,7 @@ function BPVarInit(){
 			this._waitTypeChange = () => {
 				if(port != null) {
 					bpVar.type = port._config || port.type;
-					if(bpVar.type.portFeature === BP_Port.Trigger) bpVar.type = Function;
+					if(bpVar.type.portFeature === BP_Port.Trigger) bpVar.type = Types.Trigger;
 					bpVar.emit('type.assigned');
 				}
 				else {
@@ -230,7 +230,7 @@ function BPVarInit(){
 			let ref = node.output;
 			node.createPort('output', 'Val', temp.type);
 
-			if(temp.type === Function || temp.type.prototype instanceof Function){
+			if(temp.type === Types.Trigger){
 				this._eventListen = 'call';
 				this._onChanged = () => { ref.Val() };
 			}
@@ -239,7 +239,7 @@ function BPVarInit(){
 				this._onChanged = () => { ref.Val = temp._value };
 			}
 
-			if(temp.type !== Function)
+			if(temp.type !== Types.Trigger)
 				node.output.Val = temp._value;
 
 			temp.on(this._eventListen, this._onChanged);
@@ -274,7 +274,7 @@ function BPVarInit(){
 			if(input.Val !== void 0)
 				node.deletePort('input', 'Val');
 
-			if(temp.type === Function || temp.type.prototype instanceof Function){
+			if(temp.type === Types.Trigger){
 				node.createPort('input', 'Val', BP_Port.Trigger(function(){
 					temp.emit('call');
 				}));
