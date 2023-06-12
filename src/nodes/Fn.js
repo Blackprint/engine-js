@@ -523,7 +523,7 @@ function BPFnInit(){
 				nodeB = this.node;
 				refName = {name};
 
-				portType = getFnPortType(port, 'input', this._funcMain, refName);
+				portType = getFnPortType(port, 'input', this, refName);
 				nodeA._funcInstance.input[name] = portType;
 			}
 			else { // Output (input) -> Main (output)
@@ -540,7 +540,7 @@ function BPFnInit(){
 				nodeB = this._funcMain.node;
 				refName = {name};
 
-				portType = getFnPortType(port, 'output', this._funcMain, refName);
+				portType = getFnPortType(port, 'output', this, refName);
 				nodeB._funcInstance.output[name] = portType;
 			}
 

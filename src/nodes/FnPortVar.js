@@ -109,7 +109,7 @@ function BPFnVarInit(){
 					delete this._waitPortInit;
 
 					let portName = {name};
-					let portType = getFnPortType(port, 'input', this._funcMain, portName);
+					let portType = getFnPortType(port, 'input', this, portName);
 					iPort.assignType(portType);
 					iPort._name = portName;
 
@@ -128,8 +128,10 @@ function BPFnVarInit(){
 					delete iPort.onConnect;
 					delete this._waitPortInit;
 
-					let portType = getFnPortType(port, 'input', this._funcMain, port._name);
+					let portType = getFnPortType(port, 'input', this, port._name);
 					iPort.assignType(portType);
+					iPort._name = port._name;
+
 					this._addListener();
 				}
 
@@ -138,7 +140,7 @@ function BPFnVarInit(){
 			else{
 				if(this.output.Val === void 0){
 					let port = this._funcMain._proxyInput.iface.output[name];
-					let portType = getFnPortType(port, 'input', this._funcMain, port._name);
+					let portType = getFnPortType(port, 'input', this, port._name);
 
 					let newPort = node.createPort('output', 'Val', portType);
 					newPort._name = port._name;
@@ -210,13 +212,14 @@ function BPFnVarInit(){
 					delete this._waitPortInit;
 
 					let portName = {name};
-					let portType = getFnPortType(port, 'output', this._funcMain, portName);
+					let portType = getFnPortType(port, 'output', this, portName);
 					iPort.assignType(portType);
 					iPort._name = portName;
 
 					proxyIface.addPort(port, name);
 					(cable.owner === iPort ? port : iPort).connectCable(cable);
 
+					this._recheckRoute();
 					return true;
 				};
 
@@ -228,28 +231,39 @@ function BPFnVarInit(){
 					delete iPort.onConnect;
 					delete this._waitPortInit;
 
-					let portType = getFnPortType(port, 'output', this._funcMain, port._name);
+					let portType = getFnPortType(port, 'output', this, port._name);
 					iPort.assignType(portType);
+					iPort._name = port._name;
+
+					this._recheckRoute();
 				}
 				proxyIface.once(`_add.${name}`, this._waitPortInit);
 			}
 			else {
 				let port = this._funcMain._proxyOutput.iface.input[name];
-				let portType = getFnPortType(port, 'output', this._funcMain, port._name);
+				let portType = getFnPortType(port, 'output', this, port._name);
 				let newPort = node.createPort('input', 'Val', portType);
 				newPort._name = port._name;
 			}
+		}
+		_recheckRoute(){
+			if(this.input.Val.type !== Types.Trigger) return;
+
+			let routes = this.node.routes;
+			routes.disableOut = true;
+			routes.noUpdate = true;
 		}
 	});
 }
 
 let PortTriggerDummy = BP_Port.Trigger(()=> { throw new Error("This can't be called"); });
-function getFnPortType(port, which, parentNode, ref){
+function getFnPortType(port, which, forIface, ref){
 	let portType;
 	if(port.feature === BP_Port.Trigger || port.type === Types.Trigger){
-		if(which === 'input') // Function Input (has output port inside, and input port on main node)
+		// Function Input (has output port inside, and input port on main node)
+		if(which === 'input')
 			portType = Types.Trigger;
-		else 
+		else
 			portType = PortTriggerDummy;
 	}
 	// Skip ArrayOf port feature, and just use the type
