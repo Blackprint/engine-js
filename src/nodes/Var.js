@@ -92,6 +92,9 @@ function BPVarInit(){
 			super(node);
 			this._dynamicPort = true; // Port is initialized dynamically
 		}
+		init(){
+			this._recheckRoute();
+		}
 		imported(data){
 			if(data.scope == null || data.name == null)
 				throw new Error("'scope' and 'name' options is required for creating variable node");
