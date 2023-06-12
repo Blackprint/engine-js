@@ -154,6 +154,7 @@ function BPVarInit(){
 				port = cable.owner;
 
 			temp.type = port._config || port.type;
+			if(temp.type.portFeature === BP_Port.Trigger) temp.type = Function;
 
 			if(port.type === Types.Slot)
 				this.waitTypeChange(temp, port);
@@ -170,6 +171,7 @@ function BPVarInit(){
 			this._waitTypeChange = () => {
 				if(port != null) {
 					bpVar.type = port._config || port.type;
+					if(bpVar.type.portFeature === BP_Port.Trigger) bpVar.type = Function;
 					bpVar.emit('type.assigned');
 				}
 				else {
@@ -237,7 +239,7 @@ function BPVarInit(){
 				this._onChanged = () => { ref.Val = temp._value };
 			}
 
-			if(temp.type !== Function && temp.type.portFeature !== BP_Port.Trigger)
+			if(temp.type !== Function)
 				node.output.Val = temp._value;
 
 			temp.on(this._eventListen, this._onChanged);
