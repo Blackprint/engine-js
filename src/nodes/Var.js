@@ -206,8 +206,8 @@ function BPVarInit(){
 			if(i !== -1) listener.splice(i, 1)
 		}
 		_recheckRoute(){
-			if(this.input.Val?.type === Types.Trigger
-			|| this.output.Val?.type === Types.Trigger){
+			if(this.input?.Val?.type === Types.Trigger
+			|| this.output?.Val?.type === Types.Trigger){
 				let routes = this.node.routes;
 				routes.disableOut = true;
 				routes.noUpdate = true;
