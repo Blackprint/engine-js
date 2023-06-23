@@ -1,3 +1,23 @@
+# 0.9.0
+
+### Breaking Changes
+- Change callable output port type with Trigger type
+    - Renamed type: `Function` to `Blackprint.Types.Trigger`
+- Renamed type: `Blackprint.Port.Route` to `Blackprint.Types.Route`
+
+### Features
+- Allow function node to be paused on creation
+- Add feature to linking variable between instances
+
+### Bug Fix
+- Fix error when using var node for trigger type port
+- Fix function input port that was created 2 times
+- Fix cable input's route port for skeleton
+- Add input port that have default value for skeleton
+- Fix incorrect type for variable's output port
+- Fix route check inside function node
+- Fix error when triggering function output from variable node
+
 # 0.8.15
 
 ### Bug Fix
