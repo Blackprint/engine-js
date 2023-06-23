@@ -349,6 +349,14 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		return inserted;
 	}
 
+	linkVariables(vars){
+		for (let i=0; i < vars.length; i++) {
+			let temp = vars[i];
+			setDeepProperty(this.variables, temp.id.split('/'), temp);
+			this._emit('variable.new', temp);
+		}
+	}
+
 	_getTargetPortType(instance, whichPort, targetNodes){
 		let target = targetNodes[0]; // ToDo: check all target in case if it's supporting Union type
 		let targetIface = instance.ifaceList[target.i];
@@ -521,6 +529,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		let parentObj = getDeepProperty(this.variables, ids, 1);
 
 		if(parentObj != null && lastId in parentObj){
+			if(parentObj[lastId].isShared) return;
+
 			parentObj[lastId].destroy();
 			delete parentObj[lastId];
 		}
@@ -687,6 +697,17 @@ Blackprint.onModuleConflict = async map => {
 
 	throw report;
 };
+
+Blackprint.createVariable = function(namespace, options){
+	if(/\s/.test(namespace))
+		throw new Error("Namespace can't have space character: " + `'${namespace}'`);
+
+	let temp = new BPVariable(namespace, options);
+	temp._scope = VarScope.Public;
+	temp.isShared = true;
+
+	return temp;
+}
 
 // Use this to always use the newest module
 // Blackprint.onModuleConflict = async map => Object.entries(map).forEach(v => v.useOld = false);
