@@ -3,7 +3,7 @@
 
 // For Deno
 // import Blackprint from './../dist/engine.mjs';
-// import Blackprint from 'https://cdn.skypack.dev/@blackprint/engine@0.8';
+// import Blackprint from 'https://cdn.skypack.dev/@blackprint/engine@0.9';
 
 // For Node
 require('source-map-support').install();
@@ -260,7 +260,7 @@ var Blackprint = require('./../../dist/engine.min.js');
 	});
 
 	Blackprint.registerNode('Example/Button/Simple', class extends Blackprint.Node {
-		static output = { Clicked: Function };
+		static output = { Clicked: Blackprint.Types.Trigger };
 
 		constructor(instance){
 			super(instance);
@@ -272,7 +272,7 @@ var Blackprint = require('./../../dist/engine.min.js');
 
 	Blackprint.registerNode('Example/Input/Simple', class extends Blackprint.Node {
 		static output = {
-			Changed: Function,
+			Changed: Blackprint.Types.Trigger,
 			Value: String, // Default to empty string
 		};
 
