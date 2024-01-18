@@ -466,6 +466,8 @@ function BPFnInit(){
 			};
 
 			this.bpInstance.on('cable.connect cable.disconnect node.created node.delete node.move node.id.changed port.default.changed _port.split _port.unsplit _port.resync.allow _port.resync.disallow', this._save);
+
+			this.emit('ready');
 		}
 		imported(data){ this.data = data; }
 		renamePort(which, fromName, toName){
