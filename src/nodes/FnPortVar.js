@@ -143,7 +143,7 @@ function BPFnVarInit(){
 					let portType = getFnPortType(port, 'input', this, port._name);
 
 					let newPort = node.createPort('output', 'Val', portType);
-					newPort._name = port._name;
+					newPort._name = port._name ??= {name};
 				}
 
 				this._addListener();
@@ -243,7 +243,7 @@ function BPFnVarInit(){
 				let port = this._funcMain._proxyOutput.iface.input[name];
 				let portType = getFnPortType(port, 'output', this, port._name);
 				let newPort = node.createPort('input', 'Val', portType);
-				newPort._name = port._name;
+				newPort._name = port._name ??= {name};
 			}
 		}
 		_recheckRoute(){
