@@ -55,6 +55,7 @@ Blackprint.nodes.BP.Event = {
 		}
 		destroy(){
 			let iface = this.iface;
+			iface._removeFromList();
 
 			if(iface._listener == null) return;
 			iface._insEventsRef.off(iface.data.namespace, iface._listener);
@@ -84,6 +85,10 @@ Blackprint.nodes.BP.Event = {
 			delete data.Emit;
 
 			this.instance.events.emit(this.iface.data.namespace, data);
+		}
+
+		destroy(){
+			this.iface._removeFromList();
 		}
 	},
 };
@@ -116,6 +121,8 @@ function BPEventInit(){
 			for (let key in schema) {
 				this.node.createPort(createPortTarget, key, schema[key]);
 			}
+
+			this._addToList();
 		}
 		createField(name, type=Blackprint.Types.Any){
 			let { schema } = this._eventRef;
@@ -148,6 +155,17 @@ function BPEventInit(){
 				name, 
 				namespace: this.data.namespace,
 			});
+		}
+
+		_addToList(){
+			let used = this._insEventsRef.list[this.data.namespace].used;
+			if(!used.includes(this)) used.push(this);
+			else console.error("Tried to adding this node to the InstanceEvents more than once");
+		}
+		_removeFromList(){
+			let used = this._insEventsRef.list[this.data.namespace].used;
+			let usedIndex = used.indexOf(this);
+			if(usedIndex !== -1) used.splice(usedIndex, 1);
 		}
 	};
 

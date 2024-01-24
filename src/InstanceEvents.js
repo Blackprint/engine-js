@@ -12,9 +12,7 @@ class InstanceEvents extends CustomEvent {
 
 		// Clear object by using for in to reuse the object
 		let treeList = this.treeList ??= {};
-		for (let key in treeList) {
-			delete treeList[key];
-		}
+		for (let key in treeList) sf.Obj.delete(treeList, key);
 
 		let list = this.list;
 		Object.assign(list, Blackprint._events);
@@ -52,7 +50,7 @@ class InstanceEvents extends CustomEvent {
 	}
 
 	createEvent(namespace, options={}){
-		if(namespace in this.list) return;
+		if(namespace in this.list) throw new Error(`Event with name '${namespace}' already exist`);
 		if(/\s/.test(namespace))
 			throw new Error("Namespace can't have space character: " + `'${namespace}'`);
 
@@ -64,7 +62,47 @@ class InstanceEvents extends CustomEvent {
 			}
 		}
 
-		this.list[namespace] = new InstanceEvent({ schema });
+		this.list[namespace] = new InstanceEvent({ schema, _root: this });
+		this._updateTreeList();
+	}
+
+	renameEvent(from, to){
+		if(to in this.list) throw new Error(`Event with name '${to}' already exist`);
+		if(/\s/.test(to))
+			throw new Error("Namespace can't have space character: " + `'${to}'`);
+
+		let oldEvInstance = this.list[from];
+		let used = oldEvInstance.used;
+
+		for (let i=0; i < used.length; i++) {
+			let iface = used[i];
+			if(iface._enum === _InternalNodeEnum.BPEventListen){
+				this.off(iface.data.namespace, iface._listener);
+				this.on(to, iface._listener);
+			}
+
+			iface.data.namespace = to;
+			iface.title = to.split('/').splice(-2).join(' ');;
+		}
+
+		// Rename event data.namespace from every function saved structure
+		let functions = CurrentSketch.functions;
+		for (let key in functions) {
+			let structure = functions[key].structure.instance;
+			let evListen = structure['BP/Event/Listen'];
+			let evEmit = structure['BP/Event/Emit'];
+			let list = [];
+			if(evListen != null) list.push(...evListen);
+			if(evEmit != null) list.push(...evEmit);
+
+			for (let i=0; i < list.length; i++) {
+				let data = list[i].data;
+				if(data.namespace === from) data.namespace = to;
+			}
+		}
+
+		this.list[to] = this.list[from];
+		delete this.list[from];
 		this._updateTreeList();
 	}
 
@@ -80,7 +118,8 @@ class InstanceEvents extends CustomEvent {
 
 	// second and third parameter is only be used for renaming field
 	refreshFields(namespace, _name, _to){
-		let schema = this.list[namespace]?.schema;
+		let evInstance = this.list[namespace];
+		let schema = evInstance?.schema;
 		if(schema == null) return;
 
 		function refreshPorts(iface, target){
@@ -108,29 +147,26 @@ class InstanceEvents extends CustomEvent {
 			}
 		}
 
-		function iterateList(ifaceList){
-			for (let i=0; i < ifaceList.length; i++) {
-				let iface = ifaceList[i];
-				if(iface._enum === _InternalNodeEnum.BPEventListen){
-					if(iface.data.namespace === namespace)
-						refreshPorts(iface, 'output');
-				}
-				else if(iface._enum === _InternalNodeEnum.BPEventEmit){
-					if(iface.data.namespace === namespace)
-						refreshPorts(iface, 'input');
-				}
-				else if(iface._enum === _InternalNodeEnum.BPFnMain){
-					iterateList(iface.bpInstance.ifaceList);
-				}
+		let used = evInstance.used;
+		for (let i=0; i < used.length; i++) {
+			let iface = used[i];
+			if(iface._enum === _InternalNodeEnum.BPEventListen){
+				if(iface.data.namespace === namespace)
+					refreshPorts(iface, 'output');
 			}
+			else if(iface._enum === _InternalNodeEnum.BPEventEmit){
+				if(iface.data.namespace === namespace)
+					refreshPorts(iface, 'input');
+			}
+			else throw new Error("Unrecognized node in event list's stored nodes");
 		}
-
-		iterateList(this.instance.ifaceList);
 	}
 }
 
 class InstanceEvent {
 	constructor(options){
 		this.schema = options.schema;
+		this._root = options._root;
+		this.used = [];
 	}
 }
