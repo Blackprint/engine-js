@@ -448,6 +448,7 @@ function BPFnInit(){
 						toRawObject: true,
 						exportFunctions: false,
 						exportVariables: false,
+						exportEvents: false,
 					});
 				}, 1000);
 
