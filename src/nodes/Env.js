@@ -50,15 +50,14 @@ function BPEnvInit(){
 				Blackprint.Environment.import({ [data.name]: '' });
 			}
 
-			// Listen for name change, only if Blackprint.Sketch was exist
-			if(Blackprint.Sketch != null){
-				this._nameListener = ({ old, now }) => {
-					if(this.data.name !== old) return;
-					this.data.name = now;
-				};
+			// Listen for name change
+			this._nameListener = ({ old, now }) => {
+				if(this.data.name !== old) return;
+				this.data.name = now;
+				this.title = now;
+			};
 
-				Blackprint.on('environment.renamed', this._nameListener);
-			}
+			Blackprint.on('environment.renamed', this._nameListener);
 
 			let name = this.data.name;
 			let rules = Blackprint.Environment._rules[name];

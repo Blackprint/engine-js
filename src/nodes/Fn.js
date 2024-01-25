@@ -94,6 +94,21 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 				'BP/Fn/Output':[{i: 1, x: 600, y: 100}],
 			}
 		};
+		this._envNameListener = ({ old, now }) => {
+			let instance = this.structure.instance;
+
+			let envGet = instance['BP/Env/Get'];
+			let envSet = instance['BP/Env/Set'];
+			let list = [];
+			if(envGet != null) list.push(...envGet);
+			if(envSet != null) list.push(...envSet);
+
+			for (let i=0; i < list.length; i++) {
+				let data = list[i].data;
+				if(data.name === old) data.name = data.title = now;
+			}
+		};
+		Blackprint.on('environment.renamed', this._envNameListener);
 
 		let temp = this;
 		let uniqId = 0;
