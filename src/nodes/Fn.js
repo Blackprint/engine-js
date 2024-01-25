@@ -136,6 +136,26 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 		};
 		this.rootInstance.on('function.renamed', this._funcNameListener);
 
+		this._funcPortNameListener = ({ from, to, reference, which }) => {
+			let instance = this.structure.instance;
+			let funcs = instance[`BPI/F/${reference.id}`];
+			if(funcs == null) return;
+
+			for (let i=0; i < funcs.length; i++) {
+				let item = funcs[i];
+				if(which === 'output'){
+					if(item.output_sw == null || item.output_sw[from] == null) continue;
+					item.output_sw[to] = item.output_sw[from];
+					delete item.input_d[from];
+				}
+				else if(which === 'input'){
+					if(item.input_d == null || item.input_d[from] == null) continue;
+					item.input_d[to] = item.input_d[from];
+					delete item.input_d[from];
+				}
+			}
+		};
+		this.rootInstance.on('function.port.renamed', this._funcPortNameListener);
 
 		let temp = this;
 		let uniqId = 0;
@@ -413,6 +433,10 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 					proxyVar[proxyPort].Val._name.name = toName;
 			}
 		}
+
+		this.rootInstance.emit('function.port.renamed', {
+			from: fromName, to: toName, reference: this, which,
+		});
 	}
 
 	get input(){return this._input}
