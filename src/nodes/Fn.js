@@ -97,13 +97,7 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 
 		this._envNameListener = ({ old, now }) => {
 			let instance = this.structure.instance;
-
-			let envGet = instance['BP/Env/Get'];
-			let envSet = instance['BP/Env/Set'];
-			let list = [];
-			if(envGet != null) list.push(...envGet);
-			if(envSet != null) list.push(...envSet);
-
+			let list = this._combineArray(instance['BP/Env/Get'], instance['BP/Env/Set']);
 			for (let i=0; i < list.length; i++) {
 				let data = list[i].data;
 				if(data.name === old) data.name = data.title = now;
@@ -114,12 +108,7 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 		this._varNameListener = ({ from, to, variable, scope }) => {
 			let instance = this.structure.instance;
 			if(scope === VarScope.Public || scope === VarScope.Shared){
-				let varGet = instance['BP/Var/Get'];
-				let varSet = instance['BP/Var/Set'];
-				let list = [];
-				if(varGet != null) list.push(...varGet);
-				if(varSet != null) list.push(...varSet);
-
+				let list = this._combineArray(instance['BP/Var/Get'], instance['BP/Var/Set']);
 				for (let i=0; i < list.length; i++) {
 					let data = list[i].data;
 					if(data.scope === scope && data.name === from) data.name = to;
@@ -159,12 +148,7 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 
 		this._eventNameListener = ({ from, to }) => {
 			let instance = this.structure.instance;
-			let evListen = instance['BP/Event/Listen'];
-			let evEmit = instance['BP/Event/Emit'];
-			let list = [];
-			if(evListen != null) list.push(...evListen);
-			if(evEmit != null) list.push(...evEmit);
-
+			let list = this._combineArray(instance['BP/Event/Listen'], instance['BP/Event/Emit']);
 			for (let i=0; i < list.length; i++) {
 				let data = list[i].data;
 				if(data.namespace === from) data.namespace = to;
@@ -198,6 +182,13 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 				if(!this.iface._importOnce) await this.iface._BpFnInit();
 			}
 		};
+	}
+
+	_combineArray(A, B){
+		let list = [];
+		if(A != null) list.push(...A);
+		if(B != null) list.push(...B);
+		return list;
 	}
 
 	_onFuncChanges(eventName, obj, fromNode){
