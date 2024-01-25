@@ -105,7 +105,7 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 		};
 		Blackprint.on('environment.renamed', this._envNameListener);
 
-		this._varNameListener = ({ from, to, variable, scope }) => {
+		this._varNameListener = ({ from, to, scope }) => {
 			let instance = this.structure.instance;
 			if(scope === VarScope.Public || scope === VarScope.Shared){
 				let list = this._combineArray(instance['BP/Var/Get'], instance['BP/Var/Set']);
@@ -388,6 +388,10 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 				this.variables.refresh?.();
 			}
 			else delete this.variables[from];
+
+			this.rootInstance.emit('variable.renamed', {
+				from, to, reference: varObj, scope: scopeId,
+			});
 		}
 		else throw new Error("Can't rename variable from scopeId: " + scopeId);
 
@@ -397,8 +401,6 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 				iface.title = iface.data.name = to;
 				lastInstance = iface.node.instance;
 			}
-
-			lastInstance.renameVariable(from, to, scopeId);
 		}
 		else {
 			let used = this.used;
