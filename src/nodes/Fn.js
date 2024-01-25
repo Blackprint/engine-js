@@ -157,6 +157,21 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 		};
 		this.rootInstance.on('function.port.renamed', this._funcPortNameListener);
 
+		this._eventNameListener = ({ from, to }) => {
+			let instance = this.structure.instance;
+			let evListen = instance['BP/Event/Listen'];
+			let evEmit = instance['BP/Event/Emit'];
+			let list = [];
+			if(evListen != null) list.push(...evListen);
+			if(evEmit != null) list.push(...evEmit);
+
+			for (let i=0; i < list.length; i++) {
+				let data = list[i].data;
+				if(data.namespace === from) data.namespace = to;
+			}
+		};
+		this.rootInstance.on('event.renamed', this._eventNameListener);
+
 		let temp = this;
 		let uniqId = 0;
 		this.node = class extends BPFunctionNode { // Main function node -> BPI/F/{FunctionName}

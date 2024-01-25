@@ -50,7 +50,7 @@ class InstanceEvents extends CustomEvent {
 	}
 
 	createEvent(namespace, options={}){
-		if(namespace in this.list) throw new Error(`Event with name '${namespace}' already exist`);
+		if(namespace in this.list) return; // throw new Error(`Event with name '${namespace}' already exist`);
 		if(/\s/.test(namespace))
 			throw new Error("Namespace can't have space character: " + `'${namespace}'`);
 
@@ -62,7 +62,7 @@ class InstanceEvents extends CustomEvent {
 			}
 		}
 
-		this.list[namespace] = new InstanceEvent({ schema, _root: this });
+		this.list[namespace] = new InstanceEvent({ schema, namespace, _root: this });
 		this._updateTreeList();
 	}
 
@@ -73,6 +73,7 @@ class InstanceEvents extends CustomEvent {
 
 		let oldEvInstance = this.list[from];
 		let used = oldEvInstance.used;
+		oldEvInstance.namespace = to;
 
 		for (let i=0; i < used.length; i++) {
 			let iface = used[i];
@@ -85,25 +86,11 @@ class InstanceEvents extends CustomEvent {
 			iface.title = to.split('/').splice(-2).join(' ');;
 		}
 
-		// Rename event data.namespace from every function saved structure
-		let functions = CurrentSketch.functions;
-		for (let key in functions) {
-			let structure = functions[key].structure.instance;
-			let evListen = structure['BP/Event/Listen'];
-			let evEmit = structure['BP/Event/Emit'];
-			let list = [];
-			if(evListen != null) list.push(...evListen);
-			if(evEmit != null) list.push(...evEmit);
-
-			for (let i=0; i < list.length; i++) {
-				let data = list[i].data;
-				if(data.namespace === from) data.namespace = to;
-			}
-		}
-
 		this.list[to] = this.list[from];
 		delete this.list[from];
 		this._updateTreeList();
+
+		this.instance._emit('event.renamed', {from, to, reference: oldEvInstance});
 	}
 
 	_renameFields(namespace, name, to){
@@ -167,6 +154,7 @@ class InstanceEvent {
 	constructor(options){
 		this.schema = options.schema;
 		this._root = options._root;
+		this.namespace = options.namespace;
 		this.used = [];
 	}
 }
