@@ -637,6 +637,43 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		return temp;
 	}
 
+	renameFunction(from, to){
+		from = from.replace(/^\/|\/$/gm, '').replace(/[`~!@#$%^&*()\-_+={}\[\]:"|;'\\,.<>?]+/g, '_');
+		to = to.replace(/^\/|\/$/gm, '').replace(/[`~!@#$%^&*()\-_+={}\[\]:"|;'\\,.<>?]+/g, '_');
+
+		// Old function object
+		let ids = from.split('/');
+		let lastId = ids[ids.length - 1];
+		let parentObj = getDeepProperty(this.functions, ids, 1);
+		let oldObj = parentObj[lastId];
+		if(oldObj == null)
+			throw new Error(`Function with name '${from}' was not found`);
+
+		// New target function object
+		let ids2 = to.split('/');
+		if(getDeepProperty(this.functions, ids2) != null)
+			throw new Error(`Function with similar name already exist in '${to}'`);
+
+		let map = oldObj.used;
+		for (let iface of map) {
+			iface.namespace = 'BPI/F/'+to;
+			if(iface.title === from) iface.title = to;
+		}
+
+		if(oldObj.title === from) oldObj.title = to;
+		oldObj.id = to;
+
+		if(window.sf?.Obj != null) sf.Obj.delete(parentObj, lastId);
+		else delete parentObj[lastId];
+
+		setDeepProperty(this.functions, ids2, oldObj);
+		parentObj.refresh?.();
+
+		this._emit('function.renamed', {
+			from, to, reference: oldObj,
+		});
+	}
+
 	_log(data){
 		data.instance = this;
 

@@ -128,6 +128,15 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 		};
 		this.rootInstance.on('variable.renamed', this._varNameListener);
 
+		this._funcNameListener = ({ from, to }) => {
+			let instance = this.structure.instance;
+			if(instance[`BPI/F/${from}`] == null) return;
+			instance[`BPI/F/${to}`] = instance[`BPI/F/${from}`];
+			delete instance[`BPI/F/${from}`];
+		};
+		this.rootInstance.on('function.renamed', this._funcNameListener);
+
+
 		let temp = this;
 		let uniqId = 0;
 		this.node = class extends BPFunctionNode { // Main function node -> BPI/F/{FunctionName}
