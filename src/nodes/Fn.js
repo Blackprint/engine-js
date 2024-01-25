@@ -94,6 +94,7 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 				'BP/Fn/Output':[{i: 1, x: 600, y: 100}],
 			}
 		};
+
 		this._envNameListener = ({ old, now }) => {
 			let instance = this.structure.instance;
 
@@ -109,6 +110,23 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 			}
 		};
 		Blackprint.on('environment.renamed', this._envNameListener);
+
+		this._varNameListener = ({ from, to, variable, scope }) => {
+			let instance = this.structure.instance;
+			if(scope === VarScope.Public || scope === VarScope.Shared){
+				let varGet = instance['BP/Var/Get'];
+				let varSet = instance['BP/Var/Set'];
+				let list = [];
+				if(varGet != null) list.push(...varGet);
+				if(varSet != null) list.push(...varSet);
+
+				for (let i=0; i < list.length; i++) {
+					let data = list[i].data;
+					if(data.scope === scope && data.name === from) data.name = to;
+				}
+			}
+		};
+		this.rootInstance.on('variable.renamed', this._varNameListener);
 
 		let temp = this;
 		let uniqId = 0;
@@ -312,6 +330,50 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 		}
 	}
 
+	renameVariable(from, to, scopeId){
+		if(scopeId == null) throw new Error("Third parameter couldn't be null");
+		if(to.includes('/'))
+			throw new Error("Slash symbol is reserved character and currently can't be used for creating path");
+
+		to = to.replace(/^\/|\/$/gm, '').replace(/[`~!@#$%^&*()\-_+={}\[\]:"|;'\\,.<>?]+/g, '_');
+		if(scopeId === VarScope.Private){
+			let privateVars = this.privateVars;
+			let i = privateVars.indexOf(from);
+			if(i === -1) throw new Error(`Private variable with name '${from}' was not found on '${this.id}' function`);
+			privateVars[i] = to;
+		}
+		else if(scopeId === VarScope.Shared){
+			let varObj = this.variables[from];
+			if(varObj == null) throw new Error(`Shared variable with name '${from}' was not found on '${this.id}' function`);
+
+			varObj.id = varObj.title = to;
+			if(window.sf?.Obj != null) {
+				sf.Obj.set(this.variables, to, varObj);
+				sf.Obj.delete(this.variables, from);
+				this.variables.refresh?.();
+			}
+			else delete this.variables[from];
+		}
+		else throw new Error("Can't rename variable from scopeId: " + scopeId);
+
+		let lastInstance = null;
+		if(scopeId === VarScope.Shared){
+			for (let iface of this.variables[to].used) {
+				iface.title = iface.data.name = to;
+				lastInstance = iface.node.instance;
+			}
+
+			lastInstance.renameVariable(from, to, scopeId);
+		}
+		else {
+			let used = this.used;
+			for (let i=0; i < used.length; i++) {
+				lastInstance = used[i].bpInstance;
+				lastInstance.renameVariable(from, to, scopeId);
+			}
+		}
+	}
+
 	renamePort(which, fromName, toName){
 		let main = this[which];
 		main[toName] = main[fromName];
@@ -481,7 +543,7 @@ function BPFnInit(){
 				}
 			};
 
-			this.bpInstance.on('cable.connect cable.disconnect node.created node.delete node.move node.id.changed port.default.changed _port.split _port.unsplit _port.resync.allow _port.resync.disallow', this._save);
+			this.bpInstance.on('cable.connect cable.disconnect node.created node.delete node.move node.id.changed port.default.changed _port.split _port.unsplit _port.resync.allow _port.resync.disallow variable.renamed', this._save);
 
 			this.emit('ready');
 		}

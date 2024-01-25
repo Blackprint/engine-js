@@ -545,6 +545,57 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		return temp;
 	}
 
+	renameVariable(from, to, scopeId){
+		from = from.replace(/^\/|\/$/gm, '').replace(/[`~!@#$%^&*()\-_+={}\[\]:"|;'\\,.<>?]+/g, '_');
+		to = to.replace(/^\/|\/$/gm, '').replace(/[`~!@#$%^&*()\-_+={}\[\]:"|;'\\,.<>?]+/g, '_');
+
+		let instance, varsObject;
+		if(scopeId === VarScope.Public) {
+			instance = this._mainInstance ?? this;
+			varsObject = instance.variables;
+		}
+		else if(scopeId === VarScope.Private) {
+			instance = this;
+			if(instance._mainInstance == null) throw new Error("Can't rename private function variable from main instance");
+			varsObject = instance.variables;
+		}
+		else if(scopeId === VarScope.Shared) return; // Already handled on nodes/Fn.js
+
+		// Old variable object
+		let ids = from.split('/');
+		let lastId = ids[ids.length - 1];
+		let parentObj = getDeepProperty(varsObject, ids, 1);
+		let oldObj = parentObj[lastId];
+		if(oldObj == null)
+			throw new Error(`Variable with name '${from}' was not found`);
+
+		// New target variable object
+		let ids2 = to.split('/');
+		if(getDeepProperty(varsObject, ids2) != null)
+			throw new Error(`Variable with similar name already exist in '${to}'`);
+
+		let map = oldObj.used;
+		for (let iface of map) iface.title = iface.data.name = to;
+
+		oldObj.id = oldObj.title = to;
+
+		if(window.sf?.Obj != null) {
+			sf.Obj.delete(parentObj, lastId);
+			setDeepProperty(varsObject, ids2, oldObj);
+			let newParentObj = getDeepProperty(varsObject, ids2, 1);
+			newParentObj.refresh?.();
+			parentObj.refresh?.();
+		}
+		else {
+			delete parentObj[lastId];
+			setDeepProperty(varsObject, ids2, oldObj);
+		}
+
+		instance._emit('variable.renamed', {
+			from, to, reference: oldObj, scope: scopeId,
+		});
+	}
+
 	createFunction(id, options){
 		if(this._locked_) throw new Error("This instance was locked");
 		if(/\s/.test(id))
