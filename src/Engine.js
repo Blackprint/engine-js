@@ -12,6 +12,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 		this.executionOrder = new OrderedExecution(this);
 		this._importing = false;
+		this._destroying = false;
 
 		// This is only for Sketch, other engine than JS doesn't need this
 		this._eventsInsNew = ev => this.events._updateTreeList();
@@ -73,19 +74,27 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 	clearNodes(){
 		if(this._locked_) throw new Error("This instance was locked");
+		this._destroying = true;
 
 		let list = this.ifaceList;
 		for (var i = 0; i < list.length; i++) {
 			let iface = list[i];
 			if(iface == null) continue;
 
+			let eventData = { iface };
+			this._emit('node.delete', eventData);
+
 			iface.node.destroy?.();
 			iface.destroy?.();
+
+			this._emit('node.deleted', eventData);
 		}
 
 		this.ifaceList.splice(0);
 		this.iface = {};
 		this.ref = {};
+
+		this._destroying = false;
 	}
 
 	// If this was changed, we also need to change the `importJSON` on the `@blackprint/sketch`
@@ -515,7 +524,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 				iface.init();
 		}
 
-		// this.emit('node.created', { iface });
+		this.emit('node.created', { iface });
 		return iface;
 	}
 

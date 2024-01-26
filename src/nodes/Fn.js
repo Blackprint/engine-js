@@ -553,8 +553,14 @@ function BPFnInit(){
 				}
 			}
 
+			// Fix missing HTML input component for first function node
+			this.initInputPort?.(true);
+
 			let debounce;
 			this._save = (ev, eventName, force) => {
+				if(newInstance._mainInstance._destroying || this.bpInstance._destroying)
+					return; // Avoid saving when the instance is being destroyed
+
 				clearTimeout(debounce);
 				debounce = setTimeout(() => {
 					this.bpInstance._emit('_fn.structure.update', { iface: this });
