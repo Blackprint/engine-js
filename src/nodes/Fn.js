@@ -105,27 +105,27 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 		};
 		Blackprint.on('environment.renamed', this._envNameListener);
 
-		this._varNameListener = ({ from, to, scope }) => {
+		this._varNameListener = ({ old, now, scope }) => {
 			let instance = this.structure.instance;
 			if(scope === VarScope.Public || scope === VarScope.Shared){
 				let list = this._combineArray(instance['BP/Var/Get'], instance['BP/Var/Set']);
 				for (let i=0; i < list.length; i++) {
 					let data = list[i].data;
-					if(data.scope === scope && data.name === from) data.name = to;
+					if(data.scope === scope && data.name === old) data.name = now;
 				}
 			}
 		};
 		this.rootInstance.on('variable.renamed', this._varNameListener);
 
-		this._funcNameListener = ({ from, to }) => {
+		this._funcNameListener = ({ old, now }) => {
 			let instance = this.structure.instance;
-			if(instance[`BPI/F/${from}`] == null) return;
-			instance[`BPI/F/${to}`] = instance[`BPI/F/${from}`];
-			delete instance[`BPI/F/${from}`];
+			if(instance[`BPI/F/${old}`] == null) return;
+			instance[`BPI/F/${now}`] = instance[`BPI/F/${old}`];
+			delete instance[`BPI/F/${old}`];
 		};
 		this.rootInstance.on('function.renamed', this._funcNameListener);
 
-		this._funcPortNameListener = ({ from, to, reference, which }) => {
+		this._funcPortNameListener = ({ old, now, reference, which }) => {
 			let instance = this.structure.instance;
 			let funcs = instance[`BPI/F/${reference.id}`];
 			if(funcs == null) return;
@@ -133,25 +133,25 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 			for (let i=0; i < funcs.length; i++) {
 				let item = funcs[i];
 				if(which === 'output'){
-					if(item.output_sw == null || item.output_sw[from] == null) continue;
-					item.output_sw[to] = item.output_sw[from];
-					delete item.input_d[from];
+					if(item.output_sw == null || item.output_sw[old] == null) continue;
+					item.output_sw[now] = item.output_sw[old];
+					delete item.input_d[old];
 				}
 				else if(which === 'input'){
-					if(item.input_d == null || item.input_d[from] == null) continue;
-					item.input_d[to] = item.input_d[from];
-					delete item.input_d[from];
+					if(item.input_d == null || item.input_d[old] == null) continue;
+					item.input_d[now] = item.input_d[old];
+					delete item.input_d[old];
 				}
 			}
 		};
 		this.rootInstance.on('function.port.renamed', this._funcPortNameListener);
 
-		this._eventNameListener = ({ from, to }) => {
+		this._eventNameListener = ({ old, now }) => {
 			let instance = this.structure.instance;
 			let list = this._combineArray(instance['BP/Event/Listen'], instance['BP/Event/Emit']);
 			for (let i=0; i < list.length; i++) {
 				let data = list[i].data;
-				if(data.namespace === from) data.namespace = to;
+				if(data.namespace === old) data.namespace = now;
 			}
 		};
 		this.rootInstance.on('event.renamed', this._eventNameListener);
@@ -390,7 +390,7 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 			else delete this.variables[from];
 
 			this.rootInstance.emit('variable.renamed', {
-				from, to, reference: varObj, scope: scopeId,
+				old: from, now: to, reference: varObj, scope: scopeId,
 			});
 		}
 		else throw new Error("Can't rename variable from scopeId: " + scopeId);
@@ -443,7 +443,7 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 		}
 
 		this.rootInstance.emit('function.port.renamed', {
-			from: fromName, to: toName, reference: this, which,
+			old: fromName, now: toName, reference: this, which,
 		});
 	}
 

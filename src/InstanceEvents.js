@@ -90,7 +90,7 @@ class InstanceEvents extends CustomEvent {
 		delete this.list[from];
 		this._updateTreeList();
 
-		this.instance._emit('event.renamed', {from, to, reference: oldEvInstance});
+		this.instance._emit('event.renamed', {old: from, now: to, reference: oldEvInstance});
 	}
 
 	_renameFields(namespace, name, to){

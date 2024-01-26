@@ -130,7 +130,7 @@ function BPEventInit(){
 
 			schema[name] = type;
 			this._insEventsRef.refreshFields(this.data.namespace);
-			this.node.instance.emit('eventfield.create', {
+			this.node.instance.emit('event.field.created', {
 				name, 
 				namespace: this.data.namespace,
 			});
@@ -140,8 +140,8 @@ function BPEventInit(){
 			if(schema[name] == null || schema[to] != null) return;
 
 			this._insEventsRef._renameFields(this.data.namespace, name, to);
-			this.node.instance.emit('eventfield.rename', {
-				name, to,
+			this.node.instance.emit('event.field.renamed', {
+				old: name, now: to,
 				namespace: this.data.namespace,
 			});
 		}
@@ -151,7 +151,7 @@ function BPEventInit(){
 
 			delete schema[name];
 			this._insEventsRef.refreshFields(this.data.namespace);
-			this.node.instance.emit('eventfield.delete', {
+			this.node.instance.emit('event.field.deleted', {
 				name, 
 				namespace: this.data.namespace,
 			});

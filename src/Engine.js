@@ -601,7 +601,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		}
 
 		instance._emit('variable.renamed', {
-			from, to, reference: oldObj, scope: scopeId,
+			old: from, now: to, reference: oldObj, scope: scopeId,
 		});
 	}
 
@@ -679,7 +679,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		parentObj.refresh?.();
 
 		this._emit('function.renamed', {
-			from, to, reference: oldObj,
+			old: from, now: to, reference: oldObj,
 		});
 	}
 
