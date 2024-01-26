@@ -83,7 +83,7 @@ class InstanceEvents extends CustomEvent {
 			}
 
 			iface.data.namespace = to;
-			iface.title = to.split('/').splice(-2).join(' ');;
+			iface.title = to.split('/').splice(-2).join(' ');
 		}
 
 		this.list[to] = this.list[from];

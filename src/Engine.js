@@ -572,9 +572,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 		// Old variable object
 		let ids = from.split('/');
-		let lastId = ids[ids.length - 1];
-		let parentObj = getDeepProperty(varsObject, ids, 1);
-		let oldObj = parentObj[lastId];
+		let oldObj = getDeepProperty(varsObject, ids);
 		if(oldObj == null)
 			throw new Error(`Variable with name '${from}' was not found`);
 
@@ -584,21 +582,15 @@ Blackprint.Engine = class Engine extends CustomEvent {
 			throw new Error(`Variable with similar name already exist in '${to}'`);
 
 		let map = oldObj.used;
-		for (let iface of map) iface.title = iface.data.name = to;
+		for (let i=0; i < map.length; i++) {
+			let iface = map[i];
+			iface.title = iface.data.name = to;
+		}
 
 		oldObj.id = oldObj.title = to;
 
-		if(window.sf?.Obj != null) {
-			sf.Obj.delete(parentObj, lastId);
-			setDeepProperty(varsObject, ids2, oldObj);
-			let newParentObj = getDeepProperty(varsObject, ids2, 1);
-			newParentObj.refresh?.();
-			parentObj.refresh?.();
-		}
-		else {
-			delete parentObj[lastId];
-			setDeepProperty(varsObject, ids2, oldObj);
-		}
+		deleteDeepProperty(varsObject, ids, true);
+		setDeepProperty(varsObject, ids2, oldObj);
 
 		instance._emit('variable.renamed', {
 			old: from, now: to, reference: oldObj, scope: scopeId,
@@ -662,9 +654,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 		// Old function object
 		let ids = from.split('/');
-		let lastId = ids[ids.length - 1];
-		let parentObj = getDeepProperty(this.functions, ids, 1);
-		let oldObj = parentObj[lastId];
+		let oldObj = getDeepProperty(this.functions, ids);
 		if(oldObj == null)
 			throw new Error(`Function with name '${from}' was not found`);
 
@@ -674,7 +664,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 			throw new Error(`Function with similar name already exist in '${to}'`);
 
 		let map = oldObj.used;
-		for (let iface of map) {
+		for (let i=0; i < map.length; i++) {
+			let iface = map[i];
 			iface.namespace = 'BPI/F/'+to;
 			if(iface.title === from) iface.title = to;
 		}
@@ -682,11 +673,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		if(oldObj.title === from) oldObj.title = to;
 		oldObj.id = to;
 
-		if(window.sf?.Obj != null) sf.Obj.delete(parentObj, lastId);
-		else delete parentObj[lastId];
-
+		deleteDeepProperty(this.functions, ids, true);
 		setDeepProperty(this.functions, ids2, oldObj);
-		parentObj.refresh?.();
 
 		this._emit('function.renamed', {
 			old: from, now: to, reference: oldObj,

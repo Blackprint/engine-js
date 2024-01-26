@@ -58,7 +58,7 @@ class BPVariable extends CustomEvent {
 
 		// The type need to be defined dynamically on first cable connect
 		this.type = Types.Slot;
-		this.used = new Set();
+		this.used = []; // [Interface, Interface, ...]
 
 		this.totalSet = 0;
 		this.totalGet = 0;
@@ -73,8 +73,9 @@ class BPVariable extends CustomEvent {
 	}
 
 	destroy(){
-		let map = this.used;
-		for (let iface of map) {
+		let map = this.used; // This list can be altered multiple times when deleting a node
+		for (let i=map.length-1; i >= 0; i = map.length-1) {
+			let iface = map[i];
 			iface.node.instance.deleteNode(iface);
 		}
 	}
@@ -101,7 +102,7 @@ function BPVarInit(){
 
 			this.changeVar(data.name, data.scope);
 			let temp = this._bpVarRef;
-			temp.used.add(this);
+			temp.used.push(this);
 		}
 		changeVar(name, scopeId){
 			if(this.data.name !== '')
@@ -167,7 +168,9 @@ function BPVarInit(){
 			}
 
 			// Also create port for other node that using this variable
-			for (let item of temp.used){
+			let map = temp.used;
+			for (let i=0; i < map.length; i++) {
+				let item = map[i];
 				let temp = item._reinitPort();
 				if(item === this)
 					temp.connectCable(cable);
@@ -197,7 +200,8 @@ function BPVarInit(){
 			let temp = this._bpVarRef;
 			if(temp === void 0) return;
 
-			temp.used.delete(this);
+			let i_node = temp.used.indexOf(this);
+			if(i_node !== -1) temp.used.splice(i_node, 1);
 
 			let listener = this._bpVarRef.listener;
 			if(listener == null) return;

@@ -390,7 +390,9 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 
 		let lastInstance = null;
 		if(scopeId === VarScope.Shared){
-			for (let iface of this.variables[to].used) {
+			let used = this.variables[to].used;
+			for (let i=0; i < used.length; i++) {
+				let iface = used[i];
 				iface.title = iface.data.name = to;
 				lastInstance = iface.node.instance;
 			}
@@ -446,8 +448,8 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 	set output(v){throw new Error("Can't modify port by assigning .input property")}
 
 	destroy(){
-		let map = this.used;
-		for (let i=0; i < map.length; i++) {
+		let map = this.used; // This list can be altered multiple times when deleting a node
+		for (let i=map.length-1; i >= 0; i = map.length-1) {
 			let iface = map[i];
 			iface.node.instance.deleteNode(iface);
 		}
