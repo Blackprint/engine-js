@@ -17,6 +17,16 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		// This is only for Sketch, other engine than JS doesn't need this
 		this._eventsInsNew = ev => this.events._updateTreeList();
 		Blackprint.on('_eventInstance.register', this._eventsInsNew);
+
+		this._envDeleted = ({ key }) => {
+			let list = this.ifaceList;
+			for (let i=list.length-1; i >= 0; i--) {
+				let iface = list[i];
+				if(iface.namespace !== 'BP/Env/Get' && iface.namespace !== 'BP/Env/Set') continue;
+				if(iface.data.name === key) this.deleteNode(iface);
+			}
+		};
+		Blackprint.on('environment.deleted', this._envDeleted);
 	}
 
 	deleteNode(iface){
@@ -785,6 +795,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		this.clearNodes();
 		
 		Blackprint.off('_eventInstance.new', this._eventsInsNew);
+		Blackprint.off('environment.deleted', this._envDeleted);
 		this.emit('destroy');
 	}
 }

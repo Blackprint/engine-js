@@ -62,8 +62,10 @@ class InstanceEvents extends CustomEvent {
 			}
 		}
 
-		this.list[namespace] = new InstanceEvent({ schema, namespace, _root: this });
+		let obj = this.list[namespace] = new InstanceEvent({ schema, namespace, _root: this });
 		this._updateTreeList();
+
+		this.instance._emit('event.created', obj);
 	}
 
 	renameEvent(from, to){
