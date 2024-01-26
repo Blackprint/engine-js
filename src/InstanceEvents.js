@@ -93,6 +93,21 @@ class InstanceEvents extends CustomEvent {
 		this.instance._emit('event.renamed', {old: from, now: to, reference: oldEvInstance});
 	}
 
+	deleteEvent(namespace){
+		let exist = this.list[namespace];
+		if(exist == null) return;
+
+		let map = exist.used; // This list can be altered multiple times when deleting a node
+		for (let i=map.length-1; i >= 0; i = map.length-1) {
+			let iface = map[i];
+			iface.node.instance.deleteNode(iface);
+		}
+
+		delete this.list[namespace];
+		this._updateTreeList();
+		this.instance._emit('event.deleted', exist);
+	}
+
 	_renameFields(namespace, name, to){
 		let schema = this.list[namespace]?.schema;
 		if(schema == null) return;

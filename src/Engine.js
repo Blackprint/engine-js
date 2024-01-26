@@ -605,6 +605,16 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		});
 	}
 
+	deleteVariable(namespace){
+		let path = namespace.split('/');
+		let oldObj = getDeepProperty(this.variables, path);
+		if(oldObj == null) return;
+		oldObj.destroy();
+
+		deleteDeepProperty(this.variables, path, true);
+		this._emit('variable.deleted', oldObj);
+	}
+
 	createFunction(id, options){
 		if(this._locked_) throw new Error("This instance was locked");
 		if(/\s/.test(id))
@@ -681,6 +691,16 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		this._emit('function.renamed', {
 			old: from, now: to, reference: oldObj,
 		});
+	}
+
+	deleteFunction(id){
+		let path = id.split('/');
+		let oldObj = getDeepProperty(this.functions, path);
+		if(oldObj == null) return;
+		oldObj.destroy();
+
+		deleteDeepProperty(this.functions, path, true);
+		this._emit('function.deleted', oldObj);
 	}
 
 	_log(data){
