@@ -1,7 +1,10 @@
 Blackprint._utils.setDeepProperty = setDeepProperty;
 Blackprint._utils.getDeepProperty = getDeepProperty;
+Blackprint._utils.deleteDeepProperty = deleteDeepProperty;
 function setDeepProperty(obj, path, value, onCreate){
-	var temp;
+	let temp;
+	let isSF = window.sf?.Obj != null;
+
 	for(var i = 0, n = path.length-1; i < n; i++){
 		temp = path[i];
 
@@ -10,7 +13,10 @@ function setDeepProperty(obj, path, value, onCreate){
 			return;
 
 		if(obj[temp] === void 0){
-			obj[temp] = {};
+			if(isSF) sf.Obj.set(obj, temp, {});
+			else obj[temp] = {};
+
+			// onCreate && onCreate(obj[temp], obj, temp);
 			onCreate && onCreate(obj[temp]);
 		}
 
@@ -21,17 +27,51 @@ function setDeepProperty(obj, path, value, onCreate){
 	if(temp === "constructor" || temp === "__proto__" || temp === "prototype")
 		return;
 
-	obj[temp] = value;
+	if(isSF) sf.Obj.set(obj, temp, value);
+	else obj[temp] = value;
+
 	return;
 }
 
 function getDeepProperty(obj, path, reduceLen=0){
-	for(var i = 0, n = path.length-reduceLen; i < n; i++){
+	for(let i = 0, n = path.length-reduceLen; i < n; i++){
 		if((obj = obj[path[i]]) === void 0)
 			return;
 	}
 
 	return obj;
+}
+
+function deleteDeepProperty(obj, path, deleteEmptyParent){
+	let isSF = window.sf?.Obj != null;
+	let lastPath = path[path.length - 1];
+	let parents = new Array(path.length-1);
+
+	for(let i = 0, n = path.length-1; i < n; i++){
+		parents[i] = obj;
+		if((obj = obj[path[i]]) === void 0)
+			return;
+	}
+
+	if(isSF) {
+		sf.Obj.delete(obj, lastPath);
+		obj.refresh?.();
+	}
+	else delete obj[lastPath];
+
+	if(deleteEmptyParent) that: for(let a=parents.length-1; a >= 0; a--) {
+		let checkName = path[a];
+		let check = parents[a];
+		for (let key in check[checkName]) {
+			break that; // object is not empty
+		}
+		
+		if(isSF) {
+			sf.Obj.delete(check, checkName);
+			obj.refresh?.();
+		}
+		else delete check[checkName];
+	}
 }
 
 function NoOperation(){}
