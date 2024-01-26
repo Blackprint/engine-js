@@ -97,7 +97,7 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 
 		this._envNameListener = ({ old, now }) => {
 			let instance = this.structure.instance;
-			let list = this._combineArray(instance['BP/Env/Get'], instance['BP/Env/Set']);
+			let list = _combineArray(instance['BP/Env/Get'], instance['BP/Env/Set']);
 			for (let i=0; i < list.length; i++) {
 				let data = list[i].data;
 				if(data.name === old) data.name = data.title = now;
@@ -108,7 +108,7 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 		this._varNameListener = ({ old, now, scope }) => {
 			let instance = this.structure.instance;
 			if(scope === VarScope.Public || scope === VarScope.Shared){
-				let list = this._combineArray(instance['BP/Var/Get'], instance['BP/Var/Set']);
+				let list = _combineArray(instance['BP/Var/Get'], instance['BP/Var/Set']);
 				for (let i=0; i < list.length; i++) {
 					let data = list[i].data;
 					if(data.scope === scope && data.name === old) data.name = now;
@@ -148,7 +148,7 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 
 		this._eventNameListener = ({ old, now }) => {
 			let instance = this.structure.instance;
-			let list = this._combineArray(instance['BP/Event/Listen'], instance['BP/Event/Emit']);
+			let list = _combineArray(instance['BP/Event/Listen'], instance['BP/Event/Emit']);
 			for (let i=0; i < list.length; i++) {
 				let data = list[i].data;
 				if(data.namespace === old) data.namespace = now;
@@ -182,13 +182,6 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 				if(!this.iface._importOnce) await this.iface._BpFnInit();
 			}
 		};
-	}
-
-	_combineArray(A, B){
-		let list = [];
-		if(A != null) list.push(...A);
-		if(B != null) list.push(...B);
-		return list;
 	}
 
 	_onFuncChanges(eventName, obj, fromNode){

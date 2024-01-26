@@ -189,3 +189,10 @@ Blackprint.utils.setEnumerablePrototype = function(clazz, props){
 
 	Object.defineProperties(temp, desc);
 }
+
+function _combineArray(A, B){
+	let list = [];
+	if(A != null) list.push(...A);
+	if(B != null) list.push(...B);
+	return list;
+}
