@@ -478,10 +478,38 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 		});
 	}
 
+	deletePort(which, portName){
+		let used = this.used;
+		if(used.length === 0)
+			throw new Error("One function node need to be placed to the instance before deleting port");
+
+		let main = this[which];
+		delete main[portName];
+
+		let hasDeletion = false;
+		for (let i=0; i < used.length; i++) {
+			let iface = used[i];
+			if(which === 'output'){
+				iface._proxyOutput.iface.deletePort(portName);
+				hasDeletion = true;
+			}
+			else if(which === 'input'){
+				iface._proxyInput.iface.deletePort(portName);
+				hasDeletion = true;
+			}
+		}
+
+		if(!hasDeletion) return;
+		used[0]._save(false, false, true);
+		this.rootInstance.emit('function.port.deleted', {
+			which, name: portName, reference: this,
+		});
+	}
+
 	get input(){return this._input}
 	get output(){return this._output}
 	set input(v){throw new Error("Can't modify port by assigning .input property")}
-	set output(v){throw new Error("Can't modify port by assigning .input property")}
+	set output(v){throw new Error("Can't modify port by assigning .output property")}
 
 	destroy(){
 		let map = this.used; // This list can be altered multiple times when deleting a node
@@ -748,13 +776,27 @@ function BPFnInit(){
 		}
 		deletePort(name){
 			let funcMainNode = this._funcMain.node;
+			let instance = this.node.instance;
+			let ifaceList = instance.ifaceList;
 			if(this.type === 'bp-fn-input'){ // Main (input) -> Input (output)
+				for (let i=ifaceList.length-1; i >= 0; i--) {
+					let iface = ifaceList[i];
+					if(iface.namespace === "BP/FnVar/Input" && iface.data.name === name)
+						instance.deleteNode(iface);
+				}
+
 				funcMainNode.deletePort('input', name);
 				this.node.deletePort('output', name);
 
 				delete funcMainNode._funcInstance.input[name];
 			}
 			else { // Output (input) -> Main (output)
+				for (let i=ifaceList.length-1; i >= 0; i--) {
+					let iface = ifaceList[i];
+					if(iface.namespace === "BP/FnVar/Output" && iface.data.name === name)
+						instance.deleteNode(iface);
+				}
+
 				funcMainNode.deletePort('output', name);
 				this.node.deletePort('input', name);
 
