@@ -406,6 +406,42 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 		}
 	}
 
+	deleteVariable(namespace, scopeId){
+		if(scopeId === VarScope.Public) return this.rootInstance.deleteVariable(namespace, scopeId);
+
+		let used = this.used;
+		let path = namespace.split('/');
+		if(scopeId === VarScope.Private){
+			let privateVars = this.privateVars;
+			let i = privateVars.indexOf(namespace);
+			if(i === -1) return;
+			privateVars.splice(i, 1);
+
+			used[0].bpInstance.deleteVariable(namespace, scopeId);
+
+			// Delete from all function node instance
+			for (let i=1; i < used.length; i++) {
+				let instance = used[i].bpInstance;
+				let varsObject = instance.variables;
+				let oldObj = getDeepProperty(varsObject, path);
+				if(oldObj == null) continue;
+				if(scopeId === VarScope.Private) oldObj.destroy();
+	
+				deleteDeepProperty(varsObject, path, true);
+				instance.emit('variable.deleted', oldObj);
+			}
+		}
+		else if(scopeId === VarScope.Shared){
+			let oldObj = getDeepProperty(this.variables, path);
+			used[0].bpInstance.deleteVariable(namespace, scopeId);
+
+			// Delete from all function node instance
+			for (let i=1; i < used.length; i++) {
+				used[i].bpInstance.emit('variable.deleted', oldObj);
+			}
+		}
+	}
+
 	renamePort(which, fromName, toName){
 		let main = this[which];
 		main[toName] = main[fromName];

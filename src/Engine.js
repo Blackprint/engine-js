@@ -607,13 +607,21 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		});
 	}
 
-	deleteVariable(namespace){
+	deleteVariable(namespace, scopeId){
+		let varsObject, instance = this;
+		if(scopeId === VarScope.Public) {
+			instance = this._mainInstance ?? this;
+			varsObject = instance.variables;
+		}
+		else if(scopeId === VarScope.Private) varsObject = instance.variables;
+		else if(scopeId === VarScope.Shared) varsObject = instance.sharedVariables;
+	
 		let path = namespace.split('/');
-		let oldObj = getDeepProperty(this.variables, path);
+		let oldObj = getDeepProperty(varsObject, path);
 		if(oldObj == null) return;
 		oldObj.destroy();
 
-		deleteDeepProperty(this.variables, path, true);
+		deleteDeepProperty(varsObject, path, true);
 		this._emit('variable.deleted', oldObj);
 	}
 
