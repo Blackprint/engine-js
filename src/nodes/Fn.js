@@ -12,7 +12,7 @@ Blackprint.nodes.BP.Fn = {
 			funcMain._proxyInput = this;
 		}
 		imported(){
-			let { input } = this.iface._funcMain.node._funcInstance;
+			let { input } = this.iface._funcMain.node.bpFunction;
 
 			for(let key in input)
 				this.createPort('output', key, input[key]);
@@ -37,7 +37,7 @@ Blackprint.nodes.BP.Fn = {
 		}
 
 		imported(){
-			let { output } = this.iface._funcMain.node._funcInstance;
+			let { output } = this.iface._funcMain.node.bpFunction;
 
 			for(let key in output)
 				this.createPort('input', key, output[key]);
@@ -65,7 +65,7 @@ Blackprint.nodes.BP.Fn = {
 };
 
 // used for instance.createFunction
-class BPFunction extends CustomEvent { // <= _funcInstance
+class BPFunction extends CustomEvent {
 	constructor(id, options, instance){
 		super();
 
@@ -166,7 +166,7 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 
 			constructor(instance){
 				super(instance);
-				instance._funcInstance = this._funcInstance = temp;
+				instance.bpFunction = this.bpFunction = temp;
 
 				let iface = this.setInterface("BPIC/BP/Fn/Main");
 				iface.description = temp.description;
@@ -302,7 +302,7 @@ class BPFunction extends CustomEvent { // <= _funcInstance
 
 		// BPVariable = ./Var.js
 		let temp = new BPVariable(id, options);
-		temp.funcInstance = this;
+		temp.bpFunction = this;
 		temp._scope = options.scope;
 
 		if(options.scope === VarScope.Shared){
@@ -525,7 +525,7 @@ Blackprint._utils.BPFunction = BPFunction;
 // Main function node
 class BPFunctionNode extends Blackprint.Node {
 	imported(data){
-		let instance = this._funcInstance;
+		let instance = this.bpFunction;
 		instance.used.push(this.iface);
 	}
 
@@ -551,7 +551,7 @@ class BPFunctionNode extends Blackprint.Node {
 	}
 
 	destroy(){
-		let instance = this._funcInstance;
+		let instance = this.bpFunction;
 
 		let i = instance.used.indexOf(this.iface);
 		if(i !== -1) instance.used.splice(i, 1);
@@ -582,7 +582,7 @@ function BPFnInit(){
 				this.bpInstance = new Blackprint.Sketch();
 
 			this.bpInstance.pendingRender = true;
-			let bpFunction = node._funcInstance;
+			let bpFunction = node.bpFunction;
 
 			if(this.data?.pause) this.bpInstance.executionOrder.pause = true;
 
@@ -655,7 +655,7 @@ function BPFnInit(){
 		}
 		imported(data){ this.data = data; }
 		renamePort(which, fromName, toName){
-			this.node._funcInstance.renamePort(which, fromName, toName);
+			this.node.bpFunction.renamePort(which, fromName, toName);
 			this._save(false, false, true);
 
 			this.node.instance._emit('_fn.rename.port', {
@@ -710,7 +710,7 @@ function BPFnInit(){
 				refName = {name};
 
 				portType = getFnPortType(port, 'input', this, refName);
-				nodeA._funcInstance.input[name] = portType;
+				nodeA.bpFunction.input[name] = portType;
 			}
 			else { // Output (input) -> Main (output)
 				let inc = 1;
@@ -727,7 +727,7 @@ function BPFnInit(){
 				refName = {name};
 
 				portType = getFnPortType(port, 'output', this, refName);
-				nodeB._funcInstance.output[name] = portType;
+				nodeB.bpFunction.output[name] = portType;
 			}
 
 			outputPort = nodeB.createPort('output', name, portType);
@@ -760,7 +760,7 @@ function BPFnInit(){
 			return inputPort;
 		}
 		renamePort(fromName, toName){
-			let bpFunction = this._funcMain.node._funcInstance;
+			let bpFunction = this._funcMain.node.bpFunction;
 
 			// Main (input) -> Input (output)
 			if(this.type === 'bp-fn-input')
@@ -788,7 +788,7 @@ function BPFnInit(){
 				funcMainNode.deletePort('input', name);
 				this.node.deletePort('output', name);
 
-				delete funcMainNode._funcInstance.input[name];
+				delete funcMainNode.bpFunction.input[name];
 			}
 			else { // Output (input) -> Main (output)
 				for (let i=ifaceList.length-1; i >= 0; i--) {
@@ -800,7 +800,7 @@ function BPFnInit(){
 				funcMainNode.deletePort('output', name);
 				this.node.deletePort('input', name);
 
-				delete funcMainNode._funcInstance.output[name];
+				delete funcMainNode.bpFunction.output[name];
 			}
 		}
 	}

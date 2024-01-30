@@ -50,7 +50,7 @@ Blackprint.nodes.BP.Var = {
 class BPVariable extends CustomEvent {
 	constructor(id, options, instance){
 		super();
-		// this.rootInstance = instance;
+		this.bpFunction = null; // Only exist for function node's variable (shared/private)
 
 		id = id.replace(/^\/|\/$/gm, '');
 		this.id = id.replace(/[`~!@#$%^&*()\-_+={}\[\]:"|;'\\,.<>?]+/g, '_');
@@ -120,13 +120,13 @@ function BPVarInit(){
 			if(Blackprint.Sketch != null)
 				this.data._scopeName = _scopeName;
 
-			let _funcInstance = this.node.instance._funcMain?.node._funcInstance;
+			let bpFunction = this.node.instance._funcMain?.node.bpFunction;
 
 			let scope;
 			if(scopeId === VarScope.Public)
-				scope = (_funcInstance?.rootInstance ?? this.node.instance).variables;
+				scope = (bpFunction?.rootInstance ?? this.node.instance).variables;
 			else if(scopeId === VarScope.Shared)
-				scope = _funcInstance.variables;
+				scope = bpFunction.variables;
 			else // private
 				scope = this.node.instance.variables;
 

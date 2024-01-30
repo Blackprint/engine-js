@@ -75,7 +75,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		delete this.iface[iface.id];
 		delete this.ref[iface.id];
 
-		let parent = iface.node._funcInstance;
+		let parent = iface.node.bpFunction;
 		if(parent != null)
 			delete parent.rootInstance.ref[iface.id];
 
@@ -266,7 +266,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 								linkPortA = iface.addPort(target, portName);
 
 								if(linkPortA === void 0)
-									throw new Error(`Can't create output port (${portName}) for function (${iface._funcMain.node._funcInstance.id})`);
+									throw new Error(`Can't create output port (${portName}) for function (${iface._funcMain.node.bpFunction.id})`);
 							}
 							else if(iface._enum === _InternalNodeEnum.BPVarGet){
 								let target = this._getTargetPortType(this, 'input', port);
@@ -303,7 +303,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 									linkPortB = targetNode.addPort(linkPortA, target.name);
 
 									if(linkPortB === void 0)
-										throw new Error(`Can't create output port (${target.name}) for function (${targetNode._funcMain.node._funcInstance.id})`);
+										throw new Error(`Can't create output port (${target.name}) for function (${targetNode._funcMain.node.bpFunction.id})`);
 								}
 								else if(targetNode._enum === _InternalNodeEnum.BPVarSet){
 									targetNode.useType(linkPortA);
@@ -491,7 +491,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		if(iface.id){
 			this.ref[iface.id] = iface.ref;
 
-			let parent = iface.node._funcInstance;
+			let parent = iface.node.bpFunction;
 			if(parent != null)
 				parent.rootInstance.ref[iface.id] = iface.ref;
 		}
@@ -721,11 +721,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		this.emit(evName, data);
 		if(this._funcMain == null) return;
 
-		let rootInstance = this._funcMain.node._funcInstance.rootInstance;
+		let rootInstance = this._funcMain.node.bpFunction.rootInstance;
 		if(rootInstance._remote == null) return;
-
-		data ??= {};
-		data.bpFunction = rootInstance._funcInstance;
 		rootInstance.emit(evName, data);
 	}
 
