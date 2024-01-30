@@ -312,8 +312,13 @@ class BPFunction extends CustomEvent {
 		}
 		else return this.addPrivateVars(id);
 
-		this.emit('variable.new', temp);
-		this.rootInstance.emit('variable.new', temp);
+		let eventData = {
+			reference: temp,
+			scope: temp._scope,
+			id: temp.id
+		};
+		this.emit('variable.new', eventData);
+		this.rootInstance.emit('variable.new', eventData);
 		return temp;
 	}
 
@@ -323,12 +328,10 @@ class BPFunction extends CustomEvent {
 
 		if(!this.privateVars.includes(id)){
 			this.privateVars.push(id);
-			this.emit('variable.new', {scope: VarScope.Private, id});
-			this.rootInstance.emit('variable.new', {
-				funcInstance: this,
-				scope: VarScope.Private,
-				id,
-			});
+
+			let eventData = {bpFunction: this, scope: VarScope.Private, id};
+			this.emit('variable.new', eventData);
+			this.rootInstance.emit('variable.new', eventData);
 		}
 		else return;
 
@@ -428,7 +431,8 @@ class BPFunction extends CustomEvent {
 				if(scopeId === VarScope.Private) oldObj.destroy();
 	
 				deleteDeepProperty(varsObject, path, true);
-				instance.emit('variable.deleted', oldObj);
+				let eventData = {scope: oldObj._scope, id: oldObj.id, reference: oldObj};
+				instance.emit('variable.deleted', eventData);
 			}
 		}
 		else if(scopeId === VarScope.Shared){
@@ -436,8 +440,9 @@ class BPFunction extends CustomEvent {
 			used[0].bpInstance.deleteVariable(namespace, scopeId);
 
 			// Delete from all function node instance
+			let eventData = {scope: oldObj._scope, id: oldObj.id, reference: oldObj};
 			for (let i=1; i < used.length; i++) {
-				used[i].bpInstance.emit('variable.deleted', oldObj);
+				used[i].bpInstance.emit('variable.deleted', eventData);
 			}
 		}
 	}
@@ -638,7 +643,9 @@ function BPFnInit(){
 				if(force || bpFunction._syncing) return;
 
 				ev.bpFunction = bpFunction;
-				newInstance._mainInstance.emit(eventName, ev);
+
+				if(!newInstance._mainInstance._remote)
+					newInstance._mainInstance.emit(eventName, ev);
 
 				bpFunction._syncing = true;
 				try {

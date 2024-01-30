@@ -372,7 +372,11 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		for (let i=0; i < vars.length; i++) {
 			let temp = vars[i];
 			setDeepProperty(this.variables, temp.id.split('/'), temp);
-			this._emit('variable.new', temp);
+			this._emit('variable.new', {
+				reference: temp,
+				scope: temp._scope,
+				id: temp.id,
+			});
 		}
 	}
 
@@ -559,7 +563,11 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		setDeepProperty(this.variables, ids, temp);
 
 		temp._scope = VarScope.Public;
-		this._emit('variable.new', temp);
+		this._emit('variable.new', {
+			reference: temp,
+			scope: temp._scope,
+			id: temp.id,
+		});
 
 		return temp;
 	}
@@ -622,7 +630,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		oldObj.destroy();
 
 		deleteDeepProperty(varsObject, path, true);
-		this._emit('variable.deleted', oldObj);
+		this._emit('variable.deleted', {scope: scopeId, id: oldObj.id, reference: oldObj});
 	}
 
 	createFunction(id, options){
@@ -662,7 +670,9 @@ Blackprint.Engine = class Engine extends CustomEvent {
 			}
 		}
 
-		this._emit('function.new', temp);
+		this._emit('function.new', {
+			reference: temp,
+		});
 		return temp;
 	}
 
@@ -706,7 +716,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		oldObj.destroy();
 
 		deleteDeepProperty(this.functions, path, true);
-		this._emit('function.deleted', oldObj);
+		this._emit('function.deleted', {id: oldObj.id, reference: oldObj});
 	}
 
 	_log(data){

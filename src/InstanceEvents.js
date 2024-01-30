@@ -65,7 +65,7 @@ class InstanceEvents extends CustomEvent {
 		let obj = this.list[namespace] = new InstanceEvent({ schema, namespace, _root: this });
 		this._updateTreeList();
 
-		this.instance._emit('event.created', obj);
+		this.instance._emit('event.created', {reference: obj});
 	}
 
 	renameEvent(from, to){
@@ -107,7 +107,7 @@ class InstanceEvents extends CustomEvent {
 
 		delete this.list[namespace];
 		this._updateTreeList();
-		this.instance._emit('event.deleted', exist);
+		this.instance._emit('event.deleted', {reference: exist});
 	}
 
 	_renameFields(namespace, name, to){
