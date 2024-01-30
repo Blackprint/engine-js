@@ -145,7 +145,7 @@ function BPEventInit(){
 				namespace: this.data.namespace,
 			});
 		}
-		deleteField(name, type=Blackprint.Types.Any){
+		deleteField(name){
 			let { schema } = this._eventRef;
 			if(schema[name] == null) return;
 
