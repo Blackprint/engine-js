@@ -629,8 +629,10 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		if(oldObj == null) return;
 		oldObj.destroy();
 
+		let bpFunction = this.parentInterface?.node.bpFunction;
+
 		deleteDeepProperty(varsObject, path, true);
-		this._emit('variable.deleted', {scope: scopeId, id: oldObj.id, reference: oldObj});
+		this._emit('variable.deleted', {scope: scopeId, id: oldObj.id, reference: oldObj, bpFunction});
 	}
 
 	createFunction(id, options){

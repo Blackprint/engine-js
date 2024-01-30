@@ -313,6 +313,7 @@ class BPFunction extends CustomEvent {
 		else return this.addPrivateVars(id);
 
 		let eventData = {
+			bpFunction: this,
 			reference: temp,
 			scope: temp._scope,
 			id: temp.id
@@ -386,7 +387,7 @@ class BPFunction extends CustomEvent {
 			else delete this.variables[from];
 
 			this.rootInstance.emit('variable.renamed', {
-				old: from, now: to, reference: varObj, scope: scopeId,
+				old: from, now: to, reference: varObj, scope: scopeId, bpFunction: this,
 			});
 		}
 		else throw new Error("Can't rename variable from scopeId: " + scopeId);
@@ -644,7 +645,7 @@ function BPFnInit(){
 
 				ev.bpFunction = bpFunction;
 
-				if(!newInstance._mainInstance._remote)
+				if(!newInstance._mainInstance._remote || eventName !== 'variable.renamed')
 					newInstance._mainInstance.emit(eventName, ev);
 
 				bpFunction._syncing = true;
