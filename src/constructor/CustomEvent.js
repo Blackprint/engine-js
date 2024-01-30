@@ -131,6 +131,8 @@ class CustomEvent {
 
 	emit(eventName, obj){
 		if(this._event === void 0) return false;
+		if(obj != null && obj.constructor !== Object)
+			throw new Error("Event object must be an Object, but got:" + obj.constructor.name);
 
 		var events = this._event[eventName];
 		if(events === void 0 || events.length === 0){
