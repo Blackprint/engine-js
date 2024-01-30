@@ -120,7 +120,7 @@ function BPVarInit(){
 			if(Blackprint.Sketch != null)
 				this.data._scopeName = _scopeName;
 
-			let bpFunction = this.node.instance._funcMain?.node.bpFunction;
+			let bpFunction = this.node.instance.parentInterface?.node.bpFunction;
 
 			let scope;
 			if(scopeId === VarScope.Public)

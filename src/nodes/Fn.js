@@ -8,11 +8,11 @@ Blackprint.nodes.BP.Fn = {
 			iface._enum = _InternalNodeEnum.BPFnInput;
 			iface._proxyInput = true; // Port is initialized dynamically
 
-			let funcMain = iface._funcMain = this.instance._funcMain;
+			let funcMain = iface.parentInterface = this.instance.parentInterface;
 			funcMain._proxyInput = this;
 		}
 		imported(){
-			let { input } = this.iface._funcMain.node.bpFunction;
+			let { input } = this.iface.parentInterface.node.bpFunction;
 
 			for(let key in input)
 				this.createPort('output', key, input[key]);
@@ -21,7 +21,7 @@ Blackprint.nodes.BP.Fn = {
 			let name = cable.output.name;
 
 			// This will trigger the port to request from outside and assign to this node's port
-			this.output[name] = this.iface._funcMain.node.input[name];
+			this.output[name] = this.iface.parentInterface.node.input[name];
 		}
 	},
 	Output: class extends Blackprint.Node {
@@ -32,19 +32,19 @@ Blackprint.nodes.BP.Fn = {
 			let iface = this.setInterface('BPIC/BP/Fn/Output');
 			iface._enum = _InternalNodeEnum.BPFnOutput;
 
-			let funcMain = iface._funcMain = this.instance._funcMain;
+			let funcMain = iface.parentInterface = this.instance.parentInterface;
 			funcMain._proxyOutput = this;
 		}
 
 		imported(){
-			let { output } = this.iface._funcMain.node.bpFunction;
+			let { output } = this.iface.parentInterface.node.bpFunction;
 
 			for(let key in output)
 				this.createPort('input', key, output[key]);
 		}
 
 		update(cable){
-			let iface = this.iface._funcMain;
+			let iface = this.iface.parentInterface;
 			if(cable == null){ // Triggered by port route
 				let IOutput = iface.output;
 				let Output = iface.node.output;
@@ -596,7 +596,7 @@ function BPFnInit(){
 			newInstance.sharedVariables = bpFunction.variables; // shared between function
 			newInstance.functions = node.instance.functions;
 			newInstance.events = node.instance.events;
-			newInstance._funcMain = this;
+			newInstance.parentInterface = this;
 			newInstance._mainInstance = bpFunction.rootInstance;
 
 			Blackprint.off('_eventInstance.new', newInstance._eventsInsNew);
@@ -712,7 +712,7 @@ function BPFnInit(){
 					}
 				}
 
-				nodeA = this._funcMain.node;
+				nodeA = this.parentInterface.node;
 				nodeB = this.node;
 				refName = {name};
 
@@ -730,7 +730,7 @@ function BPFnInit(){
 				}
 
 				nodeA = this.node;
-				nodeB = this._funcMain.node;
+				nodeB = this.parentInterface.node;
 				refName = {name};
 
 				portType = getFnPortType(port, 'output', this, refName);
@@ -767,7 +767,7 @@ function BPFnInit(){
 			return inputPort;
 		}
 		renamePort(fromName, toName){
-			let bpFunction = this._funcMain.node.bpFunction;
+			let bpFunction = this.parentInterface.node.bpFunction;
 
 			// Main (input) -> Input (output)
 			if(this.type === 'bp-fn-input')
@@ -782,7 +782,7 @@ function BPFnInit(){
 			});
 		}
 		deletePort(name){
-			let funcMainNode = this._funcMain.node;
+			let funcMainNode = this.parentInterface.node;
 			let instance = this.node.instance;
 			let ifaceList = instance.ifaceList;
 			if(this.type === 'bp-fn-input'){ // Main (input) -> Input (output)

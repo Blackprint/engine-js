@@ -92,7 +92,7 @@ Blackprint.RoutePort = class RoutePort extends CustomEvent {
 		let node = this.iface.node;
 		if(this.out == null){
 			if(this.iface._enum === _InternalNodeEnum.BPFnOutput)
-				return await this.iface._funcMain.node.routes.routeIn();
+				return await this.iface.parentInterface.node.routes.routeIn();
 
 			return;
 		}
@@ -112,7 +112,7 @@ Blackprint.RoutePort = class RoutePort extends CustomEvent {
 
 		if(_enum === _InternalNodeEnum.BPFnOutput){
 			await targetRoute.iface.node.update();
-			return await targetRoute.iface._funcMain.node.routes.routeOut();
+			return await targetRoute.iface.parentInterface.node.routes.routeOut();
 		}
 
 		return await targetRoute.routeIn(this.out);

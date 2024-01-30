@@ -19,7 +19,7 @@ Blackprint.nodes.BP.FnVar = {
 			let iface = this.iface;
 
 			// This will trigger the port to request from outside and assign to this node's port
-			this.output.Val = iface._funcMain.node.input[iface.data.name];
+			this.output.Val = iface.parentInterface.node.input[iface.data.name];
 		}
 		destroy(){
 			let iface = this.iface;
@@ -49,7 +49,7 @@ Blackprint.nodes.BP.FnVar = {
 			let id = iface.data.name;
 			this.refOutput[id] = this.ref.Input.Val;
 
-			let mainNodeIFace = iface._funcMain;
+			let mainNodeIFace = iface.parentInterface;
 			let proxyOutputNode = mainNodeIFace._proxyOutput;
 
 			// Also update the cache on the proxy node
@@ -76,7 +76,7 @@ function BPFnVarInit(){
 		imported(data){
 			if(!data.name) throw new Error("Parameter 'name' is required");
 			this.data.name = data.name;
-			this._funcMain = this.node.instance._funcMain;
+			this.parentInterface = this.node.instance.parentInterface;
 		}
 	};
 
@@ -88,10 +88,10 @@ function BPFnVarInit(){
 		}
 		imported(data){
 			super.imported(data);
-			let ports = this._funcMain.ref.IInput;
+			let ports = this.parentInterface.ref.IInput;
 			let node = this.node;
 
-			this._proxyIface = this._funcMain._proxyInput.iface;
+			this._proxyIface = this.parentInterface._proxyInput.iface;
 
 			// Create temporary port if the main function doesn't have the port
 			let name = data.name;
@@ -139,7 +139,7 @@ function BPFnVarInit(){
 			}
 			else{
 				if(this.output.Val === void 0){
-					let port = this._funcMain._proxyInput.iface.output[name];
+					let port = this.parentInterface._proxyInput.iface.output[name];
 					let portType = getFnPortType(port, 'input', this, port._name);
 
 					let newPort = node.createPort('output', 'Val', portType);
@@ -191,16 +191,16 @@ function BPFnVarInit(){
 		}
 		imported(data){
 			super.imported(data);
-			let ports = this._funcMain.ref.IOutput;
+			let ports = this.parentInterface.ref.IOutput;
 			let node = this.node;
 
-			node.refOutput = this._funcMain.ref.Output;
+			node.refOutput = this.parentInterface.ref.Output;
 
 			// Create temporary port if the main function doesn't have the port
 			let name = data.name;
 			if(!(name in ports)){
 				let iPort = node.createPort('input', 'Val', Types.Slot);
-				let proxyIface = this._funcMain._proxyOutput.iface;
+				let proxyIface = this.parentInterface._proxyOutput.iface;
 
 				// Run when this node is being connected with other node
 				iPort.onConnect = (cable, port) => {
@@ -240,7 +240,7 @@ function BPFnVarInit(){
 				proxyIface.once(`_add.${name}`, this._waitPortInit);
 			}
 			else {
-				let port = this._funcMain._proxyOutput.iface.input[name];
+				let port = this.parentInterface._proxyOutput.iface.input[name];
 				let portType = getFnPortType(port, 'output', this, port._name);
 				let newPort = node.createPort('input', 'Val', portType);
 				newPort._name = port._name ??= {name};

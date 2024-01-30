@@ -111,7 +111,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 					cable.visualizeFlow();
 	
 				if(target._name != null)
-					target.iface._funcMain.node.iface.output[target._name.name]._callAll();
+					target.iface.parentInterface.node.iface.output[target._name.name]._callAll();
 				else {
 					if(executionOrder.stepMode){
 						executionOrder._addStepPending(cable, 2);

@@ -266,7 +266,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 								linkPortA = iface.addPort(target, portName);
 
 								if(linkPortA === void 0)
-									throw new Error(`Can't create output port (${portName}) for function (${iface._funcMain.node.bpFunction.id})`);
+									throw new Error(`Can't create output port (${portName}) for function (${iface.parentInterface.node.bpFunction.id})`);
 							}
 							else if(iface._enum === _InternalNodeEnum.BPVarGet){
 								let target = this._getTargetPortType(this, 'input', port);
@@ -303,7 +303,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 									linkPortB = targetNode.addPort(linkPortA, target.name);
 
 									if(linkPortB === void 0)
-										throw new Error(`Can't create output port (${target.name}) for function (${targetNode._funcMain.node.bpFunction.id})`);
+										throw new Error(`Can't create output port (${target.name}) for function (${targetNode.parentInterface.node.bpFunction.id})`);
 								}
 								else if(targetNode._enum === _InternalNodeEnum.BPVarSet){
 									targetNode.useType(linkPortA);
@@ -397,8 +397,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 			delete sketch.iface[oldId];
 			delete sketch.ref[oldId];
 
-			if(sketch._funcMain != null)
-				delete sketch._funcMain.ref[oldId];
+			if(sketch.parentInterface != null)
+				delete sketch.parentInterface.ref[oldId];
 		}
 
 		newId ??= '';
@@ -408,8 +408,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 			sketch.iface[newId] = iface;
 			sketch.ref[newId] = iface.ref;
 
-			if(sketch._funcMain != null)
-				sketch._funcMain.ref[newId] = iface.ref;
+			if(sketch.parentInterface != null)
+				sketch.parentInterface.ref[newId] = iface.ref;
 		}
 
 		iface.node.instance.emit('node.id.changed', {
@@ -729,9 +729,9 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 	_emit(evName, data){
 		this.emit(evName, data);
-		if(this._funcMain == null) return;
+		if(this.parentInterface == null) return;
 
-		let rootInstance = this._funcMain.node.bpFunction.rootInstance;
+		let rootInstance = this.parentInterface.node.bpFunction.rootInstance;
 		if(rootInstance._remote == null) return;
 		rootInstance.emit(evName, data);
 	}
