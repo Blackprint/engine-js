@@ -8,6 +8,7 @@ class OrderedExecution {
 		this.stop = false;
 		this.pause = false;
 		this.stepMode = false;
+		this._execCounter = null;
 
 		// Pending because stepMode
 		this._pRequest = [];
@@ -135,6 +136,37 @@ class OrderedExecution {
 		this._emitNextExecution();
 	}
 
+	// Using singleNodeExecutionLoopLimit may affect performance
+	_checkExecutionLimit(){
+		let limit = Blackprint.settings.singleNodeExecutionLoopLimit;
+		if(limit == null || limit == 0) { this._execCounter = null; return; }
+		if(this.length - this.index === 0) {
+			this._execCounter?.clear();
+			return;
+		}
+
+		let node = this.list[this.index];
+		if(node == null) throw new Error("Empty");
+
+		let map = this._execCounter ??= new Map();
+		if(!map.has(node)) map.set(node, 0);
+
+		let count = map.get(node)+1;
+		map.set(node, count);
+
+		if(count > limit){
+			console.error("Execution terminated at", node.iface);
+			this.stepMode = true;
+			this.pause = true;
+			this._execCounter.clear();
+
+			let message = `Single node execution loop exceeded the limit (${limit}): ${node.iface.namespace}`;
+			this.instance._emit('execution.terminated', {reason: message, iface: node.iface});
+			// throw new Error(message);
+			return true;
+		}
+	}
+
 	// For step mode
 	_emitNextExecution(afterNode){
 		if(this.stop) return;
@@ -179,13 +211,14 @@ class OrderedExecution {
 				return this._emitPaused(afterNode, beforeNode, 0, null, cables);
 			}
 		}
-		else if(triggerSource === 3)
-			return this._emitPaused(inputNode, outputNode, triggerSource, cable);
+		else if(triggerSource === 3) return this._emitPaused(inputNode, outputNode, triggerSource, cable);
 		else return this._emitPaused(outputNode, inputNode, triggerSource, cable);
 	}
 
 	async _checkStepPending(){
 		if(this.stop) return;
+		if(this._checkExecutionLimit()) return;
+
 		if(!this._hasStepPending) return;
 		let { _pRequest, _pRequestLast, _pTrigger, _pRoute } = this;
 
