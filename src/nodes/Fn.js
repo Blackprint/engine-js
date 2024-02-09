@@ -598,7 +598,7 @@ function BPFnInit(){
 			newInstance.functions = node.instance.functions;
 			newInstance.events = node.instance.events;
 			newInstance.parentInterface = this;
-			newInstance._mainInstance = bpFunction.rootInstance;
+			newInstance.rootInstance = bpFunction.rootInstance;
 
 			Blackprint.off('_eventInstance.new', newInstance._eventsInsNew);
 			bpFunction.refreshPrivateVars(newInstance);
@@ -623,7 +623,7 @@ function BPFnInit(){
 
 			let debounce;
 			this._save = (ev, eventName, force) => {
-				if(newInstance._mainInstance._destroying || this.bpInstance._destroying)
+				if(newInstance.rootInstance._destroying || this.bpInstance._destroying)
 					return; // Avoid saving when the instance is being destroyed
 
 				clearTimeout(debounce);
@@ -645,8 +645,8 @@ function BPFnInit(){
 
 				ev.bpFunction = bpFunction;
 
-				if(!newInstance._mainInstance._remote || eventName !== 'variable.renamed')
-					newInstance._mainInstance.emit(eventName, ev);
+				if(!newInstance.rootInstance._remote || eventName !== 'variable.renamed')
+					newInstance.rootInstance.emit(eventName, ev);
 
 				bpFunction._syncing = true;
 				try {

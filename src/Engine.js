@@ -578,12 +578,12 @@ Blackprint.Engine = class Engine extends CustomEvent {
 
 		let instance, varsObject;
 		if(scopeId === VarScope.Public) {
-			instance = this._mainInstance ?? this;
+			instance = this.rootInstance ?? this;
 			varsObject = instance.variables;
 		}
 		else if(scopeId === VarScope.Private) {
 			instance = this;
-			if(instance._mainInstance == null) throw new Error("Can't rename private function variable from main instance");
+			if(instance.rootInstance == null) throw new Error("Can't rename private function variable from main instance");
 			varsObject = instance.variables;
 		}
 		else if(scopeId === VarScope.Shared) return; // Already handled on nodes/Fn.js
@@ -618,7 +618,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 	deleteVariable(namespace, scopeId){
 		let varsObject, instance = this;
 		if(scopeId === VarScope.Public) {
-			instance = this._mainInstance ?? this;
+			instance = this.rootInstance ?? this;
 			varsObject = instance.variables;
 		}
 		else if(scopeId === VarScope.Private) varsObject = instance.variables;
@@ -724,8 +724,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 	_log(data){
 		data.instance = this;
 
-		if(this._mainInstance != null)
-			this._mainInstance._emit('log', data);
+		if(this.rootInstance != null)
+			this.rootInstance._emit('log', data);
 		else this._emit('log', data);
 	}
 
