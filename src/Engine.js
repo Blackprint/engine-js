@@ -417,7 +417,6 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		});
 	}
 
-	// ToDo: Improve
 	getNodes(namespace){
 		var ifaces = this.ifaceList;
 		var got = [];
@@ -430,7 +429,14 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		return got;
 	}
 
-	// ToDo: turn this into async and wait call to `iface.imported`
+	// Check into main instance if this instance is created inside of a function
+	_isInsideFunction(fnNamespace){
+		if(this.rootInstance == null) return false;
+		if(this.parentInterface.namespace === fnNamespace) return true;
+		return this.parentInterface.node.instance._isInsideFunction(fnNamespace);
+	}
+
+	// ToDo: should we turn this into async and wait call to `iface.imported`
 	createNode(namespace, options, handlers){
 		if(this._locked_) throw new Error("This instance was locked");
 
@@ -452,9 +458,10 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		}
 		else{
 			func = namespace;
-			if(func.type === 'function')
-				namespace = "BPI/F/" + func.namespace;
+			if(func.type === 'function') namespace = "BPI/F/" + func.namespace;
 			else throw new Error("Unrecognized node");
+
+			if(this._isInsideFunction(namespace)) throw new Error("Blackprint doesn't support recursive function node");
 		}
 
 		// Call the registered func (from this.registerNode)
