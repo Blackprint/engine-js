@@ -113,7 +113,7 @@ function BPFnVarInit(){
 					iPort.assignType(portType);
 					iPort._name = portName;
 
-					proxyIface.addPort(port, name);
+					proxyIface.createPort(port, name);
 					(cable.owner === iPort ? port : iPort).connectCable(cable);
 
 					this._addListener();
@@ -121,7 +121,7 @@ function BPFnVarInit(){
 				};
 
 				// Run when main node is the missing port
-				this._waitPortInit = port => {
+				this._waitPortInit = ({ port }) => {
 					// Skip port with feature: ArrayOf
 					if(port.feature === BP_Port.ArrayOf) return;
 
@@ -216,7 +216,7 @@ function BPFnVarInit(){
 					iPort.assignType(portType);
 					iPort._name = portName;
 
-					proxyIface.addPort(port, name);
+					proxyIface.createPort(port, name);
 					(cable.owner === iPort ? port : iPort).connectCable(cable);
 
 					this._recheckRoute();
@@ -224,7 +224,7 @@ function BPFnVarInit(){
 				};
 
 				// Run when main node is the missing port
-				this._waitPortInit = port => {
+				this._waitPortInit = ({ port }) => {
 					// Skip port with feature: ArrayOf
 					if(port.feature === BP_Port.ArrayOf) return;
 

@@ -263,7 +263,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 						if(linkPortA === void 0){
 							if(iface._enum === _InternalNodeEnum.BPFnInput){
 								let target = this._getTargetPortType(iface.node.instance, 'input', port);
-								linkPortA = iface.addPort(target, portName);
+								linkPortA = iface.createPort(target, portName);
 
 								if(linkPortA === void 0)
 									throw new Error(`Can't create output port (${portName}) for function (${iface.parentInterface.node.bpFunction.id})`);
@@ -300,7 +300,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 							var linkPortB = targetNode.input[target.name];
 							if(linkPortB === void 0){
 								if(targetNode._enum === _InternalNodeEnum.BPFnOutput){
-									linkPortB = targetNode.addPort(linkPortA, target.name);
+									linkPortB = targetNode.createPort(linkPortA, target.name);
 
 									if(linkPortB === void 0)
 										throw new Error(`Can't create output port (${target.name}) for function (${targetNode.parentInterface.node.bpFunction.id})`);
@@ -413,7 +413,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		}
 
 		iface.node.instance.emit('node.id.changed', {
-			iface, from: oldId, to: newId
+			iface, old: oldId, now: newId
 		});
 	}
 
@@ -617,9 +617,12 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		deleteDeepProperty(varsObject, ids, true);
 		setDeepProperty(varsObject, ids2, oldObj);
 
-		instance._emit('variable.renamed', {
-			old: from, now: to, reference: oldObj, scope: scopeId,
-		});
+		if(scopeId === VarScope.Private) {
+			instance._emit('variable.renamed', {
+				old: from, now: to, bpFunction: this.parentInterface.node.bpFunction, scope: scopeId
+			});
+		}
+		else instance._emit('variable.renamed', {old: from, now: to, reference: oldObj, scope: scopeId });
 	}
 
 	deleteVariable(namespace, scopeId){

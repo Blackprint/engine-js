@@ -228,14 +228,14 @@ class BPFunction extends CustomEvent {
 
 					if(targetInput == null){
 						if(inputIface._enum === _InternalNodeEnum.BPFnOutput){
-							targetInput = inputIface.addPort(targetOutput, output.name);
+							targetInput = inputIface.createPort(targetOutput, output.name);
 						}
 						else throw new Error("Output port was not found");
 					}
 
 					if(targetOutput == null){
 						if(outputIface._enum === _InternalNodeEnum.BPFnInput){
-							targetOutput = outputIface.addPort(targetInput, input.name);
+							targetOutput = outputIface.createPort(targetInput, input.name);
 						}
 						else throw new Error("Input port was not found");
 					}
@@ -292,28 +292,45 @@ class BPFunction extends CustomEvent {
 	}
 
 	createVariable(id, options){
-		if(id in this.variables)
-			throw new Error("Variable id already exist: "+id);
+		if(id.includes('/')) throw new Error("Slash symbol is reserved character and currently can't be used for creating path");
 
-		if(id.includes('/'))
-			throw new Error("Slash symbol is reserved character and currently can't be used for creating path");
+		if(options.scope === VarScope.Private){
+			if(!this.privateVars.includes(id)){
+				this.privateVars.push(id);
 
-		// setDeepProperty
+				let eventData = {bpFunction: this, scope: VarScope.Private, id};
+				this.emit('variable.new', eventData);
+				this.rootInstance.emit('variable.new', eventData);
+			}
+			else return;
+
+			let hasSketch = Blackprint.Sketch != null;
+			let list = this.used;
+			for (let i=0; i < list.length; i++) {
+				let vars = list[i].bpInstance.variables;
+
+				if(hasSketch)
+					sf.Obj.set(vars, id, new BPVariable(id));
+				else vars[id] = new BPVariable(id);
+			}
+
+			return;
+		}
+		else if(options.scope === VarScope.Public) throw new Error("Can't create public variable from a function");
+		// else: Shared variable
+
+		if(id in this.variables) throw new Error("Variable id already exist: "+id);
 
 		// BPVariable = ./Var.js
 		let temp = new BPVariable(id, options);
 		temp.bpFunction = this;
 		temp._scope = options.scope;
 
-		if(options.scope === VarScope.Shared){
-			if(Blackprint.Sketch != null)
-				sf.Obj.set(this.variables, id, temp);
-			else this.variables[id] = temp;
-		}
-		else return this.addPrivateVars(id);
+		if(Blackprint.Sketch != null)
+			sf.Obj.set(this.variables, id, temp);
+		else this.variables[id] = temp;
 
 		let eventData = {
-			bpFunction: this,
 			reference: temp,
 			scope: temp._scope,
 			id: temp.id
@@ -321,31 +338,6 @@ class BPFunction extends CustomEvent {
 		this.emit('variable.new', eventData);
 		this.rootInstance.emit('variable.new', eventData);
 		return temp;
-	}
-
-	addPrivateVars(id){
-		if(id.includes('/'))
-			throw new Error("Slash symbol is reserved character and currently can't be used for creating path");
-
-		if(!this.privateVars.includes(id)){
-			this.privateVars.push(id);
-
-			let eventData = {bpFunction: this, scope: VarScope.Private, id};
-			this.emit('variable.new', eventData);
-			this.rootInstance.emit('variable.new', eventData);
-		}
-		else return;
-
-		let hasSketch = Blackprint.Sketch != null;
-		
-		let list = this.used;
-		for (let i=0; i < list.length; i++) {
-			let vars = list[i].bpInstance.variables;
-
-			if(hasSketch)
-				sf.Obj.set(vars, id, new BPVariable(id));
-			else vars[id] = new BPVariable(id);
-		}
 	}
 
 	refreshPrivateVars(instance){
@@ -387,7 +379,7 @@ class BPFunction extends CustomEvent {
 			else delete this.variables[from];
 
 			this.rootInstance.emit('variable.renamed', {
-				old: from, now: to, reference: varObj, scope: scopeId, bpFunction: this,
+				old: from, now: to, reference: varObj, scope: scopeId,
 			});
 		}
 		else throw new Error("Can't rename variable from scopeId: " + scopeId);
@@ -432,7 +424,7 @@ class BPFunction extends CustomEvent {
 				if(scopeId === VarScope.Private) oldObj.destroy();
 	
 				deleteDeepProperty(varsObject, path, true);
-				let eventData = {scope: oldObj._scope, id: oldObj.id, reference: oldObj};
+				let eventData = {scope: oldObj._scope, id: oldObj.id, bpFunction: this};
 				instance.emit('variable.deleted', eventData);
 			}
 		}
@@ -678,7 +670,7 @@ function BPFnInit(){
 			super(node);
 			this._dynamicPort = true; // Port is initialized dynamically
 		}
-		addPort(port, customName){
+		createPort(port, customName){
 			if(port === undefined) return;
 
 			let cable;
@@ -754,12 +746,12 @@ function BPFnInit(){
 
 			if(this.type === 'bp-fn-input'){
 				outputPort._name = refName; // When renaming port, this also need to be changed
-				this.emit(`_add.${refName.name}`, outputPort);
+				this.emit(`_add.${refName.name}`, {port: outputPort});
 				return outputPort;
 			}
 
 			inputPort._name = {name}; // When renaming port, this also need to be changed
-			this.emit(`_add.${name}`, inputPort);
+			this.emit(`_add.${name}`, {port: inputPort});
 
 			inputPort.on('value', ({ cable }) => {
 				outputPort.iface.node.output[outputPort.name] = cable.output.value;
