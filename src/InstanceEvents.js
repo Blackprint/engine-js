@@ -54,8 +54,14 @@ class InstanceEvents extends CustomEvent {
 		if(/\s/.test(namespace))
 			throw new Error("Namespace can't have space character: " + `'${namespace}'`);
 
-		let schema = {};
-		let list = options.schema;
+		if(options.schema?.constructor === Array){
+			options.fields = options.schema;
+			delete options.schema;
+			console.error(".createEvent: schema options need to be object, please re-export this instance and replace your old JSON");
+		}
+
+		let schema = options.schema ?? {};
+		let list = options.fields;
 		if(list != null){
 			for (let i=0; i < list.length; i++) {
 				schema[list[i]] = Blackprint.Types.Any;
