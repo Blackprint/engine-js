@@ -464,6 +464,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 			if(this._isInsideFunction(namespace)) throw new Error("Blackprint doesn't support recursive function node");
 		}
 
+		this.emit('node.creating', { namespace, options });
+
 		// Call the registered func (from this.registerNode)
 		if(isClass(func))
 			node = new func(this);
