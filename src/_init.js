@@ -109,7 +109,7 @@ Blackprint.allowModuleOrigin = function(list){
 
 Blackprint.loadBrowserInterface = true;
 Blackprint.loadModuleFromURL = async function(url, options){
-	if(url.constructor !== Array) url = [url];
+	if(url.splice == null) url = [url];
 	else url = url.slice(0);
 
 	if(url.length === 0) return;
