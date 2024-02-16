@@ -2,7 +2,7 @@
 // import Blackprint from 'https://cdn.skypack.dev/@blackprint/engine@0.9';
 import Blackprint from '../dist/engine.mjs';
 
-// For Node.js
+// For Node.js and Bun
 // import Blackprint from '@blackprint/engine';
 // import Blackprint from '../../dist/engine.min.js';
 
@@ -10,8 +10,8 @@ import Blackprint from '../dist/engine.mjs';
 // deno run --allow-net init.mjs
 
 // For Node.js you can also run this script like below
-// node --no-warnings --loader ../es6-https-loader.mjs ./init.mjs
-// node --no-warnings --loader @blackprint/engine/es6-https-loader ./init.mjs
+// node --no-warnings --enable-source-maps --loader ../es6-https-loader.mjs ./init.mjs
+// node --no-warnings --enable-source-maps --loader @blackprint/engine/es6-https-loader ./init.mjs
 
 // === Import JSON after all nodes was registered ===
 // You can import this to Blackprint Sketch if you want to view the nodes visually

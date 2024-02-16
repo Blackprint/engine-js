@@ -5,14 +5,14 @@
 // import Blackprint from './../dist/engine.mjs';
 // import Blackprint from 'https://cdn.skypack.dev/@blackprint/engine@0.9';
 
-// For Node
+// For Node and Bun
 require('source-map-support').install();
 var Blackprint = require('./../../dist/engine.min.js');
 // var Blackprint = require('@blackprint/engine');
 
 // Run from your CLI
 // deno run init.js
-// node init.js
+// node --enable-source-maps init.js
 
 // These comment can be collapsed depend on your IDE
 
