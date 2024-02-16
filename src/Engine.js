@@ -13,6 +13,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		this.executionOrder = new OrderedExecution(this);
 		this._importing = false;
 		this._destroying = false;
+		this._ready = false;
 
 		// This is only for Sketch, other engine than JS doesn't need this
 		this._eventsInsNew = ev => this.events._updateTreeList();
@@ -27,6 +28,21 @@ Blackprint.Engine = class Engine extends CustomEvent {
 			}
 		};
 		Blackprint.on('environment.deleted', this._envDeleted);
+
+		this.once('json.imported', () => {
+			this._ready = true;
+			this._readyResolve?.();
+		});
+	}
+
+	ready(){
+		if(this._ready) return;
+		if(this._readyPromise) return this._readyPromise;
+
+		return this._readyPromise = new Promise(resolve => {
+			this._readyResolve = resolve;
+			this._readyPromise = null;
+		});
 	}
 
 	deleteNode(iface){
