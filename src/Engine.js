@@ -680,7 +680,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		if(options.privateVars != null){
 			let privateVars = options.privateVars;
 			for (let i=0; i < privateVars.length; i++) {
-				temp.addPrivateVars(privateVars[i]);
+				temp.createVariable(privateVars[i], {scope: VarScope.Private});
 			}
 		}
 
