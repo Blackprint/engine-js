@@ -18,14 +18,14 @@ export default instance;
 let {
 	variables: Variables,
 	events: Events,
-	ref: Refs,
+	ref: Ports,
 } = instance;
 
 export {
 	instance,
 	Variables,
 	Events,
-	Refs,
+	Ports,
 };
 
 await instance.ready();
