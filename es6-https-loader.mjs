@@ -5,12 +5,8 @@ import http from 'http';
 import readline from 'readline';
 import fs from 'fs';
 
-function isSecure(url){
-	if(url.startsWith('http://localhost:')
-		|| url.startsWith('http://localhost/')
-		|| url.startsWith('https://'))
-		return true;
-	return false;
+function isMatch(url){
+	return /^(http:\/\/localhost:|http:\/\/localhost\/|https:\/\/).*?\.(js|mjs)$/m.test(url);
 }
 
 // [Experimental] Node.js may have changes for the API
@@ -20,23 +16,23 @@ export function resolve(specifier, context, nextResolve) {
 	// Normally Node.js would error on specifiers starting with 'https://', so
 	// this hook intercepts them and converts them into absolute URLs to be
 	// passed along to the later hooks below.
-	if(isSecure(specifier))
+	if(isMatch(specifier))
 		return { shortCircuit: true, url: specifier };
-	else if(parentURL && isSecure(parentURL))
+	else if(parentURL && isMatch(parentURL))
 		return { shortCircuit: true, url: new URL(specifier, parentURL).href };
 
 	// Let Node.js handle all other specifiers.
 	return nextResolve(specifier, context);
 }
 
-function request(url, callback) {
+export function request(url, callback) {
 	readline.clearLine(process.stdout, 0);
 	readline.cursorTo(process.stdout, 0, null);
 	process.stdout.write(`\x1b[1;32m[Downloading]\x1b[0m ${url}\r`);
 
 	let loader = https;
 	if(url.startsWith('http://')){
-		if(!isSecure(url)) throw new Error("URL must use https or localhost");
+		if(!isMatch(url)) throw new Error("URL must use https or localhost");
 		loader = http;
 	}
 
@@ -53,7 +49,7 @@ function request(url, callback) {
 // [Experimental] Node.js may have changes for the API
 export function load(url, context, nextLoad) {
 	// For JavaScript to be loaded over the network, we need to fetch and return it.
-	if (!url.startsWith('file:') && isSecure(url)) {
+	if (!url.startsWith('file:') && isMatch(url)) {
 		let dir = url.replace(/(https|http):\/\//, '')
 			.replace(/\\/g, '/').replace(/[*"|:?<>]/g, '-');
 
@@ -71,7 +67,7 @@ export function load(url, context, nextLoad) {
 			throw new Error("Can't import module");
 		}
 
-		dir.unshift('.', 'node_modules', 'bpModuleCache'); //> ./node_modules/bpModuleCache
+		dir.unshift('.', '.bp_cache', 'modules'); //> ./.bp_cache/modules
 		dir = dir.join('/');
 
 		if(fileName.includes('.') === false)
