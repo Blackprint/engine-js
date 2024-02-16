@@ -3,38 +3,40 @@
 // Module: @blackprint/engine
 
 declare module "*.bpi" {
-	import { IFacePort, Engine } from "@blackprint/engine";
+	import { IFacePort, Engine, BPVariable, InstanceEvents } from "@blackprint/engine";
 
+	/** Loaded Blackprint instance */
 	export let instance: Engine;
 	export default instance;
 
-	export let Variables: {[portName: string]: IFacePort<any>};
-	export let Events: {[portName: string]: IFacePort<any>};
-	export let Refs: {
+	type BPVariableList = {[id: string]: BPVariableList | BPVariable};
+
+	/** Variable list in the instance */
+	export let Variables: {[portName: string]: BPVariableList};
+	/** Event handler/emitter for the instance */
+	export let Events: InstanceEvents;
+	/**
+	 * ```txt
+	 * Node's port list in the instance
+	 * Only nodes with assigned ID that can be accessed from here
+	 * ```
+	 */
+	export let Ports: {
 		[nodeId: string]: {
+			/** Get/set node output port's value */
 			Output: {[portName: string]: any};
+			/** Get/set node input port's value */
 			Input: {[portName: string]: any};
+
+			/** Input port's interface, that can be used for listening event or get the cables */
 			IInput: {[portName: string]: IFacePort<any>};
+			/** Output port's interface, that can be used for listening event or get the cables */
 			IOutput: {[portName: string]: IFacePort<any>};
 		}
 	};
 }
 
 declare module "@blackprint/engine" {
-
-type InstanceRefs = {
-	instance: Engine;
-	Variables: {[portName: string]: IFacePort<any>};
-	Events: {[portName: string]: IFacePort<any>};
-	Refs: {
-		[nodeId: string]: {
-			Output: {[portName: string]: any};
-			Input: {[portName: string]: any};
-			IInput: {[portName: string]: IFacePort<any>};
-			IOutput: {[portName: string]: IFacePort<any>};
-		}
-	};
-};
 
 export namespace Types {
 	/** Allow any type as port type */
@@ -969,6 +971,9 @@ class BPVariable extends CustomEvent {
 	readonly type: object;
 	/** Any variable nodes in the instance/function will be stored here */
 	used: Interface[];
+
+	/** You can get/set the variable node's value in this property */
+	value: any;
 
 	/** Event that will be emitted when this variable value has changed */
 	on(eventName: 'value', callback: () => void): void;
