@@ -830,6 +830,20 @@ class Decoration {
 export type { Decoration };
 
 type NodeStaticProps = {output?: {}, input?: {}};
+export enum InitUpdate {
+	/** Only when no input cable connected */
+	NoRouteIn,
+	/** Only when no input cable connected */
+	NoInputCable,
+	/**
+	 * ```txt
+	 * Only when creating the node
+	 * All the cable haven't been connected at this moment
+	 * and some other flags may be ignored
+	 * ```
+	 */
+	WhenCreatingNode,
+};
 
 /** Blackprint Node */
 export class Node<T extends NodeStaticProps> {
@@ -837,6 +851,9 @@ export class Node<T extends NodeStaticProps> {
 	 * Set this to true if you want .update function being called for every data changes from different input port
 	 */
 	partialUpdate: Boolean;
+
+	/** Automatically call `.update` on node init depends on this flag rules */
+	static initUpdate: InitUpdate;
 
 	/** Interface reference */
 	iface: Interface<Node<T>>;

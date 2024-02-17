@@ -374,8 +374,13 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		}
 
 		// Call node init after creation processes was finished
-		for (var i = 0; i < handlers.length; i++)
-			handlers[i].init?.();
+		for (var i = 0; i < handlers.length; i++){
+			let ref = handlers[i];
+			ref.init?.();
+
+			let nodeClass = ref.constructor;
+			if(nodeClass.initUpdate != null) this._tryInitUpdateNode(ref, nodeClass.initUpdate, false);
+		}
 
 		this._importing = false;
 		this.emit("json.imported", {appendMode: options.appendMode, nodes: inserted, raw: json});
@@ -450,6 +455,26 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		if(this.rootInstance == null) return false;
 		if(this.parentInterface.namespace === fnNamespace) return true;
 		return this.parentInterface.node.instance._isInsideFunction(fnNamespace);
+	}
+
+	// rule = Blackprint.InitUpdate (from ./InitUpdate.js)
+	_tryInitUpdateNode(node, rule, creatingNode){
+		if((rule & InitUpdate.WhenCreatingNode)) { if(!creatingNode) return; }
+		else if(creatingNode) return;
+
+		// There are no cable connected when creating node
+		// So.. let's skip these checks
+		if(!creatingNode){
+			if((rule & InitUpdate.NoRouteIn) && node.routes.in.length !== 0) return;
+			if((rule & InitUpdate.NoInputCable)){
+				let input = node.iface.input;
+				for (let key in input) {
+					if(input[key].cables.length !== 0) return;
+				}
+			}
+		}
+
+		node.update();
 	}
 
 	// ToDo: should we turn this into async and wait call to `iface.imported`
@@ -538,10 +563,10 @@ Blackprint.Engine = class Engine extends CustomEvent {
 			for (let key in portSwitches) {
 				let temp = portSwitches[key];
 				let ref = iface.output[key];
-	
+
 				if((temp | 1) === 1)
 					BP_Port.StructOf.split(ref);
-	
+
 				if((temp | 2) === 2)
 					ref.allowResync = true;
 			}
@@ -562,6 +587,8 @@ Blackprint.Engine = class Engine extends CustomEvent {
 			if(iface.init !== void 0)
 				iface.init();
 		}
+
+		if(func.initUpdate != null) this._tryInitUpdateNode(node, func.initUpdate, true);
 
 		this.emit('node.created', { iface });
 		return iface;
