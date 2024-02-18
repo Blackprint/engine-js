@@ -3,13 +3,12 @@
 // Module: @blackprint/engine
 
 declare module "*.bpi" {
-	import { IFacePort, Engine, BPVariable, InstanceEvents } from "@blackprint/engine";
+	import { IFacePort, Engine } from "@blackprint/engine";
+	import type { BPVariableList, InstanceEvents } from "@blackprint/engine";
 
 	/** Loaded Blackprint instance */
 	export let instance: Engine;
 	export default instance;
-
-	type BPVariableList = {[id: string]: BPVariableList | BPVariable};
 
 	/** Variable list in the instance */
 	export let Variables: {[portName: string]: BPVariableList};
@@ -37,6 +36,8 @@ declare module "*.bpi" {
 }
 
 declare module "@blackprint/engine" {
+
+type PortWhich = 'input' | 'output';
 
 export namespace Types {
 	/** Allow any type as port type */
@@ -86,9 +87,30 @@ type PortType<T> = { [P in keyof T]: T[P] extends ClassConstructor ? InstanceTyp
 export function settings(which: String, value: any): void;
 
 type ModuleContext = {
-	[key: string]: any;
+	/**
+	 * ```txt
+	 * Store your interface class constructor here if you want
+	 * to allow it to be accessed from different module/library
+	 * ```
+	 */
 	IFace: any;
+	/**
+	 * ```txt
+	 * Define local custom type for your module that can be used for defining
+	 * port type
+	 * ```
+	 * @param originalType Class constructor reference, can be null
+	 * @param virtualName Unique type name for this module
+	 * @returns Type
+	 */
 	VirtualType: (originalType: object, virtualName: String | Array<String>) => any;
+	/**
+	 * ```txt
+	 * You can use this object to store your data
+	 * If you want to allow other developer accessing your object/data
+	 * ```
+	 */
+	[key: string]: any;
 }
 
 /**
@@ -108,9 +130,13 @@ export function getContext(name: String): Promise<ModuleContext>;
  * @param options desc
  */
 export function loadScope(options: {
+	/** This module URL (`import.meta.url`) */
 	url: String,
+	/** Set this to true if this module has HTML node interface for browser */
 	hasInterface?: Boolean,
+	/** Set this to true if this module has docs */
 	hasDocs?: Boolean,
+	/** Set this to true if this module has custom style `.css` */
 	css?: Boolean
 }): any;
 
@@ -346,21 +372,32 @@ class CustomEvent {
 	emit(eventName: string, obj?: object): any;
 }
 
-type BPFunctionList = {[id: string]: BPFunctionList | BPFunction};
-type BPVariableList = {[id: string]: BPVariableList | BPVariable};
+export type BPFunctionList = {[id: string]: BPFunctionList | BPFunction};
+export type BPVariableList = {[id: string]: BPVariableList | BPVariable};
 
 /** Blackprint Engine Instance (for browser or non-browser) */
 export class Engine extends CustomEvent {
+	/** Node interface list */
 	ifaceList: Array<Interface>;
-	iface: {[id: string]: Interface};
+	/** You can obtain the node interface by using its id from here */
+	iface: {[nodeId: string]: Interface};
+	/** Registered function in the instance */
 	functions: BPFunctionList;
+	/** Registered variable in the instance */
 	variables: BPVariableList;
+	/** Event handler/emitted for the instance */
 	events: InstanceEvents;
+	/** Instance data flow's execution manager */
 	executionOrder: OrderedExecution;
-	ref: {[id: string]: {
+	/** Shortcut for accessing node ports by using the interface id */
+	ref: {[nodeId: string]: {
+		/** Get/set node output port's value */
 		Input: {[portName: string]: any},
+		/** Get/set node input port's value */
 		Output: {[portName: string]: any},
+		/** Input port's interface, that can be used for listening event or get the cables */
 		IInput: {[portName: string]: PortIFace<any, any>},
+		/** Output port's interface, that can be used for listening event or get the cables */
 		IOutput: {[portName: string]: PortIFace<any, any>},
 	}}
 
@@ -410,9 +447,13 @@ export class Engine extends CustomEvent {
 	 * @param options additional options
 	 */
 	createNode(namespace: string, options?: {
+		/** Node's data, this will be passed into `node.imported(data)` */
 		data?: object,
+		/** Node's horizontal position in pixel */
 		x?: Number,
+		/** Node's vertical position in pixel */
 		y?: Number,
+		/** Node's id */
 		id?: Number,
 	}): Interface;
 
@@ -541,13 +582,13 @@ export class Engine extends CustomEvent {
 	on(eventName: 'execution.terminated', callback: (data: { reason: String, iface: Interface }) => void): void;
 	
 	on(eventName: 'function.port.renamed', callback: (data: {
-		which: String,
+		which: PortWhich,
 		old: String,
 		now: String,
 		reference: BPFunction,
 	}) => void): void;
 	on(eventName: 'function.port.deleted', callback: (data: {
-		which: String,
+		which: PortWhich,
 		name: String,
 		reference: BPFunction,
 	}) => void): void;
@@ -622,7 +663,8 @@ export class IFacePort<T extends Interface = any> {
 	name: String;
 	/** Return true if this was route port */
 	isRoute: Boolean;
-	source: 'input' | 'output';
+	/** Port's IO type, can be input port or output port */
+	source: PortWhich;
 	/** Port's type */
 	readonly type: object;
 	/** Return true if port from StructOf was splitted to multiple port */
@@ -702,14 +744,14 @@ type OutputPort_EventValue<T extends Interface> = { port: IFacePort<T> };
 type PropType<T, P extends keyof T> = T[P];
 type PortIFace<T, A extends Node<A>> = { [P in keyof T]: IFacePort<Interface<A>> };
 export type PortReferences<T extends Node<T>> = {
-	/** Input port's interfaces */
+	/** Input port's interface, that can be used for listening event or get the cables */
 	IInput: PortIFace<T['input'], T>,
-	/** Output port's interfaces */
+	/** Output port's interface, that can be used for listening event or get the cables */
 	IOutput: PortIFace<T['output'], T>,
 
-	/** Input port's values */
+	/** Get/set node output port's value */
 	Input: PropType<T, 'input'>,
-	/** Output port's values */
+	/** Get/set node input port's value */
 	Output: PropType<T, 'output'>,
 };
 
@@ -775,11 +817,11 @@ export class Interface<T extends Node<T> = any> extends CustomEvent {
 	 */
 	init(): void;
 
-	 /**
-	  * This function will be called before init, where this node still not connected to any cables
-	  * @override you can override/replace this functionality on your class
-	  * @param data Data that was passed when importing JSON or creating new node
-	  */
+	/**
+	 * This function will be called before init, where this node still not connected to any cables
+	 * @override you can override/replace this functionality on your class
+	 * @param data Data that was passed when importing JSON or creating new node
+	 */
 	imported(data: Object): void;
 
 	/** Two ports were connected with a cable */
@@ -843,7 +885,7 @@ export enum InitUpdate {
 	 * ```
 	 */
 	WhenCreatingNode,
-};
+}
 
 /** Blackprint Node */
 export class Node<T extends NodeStaticProps> {
@@ -943,7 +985,7 @@ export class Node<T extends NodeStaticProps> {
 	 * @param name unique port name
 	 * @param type data type (class)
 	 */
-	createPort(which: 'input' | 'output', name: string, type: Function): IFacePort<Interface<Node<T>>>;
+	createPort(which: PortWhich, name: string, type: Function): IFacePort<Interface<Node<T>>>;
 
 	/**
 	 * Dynamically rename port to this node
@@ -952,14 +994,14 @@ export class Node<T extends NodeStaticProps> {
 	 * @param to unique port name
 	 * @returns true if successfully renamed
 	 */
-	renamePort(which: 'input' | 'output', name: string, to: string): Boolean;
+	renamePort(which: PortWhich, name: string, to: string): Boolean;
 
 	/**
 	 * Dynamically delete port to this node
 	 * @param which port source
 	 * @param name port name
 	 */
-	deletePort(which: 'input' | 'output', name: string): void;
+	deletePort(which: PortWhich, name: string): void;
 
 	/**
 	 * Send data to remote nodes
@@ -979,6 +1021,7 @@ export class Node<T extends NodeStaticProps> {
 	syncIn(id: string, data: any): void;
 }
 
+export type { BPVariable };
 class BPVariable extends CustomEvent {
 	/** Only available for private/shared variable scope (inside of a function) */
 	readonly bpFunction?: BPFunction;
@@ -1000,12 +1043,14 @@ class BPVariable extends CustomEvent {
 	on(eventName: 'type.assigned', callback: () => void): void;
 }
 
+export type { BPFunction };
 class BPFunction {
 	/** Function namespace/id */
 	readonly id: string;
 	/** Function title */
 	title: string;
-	// rootInstance;
+	/** Main/root instance, can be Sketch or Engine */
+	rootInstance: Engine;
 	/** Function description */
 	description: string;
 	/** Any function nodes in the instance/function will be stored here */
@@ -1052,14 +1097,14 @@ class BPFunction {
 	 * @param from old port name
 	 * @param to new port name
 	 */
-	renamePort(which: 'input' | 'output', from: string, to: string): void;
+	renamePort(which: PortWhich, from: string, to: string): void;
 
 	/**
 	 * Delete defined port for the function
 	 * @param which Which port IO to be renamed
 	 * @param name port name
 	 */
-	deletePort(which: 'input' | 'output', name: string): void;
+	deletePort(which: PortWhich, name: string): void;
 }
 
 class InstanceEvent {
@@ -1074,6 +1119,7 @@ class InstanceEvent {
 	/** Any event nodes in the instance/function will be stored here */
 	used: Interface[];
 }
+export type { InstanceEvents };
 class InstanceEvents extends CustomEvent {
 	/** You can access stored InstanceEvent from this list */
 	list: {[namespace: string]: InstanceEvent};
@@ -1186,22 +1232,22 @@ export class InputPort extends PortGhost {
 	on(eventName: 'call', callback: () => void): void;
 }
 
-class RoutePort_1 {
-	/** [Experimental] [ToDo] */
+/** Can be used to control data flow between nodes */
+class RoutePort {
+	/** Pause/disable this route port */
 	pause(): any;
 
-	/** [Experimental] [ToDo] */
+	/** Unpause/enable this route port */
 	unpause(): any;
 
 	/**
-	 * Create cable from this port
-	 * @param event [ToDo]
+	 * Create cable from this port that not connected to other port
 	 */
-	createCable(event: any): any;
+	createCable(): Cable;
 
 	/**
 	 * Connect current output route to other node
-	 * @param iface [ToDo]
+	 * @param iface Target node interface
 	 */
 	routeTo(iface: Interface): Boolean;
 
@@ -1216,14 +1262,6 @@ class RoutePort_1 {
 
 	/** This will be called after '.update' has been executed */
 	routeOut(): Promise<any>;
-}
-
-/** Can be used to control data flow between nodes */
-class RoutePort extends RoutePort_1 {
-	/**
-	 * @param iface
-	 */
-	constructor(iface: Interface);
 }
 
 export type { RoutePort };
@@ -1332,4 +1370,5 @@ export class RemoteEngine extends RemoteBase {
 	 */
 	onSyncIn(data: any): Promise<any>;
 }
+
 }
