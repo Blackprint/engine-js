@@ -189,9 +189,9 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 						portIface._requesting = false;
 						if(port.feature === BP_Port.ArrayOf)
-							return port._cache = [output.value ?? output.default];
+							return port._cache = [output.value];
 
-						return port._cache = output.value ?? port.default ?? output.default;
+						return port._cache = output.value ?? port.default;
 					}
 
 					let isNotArrayPort = port.feature !== BP_Port.ArrayOf;
@@ -222,13 +222,12 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 						if(Blackprint.settings.visualizeFlow)
 							cable.visualizeFlow();
 
-						let gotData = output.value ?? port.default ?? output.default;
 						if(isNotArrayPort){
 							portIface._requesting = false;
-							return port._cache = gotData;
+							return port._cache = output.value ?? port.default;
 						}
 
-						data[i] = gotData;
+						data[i] = output.value;
 					}
 
 					portIface._requesting = false;
@@ -240,7 +239,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 					return port.__call ??= () => port._callAll();
 
 				// else type: output port, let's just return the value
-				return port.value ?? port.default;
+				return port.value;
 			}
 		};
 

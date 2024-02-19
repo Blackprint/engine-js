@@ -755,8 +755,7 @@ function BPFnInit(){
 			this.emit(`_add.${name}`, {port: inputPort});
 
 			inputPort.on('value', ({ cable }) => {
-				let temp = cable.output;
-				outputPort.iface.node.output[outputPort.name] = temp.value ?? temp.default;
+				outputPort.iface.node.output[outputPort.name] = cable.output.value;
 			});
 
 			return inputPort;

@@ -23,9 +23,7 @@ class Cable{
 			this.visualizeFlow();
 
 		if(this._disconnecting) return this.input.default;
-
-		let temp = this.output;
-		return temp.value ?? temp.default;
+		return this.output.value;
 	}
 
 	activation(enable){
@@ -126,7 +124,7 @@ class Cable{
 		inp.emit('connect', temp);
 		out.emit('connect', {port: out, target: inp, cable: this});
 
-		if(out.value != null || out.default != null){
+		if(out.value != null){
 			inp.emit('value', temp);
 			inp.iface.emit('port.value', temp);
 
