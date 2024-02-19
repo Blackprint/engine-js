@@ -579,8 +579,9 @@ function BPFnInit(){
 			else
 				this.bpInstance = new Blackprint.Sketch();
 
-			this.bpInstance.pendingRender = true;
 			let bpFunction = node.bpFunction;
+			this.bpInstance.pendingRender = true;
+			this.bpInstance.executionOrder._rootExecOrder = bpFunction.rootInstance.executionOrder;
 
 			if(this.data?.pause) this.bpInstance.executionOrder.pause = true;
 

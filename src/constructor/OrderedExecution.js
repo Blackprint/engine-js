@@ -9,6 +9,7 @@ class OrderedExecution {
 		this.pause = false;
 		this.stepMode = false;
 		this._execCounter = null;
+		this._rootExecOrder = {stop: false};
 
 		// Pending because stepMode
 		this._pRequest = [];
@@ -33,7 +34,7 @@ class OrderedExecution {
 		this.length = this.index = 0;
 	}
 	add(node, _cable){
-		if(this.stop || this.isPending(node)) return;
+		if(this.stop || this._rootExecOrder.stop || this.isPending(node)) return;
 		this._isReachLimit();
 
 		this.list[this.length++] = node;
@@ -44,7 +45,7 @@ class OrderedExecution {
 	}
 
 	_tCableAdd(node, cable){
-		if(this.stop) return;
+		if(this.stop || this._rootExecOrder.stop) return;
 		let tCable = this._tCable; // Cable triggerer
 		let sets = tCable.get(node);
 		if(sets == null) {
@@ -62,7 +63,7 @@ class OrderedExecution {
 	}
 
 	_next(){
-		if(this.stop) return;
+		if(this.stop || this._rootExecOrder.stop) return;
 		if(this.index >= this.length) return;
 
         let i = this.index;
@@ -77,7 +78,7 @@ class OrderedExecution {
 	}
 
 	_emitPaused(afterNode, beforeNode, triggerSource, cable, cables){
-		if(this.stop) return;
+		if(this.stop || this._rootExecOrder.stop) return;
 		this.instance._emit('execution.paused', {
 			afterNode,
 			beforeNode,
@@ -91,7 +92,7 @@ class OrderedExecution {
 	}
 
 	_addStepPending(cable, triggerSource){
-		if(this.stop) return;
+		if(this.stop || this._rootExecOrder.stop) return;
 
 		// 0 = execution order, 1 = route, 2 = trigger port, 3 = request
 		if(triggerSource === 1 && !this._pRoute.includes(cable)) this._pRoute.push(cable);
@@ -169,7 +170,7 @@ class OrderedExecution {
 
 	// For step mode
 	_emitNextExecution(afterNode){
-		if(this.stop) return;
+		if(this.stop || this._rootExecOrder.stop) return;
 
 		let { _pRequest, _pRequestLast, _pTrigger, _pRoute } = this;
 		let cable, triggerSource = 0, beforeNode = null;
@@ -216,7 +217,7 @@ class OrderedExecution {
 	}
 
 	async _checkStepPending(){
-		if(this.stop) return;
+		if(this.stop || this._rootExecOrder.stop) return;
 		if(this._checkExecutionLimit()) return;
 
 		if(!this._hasStepPending) return;
@@ -296,7 +297,7 @@ class OrderedExecution {
 	}
 
 	async next(force){
-		if(this.stop) return;
+		if(this.stop || this._rootExecOrder.stop) return;
 		if(this.stepMode) this.pause = true;
 		if(this.pause && !force) return;
 		if(await this._checkStepPending()) return;
