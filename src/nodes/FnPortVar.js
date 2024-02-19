@@ -162,7 +162,7 @@ function BPFnVarInit(){
 				this._listener = ({ port }) => {
 					if(port.iface.node.routes.out != null){
 						let { Val } = this.ref.IOutput;
-						Val.value = port.value; // Change value without trigger node.update
+						Val.value = port.value ?? port.default; // Change value without trigger node.update
 	
 						let list = Val.cables;
 						for (let i=0; i < list.length; i++) {
@@ -175,7 +175,7 @@ function BPFnVarInit(){
 						return;
 					}
 
-					this.ref.Output.Val = port.value;
+					this.ref.Output.Val = port.value ?? port.default;
 				};
 
 				port.on('value', this._listener);

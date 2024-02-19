@@ -150,9 +150,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 				// This port must use values from connected output
 				if(port.source === 'input'){
 					if(port._cache !== void 0) return port._cache;
-
-					if(port.cables.length === 0)
-						return port.default;
+					if(port.cables.length === 0) return port.default;
 
 					let portIface = port.iface;
 
@@ -190,22 +188,17 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 							cable.visualizeFlow();
 
 						portIface._requesting = false;
-						if(port.feature === BP_Port.ArrayOf){
-							port._cache = [];
-							if(output.value != null)
-								port._cache.push(output.value);
+						if(port.feature === BP_Port.ArrayOf)
+							return port._cache = [output.value ?? output.default];
 
-							return port._cache;
-						}
-
-						return port._cache = output.value ?? port.default;
+						return port._cache = output.value ?? port.default ?? output.default;
 					}
 
 					let isNotArrayPort = port.feature !== BP_Port.ArrayOf;
 
 					// Return multiple data as an array
 					var cables = port.cables;
-					var data = [];
+					var data = new Array(cables.length);
 					for (var i = 0; i < cables.length; i++) {
 						var cable = cables[i];
 						if(cable.connected === false || cable.disabled)
@@ -229,12 +222,13 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 						if(Blackprint.settings.visualizeFlow)
 							cable.visualizeFlow();
 
+						let gotData = output.value ?? port.default ?? output.default;
 						if(isNotArrayPort){
 							portIface._requesting = false;
-							return port._cache = output.value ?? port.default;
+							return port._cache = gotData;
 						}
 
-						data.push(output.value);
+						data[i] = gotData;
 					}
 
 					portIface._requesting = false;
@@ -246,7 +240,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 					return port.__call ??= () => port._callAll();
 
 				// else type: output port, let's just return the value
-				return port.value;
+				return port.value ?? port.default;
 			}
 		};
 

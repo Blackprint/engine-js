@@ -23,7 +23,9 @@ class Cable{
 			this.visualizeFlow();
 
 		if(this._disconnecting) return this.input.default;
-		return this.output.value;
+
+		let temp = this.output;
+		return temp.value ?? temp.default;
 	}
 
 	activation(enable){
@@ -124,12 +126,12 @@ class Cable{
 		inp.emit('connect', temp);
 		out.emit('connect', {port: out, target: inp, cable: this});
 
-		if(out.value !== void 0){
+		if(out.value != null || out.default != null){
 			inp.emit('value', temp);
 			inp.iface.emit('port.value', temp);
 
 			let node = inp.iface.node;
-			if(node.update !== void 0) {
+			if(node.update != null) {
 				if(node.instance._importing)
 					node.instance.executionOrder.add(node, this);
 				else if(node.routes.in.length === 0) {
