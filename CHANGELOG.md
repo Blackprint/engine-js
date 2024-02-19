@@ -1,3 +1,32 @@
+# 0.9.1
+
+### Features
+- Add function to rename events, variable name, and function namespace
+- Add feature to delete function, function port, variable, and event
+- Add `.stop` property to stop data flow in the instance
+- Emit `ready` event when function node is initialized
+- Emit event when creating event and handle environment variable deletion
+- Watch function node's port name changes when renaming from other node
+- Watch event namespace changes when renaming from other node
+- Improve utils for set and delete object property
+- Add and improve Bun and Node.js loader
+- Add `.ready` function for waiting until first `json.imported` instance event
+- Auto trigger `node.update` when `initUpdate` static class property exist
+- Improve TypeScript definition file
+
+### Bug Fix
+- Avoid emitting non-object data when emitting event data
+- Avoid creating a function node inside of the node itself
+- Emit some event and avoid trigger resave on function node
+- Fix import error because duplicated event export
+- Fix error when renaming port name for function node
+- Make sure the event `schema` option is object
+- Rename environment node inside all function node
+- Some modification for remote collaboration
+- Stop execution order inside function if root is stopped
+- Use default port output value as input value if exist
+
+
 # 0.9.0
 
 ### Breaking Changes
