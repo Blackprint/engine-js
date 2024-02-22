@@ -524,9 +524,13 @@ export class Engine extends CustomEvent {
 	/** A node was created */
 	on(eventName: 'node.created', callback: (data: { iface: Interface }) => void): void;
 
+	/** New event data field was created */
 	on(eventName: 'event.field.created', callback: (data: { name: String, namespace: String }) => void): void;
+	/** An event data field was renamed */
 	on(eventName: 'event.field.renamed', callback: (data: { old: String, now: String, namespace: String }) => void): void;
+	/** An event data field was deleted */
 	on(eventName: 'event.field.deleted', callback: (data: { name: String, namespace: String }) => void): void;
+	/** New variable was created */
 	on(eventName: 'variable.new', callback: (data: {
 		scope: VarScope,
 		id: String,
@@ -536,6 +540,7 @@ export class Engine extends CustomEvent {
 		/** Only available for Private variable */
 		bpFunction?: BPFunction,
 	}) => void): void;
+	/** A variable was renamed */
 	on(eventName: 'variable.renamed', callback: (data: {
 		old: String, now: String,
 		scope: VarScope,
@@ -545,6 +550,7 @@ export class Engine extends CustomEvent {
 		/** Only available for Private variable */
 		bpFunction?: BPFunction,
 	}) => void): void;
+	/** A variable was deleted */
 	on(eventName: 'variable.deleted', callback: (data: {
 		id: String,
 		scope: VarScope,
@@ -554,13 +560,20 @@ export class Engine extends CustomEvent {
 		/** Only available for Private variable */
 		bpFunction?: BPFunction,
 	}) => void): void;
+	/** A function template was created */
 	on(eventName: 'function.new', callback: (data: { reference: BPFunction }) => void): void;
+	/** A function template was renamed */
 	on(eventName: 'function.renamed', callback: (data: { old: String, now: String, reference: BPFunction }) => void): void;
+	/** A function template was deleted */
 	on(eventName: 'function.deleted', callback: (data: { reference: BPFunction, id: String }) => void): void;
+	/** An event namespace was created */
 	on(eventName: 'event.new', callback: (data: { reference: InstanceEvent }) => void): void;
+	/** An event namespace was renamed */
 	on(eventName: 'event.renamed', callback: (data: { old: String, now: String, reference: InstanceEvent }) => void): void;
+	/** An event namespace was deleted */
 	on(eventName: 'event.deleted', callback: (data: { reference: InstanceEvent }) => void): void;
 
+	/** The instance have been paused */
 	on(eventName: 'execution.paused', callback: (data: {
 		/** Previous executed node */
 		afterNode?: Node<NodeStaticProps>,
@@ -579,19 +592,23 @@ export class Engine extends CustomEvent {
 		 */
 		triggerSource: Number,
 	}) => void): void;
+	/** The instance data flow got terminated */
 	on(eventName: 'execution.terminated', callback: (data: { reason: String, iface: Interface }) => void): void;
 	
+	/** A function node's port get renamed */
 	on(eventName: 'function.port.renamed', callback: (data: {
 		which: PortWhich,
 		old: String,
 		now: String,
 		reference: BPFunction,
 	}) => void): void;
+	/** A function node's port get deleted */
 	on(eventName: 'function.port.deleted', callback: (data: {
 		which: PortWhich,
 		name: String,
 		reference: BPFunction,
 	}) => void): void;
+	/** A node was created into the instance */
 	on(eventName: 'node.created', callback: (data: { iface: Interface }) => void): void;
 }
 
