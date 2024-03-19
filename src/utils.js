@@ -8,6 +8,9 @@ function setDeepProperty(obj, path, value, onCreate){
 	for(var i = 0, n = path.length-1; i < n; i++){
 		temp = path[i];
 
+		if(temp.constructor !== String && temp.constructor !== Number)
+			throw new Error("Object field must be Number or String, but found: " + JSON.stringify(temp));
+
 		// Disallow diving into internal JavaScript property
 		if(temp === "constructor" || temp === "__proto__" || temp === "prototype")
 			return;
@@ -24,6 +27,9 @@ function setDeepProperty(obj, path, value, onCreate){
 	}
 
 	temp = path[i];
+	if(temp.constructor !== String && temp.constructor !== Number)
+		throw new Error("Object field must be Number or String, but found: " + JSON.stringify(temp));
+
 	if(temp === "constructor" || temp === "__proto__" || temp === "prototype")
 		return;
 
