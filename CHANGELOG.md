@@ -1,3 +1,8 @@
+# 0.9.2
+
+### Bug Fix
+- Fix validation to avoid prototype pollution
+
 # 0.9.1
 
 ### Features
@@ -25,7 +30,6 @@
 - Some modification for remote collaboration
 - Stop execution order inside function if root is stopped
 - Use default port output value as input value if exist
-
 
 # 0.9.0
 
