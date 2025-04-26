@@ -383,7 +383,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		}
 
 		this._importing = false;
-		this.emit("json.imported", {appendMode: options.appendMode, nodes: inserted, raw: json});
+		this.emit("json.imported", {appendMode: options.appendMode, startIndex: appendLength, nodes: inserted, raw: json});
 		await this.executionOrder.next();
 
 		return inserted;
