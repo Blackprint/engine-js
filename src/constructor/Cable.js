@@ -140,11 +140,11 @@ class Cable{
 	}
 
 	disconnect(which){ // which = port
+		let {owner, target} = this;
 		if(this.isRoute){ // ToDo: simplify, use 'which' instead of check all
 			let { input, output } = this;
 
-			if(output.cables != null) output.cables.splice(0);
-			else if(output.out === this) output.out = null;
+			if(output.out === this) output.out = null;
 			else if(input?.out === this) input.out = null;
 
 			let i = output.in ? output.in.indexOf(this) : -1;
@@ -158,10 +158,28 @@ class Cable{
 			}
 
 			this.connected = false;
+
+			let temp1 = {
+				cable: this,
+				port: owner,
+				target: target
+			};
+
+			owner.emit('disconnect', temp1);
+			owner.iface.emit('cable.disconnect', temp1);
+			owner.iface.node.instance.emit('cable.disconnect', temp1);
+
+			let temp2 = {
+				cable: this,
+				port: target,
+				target: owner
+			};
+			target.emit('disconnect', temp2);
+			target.iface.emit('cable.disconnect', temp2);
+
 			return;
 		}
 
-		let {owner, target} = this;
 		let hasOwner = false;
 		let hasTarget = false;
 		let alreadyEmitToInstance = false;
