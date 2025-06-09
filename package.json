@@ -21,7 +21,8 @@
       "require": "./dist/engine.min.js",
       "import": "./dist/engine.mjs"
     },
-    "./es6-https-loader": "./es6-https-loader.mjs",
+    "./nodejs-loader": "./nodejs-loader.js",
+    "./bun-loader": "./bun-loader.mjs",
     "./skeleton": {
       "types": "./src/skeleton/index.d.ts",
       "require": "./dist/skeleton.min.js",

@@ -1,0 +1,3 @@
+preload = [
+    "../bun-loader.mjs",
+]

@@ -1,13 +1,9 @@
-// For Node.js and Bun
-// import Blackprint from '@blackprint/engine';
-import '../../dist/engine.min.js';
-
 // Run from your CLI
-// bun run --preload ./../bun-loader.mjs ./test-loader.mjs
-// node --no-warnings --env-file=.env --enable-source-maps --loader ../nodejs-loader.mjs ./test-loader.mjs
+// bun run --env-file=.env --preload ./../bun-loader.mjs ./test-loader.mjs
+// bun run --env-file=.env ./test-loader.mjs
+// node --env-file=.env --enable-source-maps --import ../nodejs-loader.js ./test-loader.mjs
 
-import { instance, Ports } from './test.bpi';
+import { instance, ref } from './test.bpi';
 
-console.log(Object.keys(instance.iface));
-// instance.ref.myButton.Output.Clicked();
-Ports.myButton.Output.Clicked();
+console.log(Object.keys(instance.iface)); // [ "myLogger", "mul_outer", "myButton", "myInput" ]
+ref.myButton.Output.Clicked();

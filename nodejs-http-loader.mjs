@@ -1,5 +1,4 @@
-// Modified from https://nodejs.org/api/esm.html#esm_https_loader
-// [Experimental] https://github.com/nodejs/node/tree/main/lib/internal/modules/esm
+// Modified from https://nodejs.org/api/module.html#import-from-https
 import https from 'https';
 import http from 'http';
 import readline from 'readline';
@@ -9,7 +8,6 @@ function isMatch(url){
 	return /^(http:\/\/localhost:|http:\/\/localhost\/|https:\/\/).*?\.(js|mjs)$/m.test(url);
 }
 
-// [Experimental] Node.js may have changes for the API
 export function resolve(specifier, context, nextResolve) {
 	const { parentURL = null } = context;
 
@@ -25,33 +23,10 @@ export function resolve(specifier, context, nextResolve) {
 	return nextResolve(specifier, context);
 }
 
-export function request(url, callback) {
-	readline.clearLine(process.stdout, 0);
-	readline.cursorTo(process.stdout, 0, null);
-	process.stdout.write(`\x1b[1;32m[Downloading]\x1b[0m ${url}\r`);
-
-	let loader = https;
-	if(url.startsWith('http://')){
-		if(!isMatch(url)) throw new Error("URL must use https or localhost");
-		loader = http;
-	}
-
-	loader.get(url, function(response){
-		if(response.headers.location)
-			request(response.headers.location, callback);
-		else callback(response);
-	})
-	.on('error', function(msg){
-		console.error("Get an error when loading", url, ":\n", msg);
-	});
-}
-
-// [Experimental] Node.js may have changes for the API
 export function load(url, context, nextLoad) {
 	// For JavaScript to be loaded over the network, we need to fetch and return it.
 	if (!url.startsWith('file:') && isMatch(url)) {
-		let dir = url.replace(/(https|http):\/\//, '')
-			.replace(/\\/g, '/').replace(/[*"|:?<>]/g, '-');
+		let dir = url.replace(/(https|http):\/\//, '').replace(/\/\//, '').replace(/\\/g, '/').replace(/[*"|:?<>]/g, '-')
 
 		if(dir.includes('/../')){
 			console.log(dir);
@@ -84,8 +59,7 @@ export function load(url, context, nextLoad) {
 						res.on('data', (chunk) => data += chunk)
 						.on('error', console.log)
 						.on('end', () => {
-							if(!fs.existsSync(dir))
-								fs.mkdirSync(dir, {recursive: true});
+							if(!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive: true});
 
 							fs.writeFile(dir+`/${fileName}`, data, (err) => {
 								if(err)
@@ -109,4 +83,27 @@ export function load(url, context, nextLoad) {
 
 	// Let Node.js handle all other URLs.
 	return nextLoad(url, context);
+}
+
+
+
+export function request(url, callback) {
+	readline.clearLine(process.stdout, 0);
+	readline.cursorTo(process.stdout, 0, null);
+	process.stdout.write(`\x1b[1;32m[Downloading]\x1b[0m ${url}\r`);
+
+	let loader = https;
+	if(url.startsWith('http://')){
+		if(!isMatch(url)) throw new Error("URL must use https or localhost");
+		loader = http;
+	}
+
+	loader.get(url, function(response){
+		if(response.headers.location)
+			request(response.headers.location, callback);
+		else callback(response);
+	})
+	.on('error', function(msg){
+		console.error("Get an error when loading", url, ":\n", msg);
+	});
 }
