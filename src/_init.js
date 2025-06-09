@@ -142,7 +142,7 @@ Blackprint.loadModuleFromURL = async function(url, options){
 
 		// Do security check, block insecure URL
 		if(temp.indexOf('http:') === 0 && /^http:\/\/localhost[:\/]/m.test(temp) === false)
-			throw "Remote URL must use https to avoid security issues, but got: "+temp;
+			console.warn("Remote URL should use https to avoid middle man script injection, but got: "+temp);
 
 		// Remove loaded module from the list
 		if(loadedList.includes(temp))
