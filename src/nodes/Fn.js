@@ -45,9 +45,10 @@ Blackprint.nodes.BP.Fn = {
 
 		update(cable){
 			let iface = this.iface.parentInterface;
+			let Output = iface.node.output;
+
 			if(cable == null){ // Triggered by port route
 				let IOutput = iface.output;
-				let Output = iface.node.output;
 				let thisInput = this.input;
 
 				// Sync all port value
@@ -59,7 +60,8 @@ Blackprint.nodes.BP.Fn = {
 				return;
 			}
 
-			iface.node.output[cable.input.name] = cable.value;
+			// Update output value on the outside of this function node
+			Output[cable.input.name] = cable.value;
 		}
 	},
 };
@@ -166,7 +168,7 @@ class BPFunction extends CustomEvent {
 
 			constructor(instance){
 				super(instance);
-				instance.bpFunction = this.bpFunction = temp;
+				this.bpFunction = temp;
 
 				let iface = this.setInterface("BPIC/BP/Fn/Main");
 				iface.description = temp.description;
@@ -523,8 +525,8 @@ Blackprint._utils.BPFunction = BPFunction;
 // Main function node
 class BPFunctionNode extends Blackprint.Node {
 	imported(data){
-		let instance = this.bpFunction;
-		instance.used.push(this.iface);
+		let bpFunction = this.bpFunction;
+		bpFunction.used.push(this.iface);
 	}
 
 	update(cable){
@@ -549,10 +551,10 @@ class BPFunctionNode extends Blackprint.Node {
 	}
 
 	destroy(){
-		let instance = this.bpFunction;
+		let bpFunction = this.bpFunction;
 
-		let i = instance.used.indexOf(this.iface);
-		if(i !== -1) instance.used.splice(i, 1);
+		let i = bpFunction.used.indexOf(this.iface);
+		if(i !== -1) bpFunction.used.splice(i, 1);
 
 		this.iface.bpInstance.destroy();
 	}

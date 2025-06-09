@@ -263,7 +263,8 @@ class OrderedExecution {
 		else if(_pRequestLast.length !== 0){
 			let { node, cableCall } = _pRequestLast.pop();
 
-			await node.update?.();
+			let temp = node.update?.();
+			if(temp?.constructor === Promise) await temp; // Performance optimization
 
 			if(cableCall != null)
 				cableCall.input._call(cableCall);
@@ -300,6 +301,7 @@ class OrderedExecution {
 		if(this.stop || this._rootExecOrder.stop) return;
 		if(this.stepMode) this.pause = true;
 		if(this.pause && !force) return;
+		if(this.instance.ifaceList.length === 0) return;
 		if(await this._checkStepPending()) return;
 
 		let next = this._next(); // next => node
@@ -336,7 +338,8 @@ class OrderedExecution {
 									if(!cable._hasUpdate) continue;
 									cable._hasUpdate = false;
 
-									await next.update(cable);
+									let temp = next.update(cable);
+									if(temp?.constructor === Promise) await temp; // Performance optimization
 								}
 							}
 						}
@@ -345,7 +348,10 @@ class OrderedExecution {
 						let cable = inp._hasUpdateCable;
 						inp._hasUpdateCable = null;
 
-						if(!skipUpdate) await next.update(cable);
+						if(!skipUpdate) {
+							let temp = next.update(cable);
+							if(temp?.constructor === Promise) await temp; // Performance optimization
+						}
 					}
 				}
 			}

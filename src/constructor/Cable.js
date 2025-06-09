@@ -169,6 +169,7 @@ class Cable{
 			owner.iface.emit('cable.disconnect', temp1);
 			owner.iface.node.instance.emit('cable.disconnect', temp1);
 
+			if(target == null) return;
 			let temp2 = {
 				cable: this,
 				port: target,

@@ -135,7 +135,8 @@ Blackprint.Node = class Node {
 		if(this.update != null){
 			this._bpUpdating = true;
 			try {
-				await this.update();
+				let temp = this.update();
+				if(temp?.constructor === Promise) await temp; // Performance optimization
 			}
 			finally {
 				this._bpUpdating = false;
@@ -160,7 +161,7 @@ Blackprint.Node = class Node {
 	}
 
 	// Will be replaced by @blackprint/remote-control/js/src/Node.js
-	syncOut(id, data){}
+	syncOut(id, data, force=false){}
 
 	// To be replaced by the developer or user
 	syncIn(id, data){}
