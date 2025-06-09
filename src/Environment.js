@@ -107,7 +107,12 @@ Blackprint.Environment = {
 	},
 };
 
-if(window.HTMLVideoElement !== void 0){
+if(window.Bun != null){
+	Blackprint.Environment.isBun = true;
+	Blackprint.Environment.isNode = true;
+	Blackprint.Environment.loadFromURL = true;
+}
+else if(window.HTMLVideoElement !== void 0){
 	Blackprint.Environment.isBrowser = true;
 	Blackprint.Environment.loadFromURL = true;
 }
