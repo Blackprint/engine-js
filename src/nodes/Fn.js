@@ -506,6 +506,65 @@ class BPFunction extends CustomEvent {
 		});
 	}
 
+	async invoke(input){
+		let iface = this.directInvokeFn;
+		if(iface == null){
+			iface = this.directInvokeFn = this.createNode(this.rootInstance);
+			iface.bpInstance.executionOrder.stop = true; // Disable execution order and force to use route cable
+			iface.bpInstance.pendingRender = true;
+			iface.isDirectInvoke = true; // Mark this node as direct invoke, for some optimization
+
+			// For sketch instance, we will remove it from sketch visibility
+			let sketchScope = iface.node.instance.scope;
+			if(sketchScope != null){
+				let list = sketchScope('nodes').list;
+				if(list.includes(iface)) list.splice(list.indexOf(iface), 1);
+			}
+
+			// Wait until ready
+			await new Promise(resolve => iface.once('ready', resolve));
+		}
+
+		let proxyInput = iface._proxyInput;
+		if(proxyInput.routes.out == null){
+			throw new Error(this.id + ": Blackprint function node must have route port that connected from input node to the output node");
+		}
+
+		let inputPorts = proxyInput.iface.output;
+		for (let key in inputPorts) {
+			let port = inputPorts[key];
+			let val = input[key];
+
+			if(port.value == val) continue; // Skip if value is the same
+
+			// Set the value if different, and reset cache and emit value event after this line
+			port.value = val;
+
+			// Check all connected cables, if any node need to synchronize
+			let cables = port.cables;
+			for (var i = 0; i < cables.length; i++) {
+				var cable = cables[i];
+				if(cable.hasBranch) continue;
+
+				var inp = cable.input;
+				if(inp === void 0) continue;
+
+				inp._cache = void 0;
+				inp.emit('value', { port: inp, target: iface, cable });
+			}
+		}
+
+		await proxyInput.routes.routeOut();
+
+		let ret = {};
+		let outputs = iface.node.output;
+		for (let key in outputs) {
+			ret[key] = outputs[key];
+		}
+
+		return ret;
+	}
+
 	get input(){return this._input}
 	get output(){return this._output}
 	set input(v){throw new Error("Can't modify port by assigning .input property")}
@@ -574,6 +633,7 @@ function BPFnInit(){
 				throw new Error("Can't import function more than once");
 
 			this._importOnce = true;
+			this.isDirectInvoke = false;
 			let node = this.node;
 
 			if(node.instance.constructor === Blackprint.Engine)
