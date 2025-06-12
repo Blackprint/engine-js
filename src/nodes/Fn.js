@@ -33,7 +33,8 @@ Blackprint.nodes.BP.Fn = {
 			iface._enum = _InternalNodeEnum.BPFnOutput;
 
 			let funcMain = iface.parentInterface = this.instance.parentInterface;
-			funcMain._proxyOutput = this;
+			funcMain._proxyOutput ??= [];
+			funcMain._proxyOutput.push(this);
 		}
 
 		imported(){
@@ -455,9 +456,17 @@ class BPFunction extends CustomEvent {
 			let iface = used[i];
 			iface.node.renamePort(which, fromName, toName);
 
-			let temp = which === 'output' ? iface._proxyOutput : iface._proxyInput;
-			temp.iface[proxyPort][fromName]._name.name = toName;
+			if(which === 'output'){
+				let list = iface._proxyOutput;
+				for (let a=0; a < list.length; a++) {
+					list[a].renamePort(proxyPort, fromName, toName);
+				}
+			}
+			else { // input
+				let temp = iface._proxyInput;
+				temp.iface[proxyPort][fromName]._name.name = toName; // for function input variable node
 			temp.renamePort(proxyPort, fromName, toName);
+			}
 
 			if(which === 'input'){
 				let ifaces = iface.bpInstance.ifaceList;
@@ -489,7 +498,11 @@ class BPFunction extends CustomEvent {
 		for (let i=0; i < used.length; i++) {
 			let iface = used[i];
 			if(which === 'output'){
-				iface._proxyOutput.iface.deletePort(portName);
+				let list = iface._proxyOutput;
+				for (let a=0; a < list.length; a++) {
+					list[a].iface.deletePort(portName);
+				}
+
 				hasDeletion = true;
 			}
 			else if(which === 'input'){
@@ -795,9 +808,12 @@ function BPFnInit(){
 			outputPort = nodeB.createPort('output', name, portType);
 
 			let inputPort;
+			let inputPortType;
 			if(portType === Types.Trigger)
-				inputPort = nodeA.createPort('input', name, BP_Port.Trigger(()=> outputPort._callAll()));
-			else inputPort = nodeA.createPort('input', name, portType);
+				inputPortType = BP_Port.Trigger(()=> outputPort._callAll());
+			else inputPortType = portType;
+
+			inputPort = nodeA.createPort('input', name, inputPortType);
 
 			// When using Blackprint.Sketch we need to reconnect the cable
 			if(cable != null){
@@ -811,13 +827,25 @@ function BPFnInit(){
 				this.emit(`_add.${refName.name}`, {port: outputPort});
 				return outputPort;
 			}
+			// else = bp-fn-output
 
 			inputPort._name = {name}; // When renaming port, this also need to be changed
 			this.emit(`_add.${name}`, {port: inputPort});
 
-			inputPort.on('value', ({ cable }) => {
+			let onValueChanged = ({ cable }) => {
 				outputPort.iface.node.output[outputPort.name] = cable.output.value;
-			});
+			}
+			inputPort.on('value', onValueChanged);
+
+			let list = this.parentInterface._proxyOutput;
+			for (let i=0; i < list.length; i++) {
+				let node = list[i];
+				let port = node.createPort('input', name, inputPortType);
+
+				port._name = inputPort._name;
+				this.emit(`_add.${name}`, {port});
+				port.on('value', onValueChanged);
+			}
 
 			return inputPort;
 		}
