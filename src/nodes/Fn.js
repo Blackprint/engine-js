@@ -230,6 +230,9 @@ class BPFunction extends CustomEvent {
 					let targetInput = inputIface.input[input.name];
 					let targetOutput = outputIface.output[output.name];
 
+					if(targetInput == null && input.isRoute) targetInput = inputIface.node.routes;
+					if(targetOutput == null && output.isRoute) targetOutput = outputIface.node.routes;
+
 					if(targetInput == null){
 						if(inputIface._enum === _InternalNodeEnum.BPFnOutput){
 							targetInput = inputIface.createPort(targetOutput, output.name);
@@ -244,11 +247,19 @@ class BPFunction extends CustomEvent {
 						else throw new Error("Input port was not found");
 					}
 
-					targetInput.connectPort(targetOutput);
+					if(targetInput.isRoute){
+						targetInput.connectCable(targetOutput.createCable());
+					}
+					else targetInput.connectPort(targetOutput);
 				}
 				else if(eventName === 'cable.disconnect'){
-					let cables = inputIface.input[input.name].cables;
+					let inputPort = inputIface.input[input.name];
 					let outputPort = outputIface.output[output.name];
+					if(outputPort == null && output.isRoute) outputPort = outputIface.node.routes;
+
+					let cables;
+					if(inputPort == null && input.isRoute) cables = inputIface.node.routes.in;
+					else cables = inputPort.cables;
 
 					for (let z=0; z < cables.length; z++) {
 						let cable = cables[z];
@@ -465,7 +476,7 @@ class BPFunction extends CustomEvent {
 			else { // input
 				let temp = iface._proxyInput;
 				temp.iface[proxyPort][fromName]._name.name = toName; // for function input variable node
-			temp.renamePort(proxyPort, fromName, toName);
+				temp.renamePort(proxyPort, fromName, toName);
 			}
 
 			if(which === 'input'){
