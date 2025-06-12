@@ -458,18 +458,16 @@ class BPFunction extends CustomEvent {
 			temp.iface[proxyPort][fromName]._name.name = toName;
 			temp.renamePort(proxyPort, fromName, toName);
 
+			if(which === 'input'){
 			let ifaces = iface.bpInstance.ifaceList;
 			for (let a=0; a < ifaces.length; a++) {
 				let proxyVar = ifaces[a];
-				if((which === 'output' && proxyVar.namespace !== "BP/FnVar/Output")
-					|| (which === 'input' && proxyVar.namespace !== "BP/FnVar/Input"))
+					if(proxyVar.namespace !== "BP/FnVar/Input")
 					continue;
 
 				if(proxyVar.data.name !== fromName) continue;
 				proxyVar.data.name = toName;
-
-				if(which === 'output')
-					proxyVar[proxyPort].Val._name.name = toName;
+				}
 			}
 		}
 
@@ -842,7 +840,7 @@ function BPFnInit(){
 			let instance = this.node.instance;
 			let ifaceList = instance.ifaceList;
 			if(this.type === 'bp-fn-input'){ // Main (input) -> Input (output)
-				for (let i=ifaceList.length-1; i >= 0; i--) {
+				for (let i=ifaceList.length-1; i >= 0; i--) { // Delete function input variable nodes
 					let iface = ifaceList[i];
 					if(iface.namespace === "BP/FnVar/Input" && iface.data.name === name)
 						instance.deleteNode(iface);
@@ -854,12 +852,6 @@ function BPFnInit(){
 				delete funcMainNode.bpFunction.input[name];
 			}
 			else { // Output (input) -> Main (output)
-				for (let i=ifaceList.length-1; i >= 0; i--) {
-					let iface = ifaceList[i];
-					if(iface.namespace === "BP/FnVar/Output" && iface.data.name === name)
-						instance.deleteNode(iface);
-				}
-
 				funcMainNode.deletePort('output', name);
 				this.node.deletePort('input', name);
 
