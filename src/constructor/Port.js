@@ -587,33 +587,42 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 		if(this._node.instance._locked_)
 			throw new Error("This instance was locked");
 
-		if(!(port instanceof Engine.Port))
-			throw new Error("First parameter must be instance of Port");
+		if(port instanceof Engine.Port){
+			let cable = createPortCable(port);
+			if(port._ghost) cable._ghost = true;
 
-		let cable;
+			port.cables.push(cable);
+			if(this.connectCable(cable))
+				return true;
 
-		if(port._scope != null){
-			let list = port.iface[port.source]._portList;
-			let rect;
-
-			if(list.getElement == null || DOMRect.fromRect == null){
-				rect = new DOMRect(); // use fake DOMRect (usually for testing with Jest)
-				rect.height = rect.width = rect.y = rect.x = 10;
-			}
-			else rect = port.findPortElement(list.getElement(port)).getBoundingClientRect();
-
-			cable = port.createCable(rect, true);
+			return false;
 		}
-		else cable = new Engine.Cable(port);
-
-		if(port._ghost) cable._ghost = true;
-
-		port.cables.push(cable);
-		if(this.connectCable(cable))
-			return true;
-
-		return false;
+		else if(port instanceof Blackprint.RoutePort){
+			if(this.source === 'output'){
+				let cable = createPortCable(this);
+				this.cables.push(cable);
+				return port.connectCable(cable);
+			}
+			throw new Error("Unhandled connection for RoutePort");
+		}
+		throw new Error("First parameter must be instance of Port or RoutePort");
 	}
+}
+
+function createPortCable(port){
+	if(port._scope != null){
+		let list = port.iface[port.source]._portList;
+		let rect;
+
+		if(list.getElement == null || DOMRect.fromRect == null){
+			rect = new DOMRect(); // use fake DOMRect (usually for testing with Jest)
+			rect.height = rect.width = rect.y = rect.x = 10;
+		}
+		else rect = port.findPortElement(list.getElement(port)).getBoundingClientRect();
+
+		return port.createCable(rect, true);
+	}
+	return new Engine.Cable(port);
 }
 
 function getDataType(which){

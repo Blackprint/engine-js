@@ -65,6 +65,7 @@ Blackprint.RoutePort = class RoutePort extends CustomEvent {
 
 		this.in.push(cable);
 		cable.target = cable.input = this;
+		cable.isRoute = true;
 		cable._connected();
 
 		return true;

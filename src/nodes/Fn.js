@@ -248,7 +248,9 @@ class BPFunction extends CustomEvent {
 					}
 
 					if(targetInput.isRoute){
-						targetInput.connectCable(targetOutput.createCable());
+						if(!(targetOutput instanceof Blackprint.RoutePort))
+							targetOutput.connectPort(targetInput);
+						else targetInput.connectCable(targetOutput.createCable());
 					}
 					else targetInput.connectPort(targetOutput);
 				}
