@@ -348,7 +348,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			if(skipSync || thisNode._bpUpdating) continue;
 
 			if(inpNode.update && nextUpdate)
-				inpNode._bpUpdate();
+				inpNode._bpUpdate(cable);
 		}
 
 		if(singlePortUpdate){

@@ -127,7 +127,7 @@ Blackprint.Node = class Node {
 		// await this.update?.(cable);
 	}
 
-	async _bpUpdate(){
+	async _bpUpdate(cable){
 		let thisIface = this.iface;
 		let isMainFuncNode = thisIface._enum === _InternalNodeEnum.BPFnMain;
 		let ref = this.instance.executionOrder;
@@ -135,7 +135,7 @@ Blackprint.Node = class Node {
 		if(this.update != null){
 			this._bpUpdating = true;
 			try {
-				let temp = this.update();
+				let temp = this.update(cable);
 				if(temp?.constructor === Promise) await temp; // Performance optimization
 			}
 			finally {
@@ -145,19 +145,17 @@ Blackprint.Node = class Node {
 		}
 
 		if(this.routes.out == null){
-			if(isMainFuncNode && thisIface.node.routes.out != null){
-				await thisIface.node.routes.routeOut();
-				await ref.next();
+			if(isMainFuncNode && thisIface._proxyInput.routes.out != null){
+				await thisIface._proxyInput.routes.routeOut();
 			}
-			else await ref.next();
 		}
 		else{
 			if(!isMainFuncNode)
 				await this.routes.routeOut();
 			else await thisIface._proxyInput.routes.routeOut();
-
-			await ref.next();
 		}
+
+		await ref.next();
 	}
 
 	// Will be replaced by @blackprint/remote-control/js/src/Node.js

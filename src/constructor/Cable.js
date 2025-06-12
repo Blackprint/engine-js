@@ -133,7 +133,7 @@ class Cable{
 				if(node.instance._importing)
 					node.instance.executionOrder.add(node, this);
 				else if(node.routes.in.length === 0) {
-					node._bpUpdate();
+					node._bpUpdate(this);
 				}
 			}
 		}

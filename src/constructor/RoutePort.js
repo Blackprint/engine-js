@@ -111,7 +111,7 @@ Blackprint.RoutePort = class RoutePort extends CustomEvent {
 		// 	return await targetRoute.iface._proxyInput.routes.routeIn(this.out);
 
 		if(_enum === _InternalNodeEnum.BPFnOutput){
-			let temp = targetRoute.iface.node.update();
+			let temp = targetRoute.iface.node._bpUpdate();
 			if(temp?.constructor === Promise) await temp; // Performance optimization
 			return await targetRoute.iface.parentInterface.node.routes.routeOut();
 		}

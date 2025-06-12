@@ -53,11 +53,12 @@ Blackprint.nodes.BP.Fn = {
 
 				// Sync all port value
 				for (let key in IOutput){
-					if(IOutput[key].type === Types.Trigger) continue;
-					Output[key] = thisInput[key];
+					let port = IOutput[key];
+					if(port.type === Types.Trigger) continue;
+					port.value = thisInput[key];
 				}
-	
-				return;
+
+				return iface.node.routes.routeOut(); // Also trigger route on the function caller if exist
 			}
 
 			// Update output value on the outside of this function node
@@ -459,14 +460,14 @@ class BPFunction extends CustomEvent {
 			temp.renamePort(proxyPort, fromName, toName);
 
 			if(which === 'input'){
-			let ifaces = iface.bpInstance.ifaceList;
-			for (let a=0; a < ifaces.length; a++) {
-				let proxyVar = ifaces[a];
+				let ifaces = iface.bpInstance.ifaceList;
+				for (let a=0; a < ifaces.length; a++) {
+					let proxyVar = ifaces[a];
 					if(proxyVar.namespace !== "BP/FnVar/Input")
-					continue;
-
-				if(proxyVar.data.name !== fromName) continue;
-				proxyVar.data.name = toName;
+						continue;
+	
+					if(proxyVar.data.name !== fromName) continue;
+					proxyVar.data.name = toName;
 				}
 			}
 		}
