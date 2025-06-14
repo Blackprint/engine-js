@@ -38,6 +38,7 @@ Blackprint.nodes.BP.Fn = {
 		}
 
 		imported(){
+			this.routes.disableOut = true; // Disable route out
 			let { output } = this.iface.parentInterface.node.bpFunction;
 
 			for(let key in output)
