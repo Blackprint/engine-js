@@ -113,7 +113,20 @@ Blackprint.Node = class Node {
 			throw new Error("Can only delete port for 'input' and 'output'");
 
 		if(name.constructor !== String) name = String(name);
-		return this[which]._delete(name);
+		let ret = this[which]._delete(name);
+
+		// Sketch only: Recalculate cable position
+		if(this.instance.scope !== void 0){
+			let iface = this.iface;
+			if(iface.$el?.[0] !== void 0){
+				this.instance.scope('nodes')._recalculate([{
+					target: {model: iface},
+					contentRect: iface.$el[0].firstElementChild.getBoundingClientRect()
+				}], true);
+			}
+		}
+
+		return ret;
 	}
 
 	log(message){
