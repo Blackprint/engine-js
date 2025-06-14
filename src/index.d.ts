@@ -1034,8 +1034,10 @@ export class Node<T extends NodeStaticProps> {
 	 * ```
 	 * @param id your defined id
 	 * @param data received data
+	 * @param isRemote true if this data was received from remote engine
+	 * @override you can override/replace this functionality on your class
 	 */
-	syncIn(id: string, data: any): void;
+	syncIn(id: string, data: any, isRemote: boolean): void;
 }
 
 export type { BPVariable };

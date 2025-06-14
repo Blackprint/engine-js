@@ -171,9 +171,35 @@ Blackprint.Node = class Node {
 		await ref.next();
 	}
 
-	// Will be replaced by @blackprint/remote-control/js/src/Node.js
-	syncOut(id, data, force=false){}
+	_syncToAllFunction(id, data){
+		let parentInterface = this.instance.parentInterface;
+		if(parentInterface === void 0) return; // This is not in a function node
+
+		let list = parentInterface.node.bpFunction.used;
+		let nodeIndex = this.iface.i;
+		let namespace = this.instance.parentInterface.namespace;
+
+		for (let i=0; i < list.length; i++) {
+			let iface = list[i];
+			if(iface === parentInterface) continue; // Skip self
+			let target = iface.bpInstance.ifaceList[nodeIndex];
+
+			if(target === void 0) throw new Error("Target node was not found on other function instance, maybe the node was not correctly synced? (" + namespace.replace('BPI/F/', '') + ");");
+			target.node.syncIn(id, data, false);
+		}
+	}
+
+	syncOut(id, data, force=false){
+		this._syncToAllFunction(id, data);
+
+		let instance = this.instance;
+		if(instance.rootInstance !== void 0) instance.rootInstance = instance.rootInstance; // Ensure rootInstance is set
+
+		let remote = instance._remote_;
+		if(remote !== void 0)
+			remote.nodeSyncOut(this, id, data, force);
+	}
 
 	// To be replaced by the developer or user
-	syncIn(id, data){}
+	syncIn(id, data, isRemote=false){}
 };
