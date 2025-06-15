@@ -159,6 +159,8 @@ class Cable{
 
 			this.connected = false;
 
+			if(target == null) return; // Skip disconnection event emit
+
 			let temp1 = {
 				cable: this,
 				port: owner,

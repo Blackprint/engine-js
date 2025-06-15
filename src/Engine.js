@@ -315,7 +315,10 @@ Blackprint.Engine = class Engine extends CustomEvent {
 							// output can only meet input port
 							var linkPortB = targetNode.input[target.name];
 							if(linkPortB === void 0){
-								if(targetNode._enum === _InternalNodeEnum.BPFnOutput){
+								if(linkPortA.type === Blackprint.Types.Route){
+									linkPortB = targetNode.node.routes;
+								}
+								else if(targetNode._enum === _InternalNodeEnum.BPFnOutput){
 									linkPortB = targetNode.createPort(linkPortA, target.name);
 
 									if(linkPortB === void 0)
@@ -324,9 +327,6 @@ Blackprint.Engine = class Engine extends CustomEvent {
 								else if(targetNode._enum === _InternalNodeEnum.BPVarSet){
 									targetNode.useType(linkPortA);
 									linkPortB = targetNode.input[target.name];
-								}
-								else if(linkPortA.type === Blackprint.Types.Route){
-									linkPortB = targetNode.node.routes;
 								}
 								else{
 									console.error("Node port not found for", targetNode, "with name:", target.name);
@@ -480,6 +480,15 @@ Blackprint.Engine = class Engine extends CustomEvent {
 	// ToDo: should we turn this into async and wait call to `iface.imported`
 	createNode(namespace, options, handlers){
 		if(this._locked_) throw new Error("This instance was locked");
+
+		if(namespace === "" && this.parentInterface != null){
+			let funcMain = iface.parentInterface = this.instance.parentInterface;
+			if(funcMain._proxyInput != null) {
+				// Disallow to have more than one proxy input
+				console.error("Function node can't have more than one proxy input");
+				return this;
+			}
+		}
 
 		var node, func;
 		if(!(namespace.prototype instanceof Blackprint.Node)){
