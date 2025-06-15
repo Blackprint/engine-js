@@ -481,12 +481,12 @@ Blackprint.Engine = class Engine extends CustomEvent {
 	createNode(namespace, options, handlers){
 		if(this._locked_) throw new Error("This instance was locked");
 
-		if(namespace === "" && this.parentInterface != null){
-			let funcMain = iface.parentInterface = this.instance.parentInterface;
+		if(namespace === "BP/Fn/Input" && this.parentInterface != null){
+			let funcMain = this.parentInterface;
 			if(funcMain._proxyInput != null) {
 				// Disallow to have more than one proxy input
 				console.error("Function node can't have more than one proxy input");
-				return this;
+				return null;
 			}
 		}
 
