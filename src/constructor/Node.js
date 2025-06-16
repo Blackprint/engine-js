@@ -74,7 +74,12 @@ Blackprint.Node = class Node {
 			|| type.isTrigger
 			|| type.portFeature !== void 0
 		){
-			return this[which]._add(name, type);
+			let ret = this[which]._add(name, type);
+
+			// Sketch only: Recalculate cable position
+			this.iface._recalculateBpVisual?.();
+
+			return ret;
 		}
 
 		console.error("Error:", type);
@@ -116,15 +121,7 @@ Blackprint.Node = class Node {
 		let ret = this[which]._delete(name);
 
 		// Sketch only: Recalculate cable position
-		if(this.instance.scope !== void 0){
-			let iface = this.iface;
-			if(iface.$el?.[0] !== void 0){
-				this.instance.scope('nodes')._recalculate([{
-					target: {model: iface},
-					contentRect: iface.$el[0].firstElementChild.getBoundingClientRect()
-				}], true);
-			}
-		}
+		this.iface._recalculateBpVisual?.();
 
 		return ret;
 	}

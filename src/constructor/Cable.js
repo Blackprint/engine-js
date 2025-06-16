@@ -144,6 +144,8 @@ class Cable{
 		if(this.isRoute){ // ToDo: simplify, use 'which' instead of check all
 			let { input, output } = this;
 
+			if(output == null) return;
+
 			if(output.out === this) output.out = null;
 			else if(input?.out === this) input.out = null;
 
