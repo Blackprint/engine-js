@@ -57,6 +57,7 @@ Blackprint.RoutePort = class RoutePort extends CustomEvent {
 
 	// Connect to input route
 	connectCable(cable){
+		if(!cable.isRoute) throw new Error("Cable must be created from route port before can be connected to other route port. Please use .routeTo(interface) instead if possible.");
 		if(this.in.includes(cable)) return false;
 		if(this.iface.node.update === void 0){
 			cable.disconnect();
