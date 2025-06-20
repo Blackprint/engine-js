@@ -192,7 +192,7 @@ Blackprint.Node = class Node {
 		let instance = this.instance;
 		if(instance.rootInstance !== void 0) instance.rootInstance = instance.rootInstance; // Ensure rootInstance is set
 
-		let remote = instance._remote_;
+		let remote = instance._remote;
 		if(remote !== void 0)
 			remote.nodeSyncOut(this, id, data, force);
 	}
