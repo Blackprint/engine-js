@@ -174,7 +174,7 @@ Blackprint.Node = class Node {
 
 		let list = parentInterface.node.bpFunction.used;
 		let nodeIndex = this.iface.i;
-		let namespace = this.instance.parentInterface.namespace;
+		let namespace = parentInterface.namespace;
 
 		for (let i=0; i < list.length; i++) {
 			let iface = list[i];
