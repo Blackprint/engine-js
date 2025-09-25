@@ -167,7 +167,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		if(json.environments !== void 0 && !options.noEnv){
 			let Env = Blackprint.Environment;
 			let temp = json.environments;
-			
+
 			for (let key in temp) {
 				Env.set(key, temp[key]);
 			}
@@ -355,7 +355,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 				for (let a=0; a < conf.length; a++) {
 					let { i: index, name } = conf[a];
 					let targetIface = inserted[index + appendLength];
-					
+
 					for (let z=0; z < cables.length; z++) {
 						let cable = cables[z];
 						if(cable.output.name !== name || cable.output.iface !== targetIface) continue;
@@ -573,10 +573,10 @@ Blackprint.Engine = class Engine extends CustomEvent {
 				let temp = portSwitches[key];
 				let ref = iface.output[key];
 
-				if((temp | 1) === 1)
+				if((temp & 1) === 1)
 					BP_Port.StructOf.split(ref);
 
-				if((temp | 2) === 2)
+				if((temp & 2) === 2)
 					ref.allowResync = true;
 			}
 		}
@@ -687,7 +687,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		}
 		else if(scopeId === VarScope.Private) varsObject = instance.variables;
 		else if(scopeId === VarScope.Shared) varsObject = instance.sharedVariables;
-	
+
 		let path = namespace.split('/');
 		let oldObj = getDeepProperty(varsObject, path);
 		if(oldObj == null) return;
@@ -874,7 +874,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		this._locked_ = false;
 		this._destroyed_ = true;
 		this.clearNodes();
-		
+
 		Blackprint.off('_eventInstance.new', this._eventsInsNew);
 		Blackprint.off('environment.deleted', this._envDeleted);
 		this.emit('destroy');
