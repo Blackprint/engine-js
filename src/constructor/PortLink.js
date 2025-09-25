@@ -32,9 +32,6 @@ class PortLink {
 
 	_add(portName, val){
 		portName = ''+portName;
-		if(/([~!@#$%^&*()_\-+=[]{};'\\:"|,.\/<>?]|\s)/.test(portName))
-			throw new Error("Port name can't include symbol character except underscore");
-
 		if(portName === '')
 			throw new Error("Port name can't be empty");
 
