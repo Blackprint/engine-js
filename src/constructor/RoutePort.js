@@ -15,6 +15,7 @@ Blackprint.RoutePort = class RoutePort extends CustomEvent {
 		this.disabled = false;
 		this._isPaused = false;
 		this.isRoute = true;
+		this.name = 'BPRoute';
 	}
 
 	// May be deleted on future
@@ -74,14 +75,20 @@ Blackprint.RoutePort = class RoutePort extends CustomEvent {
 
 	async routeIn(_cable, _force){
 		let node = this.iface.node;
+		if(node.disablePorts) return;
 		// console.log('routeIn', this.iface.id || this.iface.title);
 
-		// Add to execution list if the OrderedExecution is in Step Mode
 		let executionOrder = node.instance.executionOrder;
+		if(executionOrder.stop || executionOrder._rootExecOrder.stop) return;
+
+		// Add to execution list if the OrderedExecution is in Step Mode
 		if(executionOrder.stepMode && _cable && !_force){
 			executionOrder._addStepPending(_cable, 1);
 			return;
 		}
+
+		if(!node.instance._pendingRender)
+			_cable.visualizeFlow();
 
 		if(this.iface._enum !== _InternalNodeEnum.BPFnInput)
 			await node._bpUpdate();
@@ -91,16 +98,13 @@ Blackprint.RoutePort = class RoutePort extends CustomEvent {
 	async routeOut(){
 		if(this.disableOut) return;
 
-		let node = this.iface.node;
+		if(this.iface.node.disablePorts) return;
 		if(this.out == null){
 			if(this.iface._enum === _InternalNodeEnum.BPFnOutput)
 				return await this.iface.parentInterface.node.routes.routeIn();
 
 			return;
 		}
-
-		if(!node.instance._pendingRender && !node.instance.executionOrder.stepMode)
-			this.out.visualizeFlow();
 
 		let targetRoute = this.out.input;
 		if(targetRoute == null) return;

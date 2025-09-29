@@ -88,9 +88,6 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			if(cable === void 0) return;
 			if(cable.hasBranch) cable = cables[1];
 
-			if(Blackprint.settings.visualizeFlow)
-				cable.visualizeFlow();
-
 			if(cable.input == null) return;
 			await cable.input.routeIn(cable);
 		}
@@ -99,17 +96,19 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 			if(node.disablePorts) return;
 			let executionOrder = node.instance.executionOrder;
 
+			if(executionOrder.stop || executionOrder._rootExecOrder.stop) return;
+
 			var cables = this.cables;
 			for (var i = 0; i < cables.length; i++) {
 				var cable = cables[i];
-	
+
 				var target = cable.input;
 				if(target === void 0)
 					continue;
-	
+
 				if(Blackprint.settings.visualizeFlow && !executionOrder.stepMode)
 					cable.visualizeFlow();
-	
+
 				if(target._name != null)
 					target.iface.parentInterface.node.iface.output[target._name.name]._callAll();
 				else {
@@ -121,7 +120,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 					target.iface.input[target.name]._call(cable);
 				}
 			}
-	
+
 			this.emit('call');
 		}
 	}
@@ -175,6 +174,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 						if(output.value == null){
 							let node = output.iface.node;
 							let executionOrder = node.instance.executionOrder;
+							if(executionOrder.stop || executionOrder._rootExecOrder.stop) return;
 
 							if(executionOrder.stepMode && node.request != null){
 								executionOrder._addStepPending(cable, 3);
@@ -210,13 +210,14 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 						if(output.value == null){
 							let node = output.iface.node;
 							let executionOrder = node.instance.executionOrder;
+							if(executionOrder.stop || executionOrder._rootExecOrder.stop) return;
 
 							if(executionOrder.stepMode && node.request != null){
 								executionOrder._addStepPending(cable, 3);
 								continue;
 							}
 
-							output.iface.node.request?.(cable);
+							node.request?.(cable);
 						}
 
 						if(Blackprint.settings.visualizeFlow)

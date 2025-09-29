@@ -6,6 +6,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		this.variables = {}; // { category => BPVariable{ name, value, type }, category => { category } }
 		this.functions = {}; // { category => BPFunction{ name, variables, input, output, used: [], node, description }, category => { category } }
 		this.events = new InstanceEvents(this);
+		this.disablePorts = false; // true = disable port data sync and disable route
 
 		this.iface = {}; // { id => IFace }
 		this.ref = {}; // { id => Port references }
