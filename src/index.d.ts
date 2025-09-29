@@ -82,7 +82,7 @@ type PortType<T> = { [P in keyof T]: T[P] extends ClassConstructor ? InstanceTyp
 /**
  * Change global Blackprint settings
  * @param which setting name
- * @param value or data 
+ * @param value or data
  */
 export function settings(which: String, value: any): void;
 
@@ -171,20 +171,20 @@ export namespace Port {
  	 * it's only one type, not union
  	 * for union port, please split it to different port to handle it
 	 * ```
-	 * @param type Type Data that allowed for the Port 
+	 * @param type Type Data that allowed for the Port
 	 */
 	export function ArrayOf(type: any): any;
 
 	/**
 	 * This port can have default value if no cable was connected
-	 * @param type Type Data that allowed for the Port 
+	 * @param type Type Data that allowed for the Port
 	 * @param value default value when no cable was connected
 	 */
 	export function Default(type: any, value: any): any;
 
 	/**
 	 * This port will be used as a trigger or callable input port
-	 * @param func callback when the port was being called as a function 
+	 * @param func callback when the port was being called as a function
 	 */
 	export function Trigger(func: Function): any;
 
@@ -262,7 +262,7 @@ export namespace Environment {
 	 */
 	export let map: {[key: string]: string};
 
-	/** 
+	/**
 	 * ```txt
 	 * Change this to false if you want to load module from node_modules
 	 * This will default to true if running on Browser/Deno
@@ -352,7 +352,7 @@ class CustomEvent {
 	 * Listen to an event and remove after being triggered once
 	 * @param eventName event name
 	 * @param callback function that will be triggered each time an event is emitted
-	 * @param options additional registration options 
+	 * @param options additional registration options
 	 */
 	once(eventName: string, callback: (data?: object) => void, options?: EventOptions): any;
 
@@ -360,7 +360,7 @@ class CustomEvent {
 	 * Unlisten to an event
 	 * @param eventName event name
 	 * @param callback function that will be triggered each time an event is emitted
-	 * @param options additional registration options 
+	 * @param options additional registration options
 	 */
 	off(eventName: string, callback: (data?: object) => void, options?: EventOptions): any;
 
@@ -510,7 +510,7 @@ export class Engine extends CustomEvent {
 	on(eventName: 'cable.connect', callback: (data: { port: IFacePort, target: IFacePort, cable: Cable }) => void): void;
 
 	/** JSON was imported into the instance */
-	on(eventName: 'json.imported', callback: (data: { appendMode: Boolean, nodes: Array<Node<any>>, raw: String }) => void): void;
+	on(eventName: 'json.imported', callback: (data: { appendMode: Boolean, nodes: Array<Node<any>>, data: String }) => void): void;
 	/** An error happened on the instance */
 	on(eventName: 'error', callback: (data: { type: String, data: Object }) => void): void;
 	/** A cable was created */
@@ -594,7 +594,7 @@ export class Engine extends CustomEvent {
 	}) => void): void;
 	/** The instance data flow got terminated */
 	on(eventName: 'execution.terminated', callback: (data: { reason: String, iface: Interface }) => void): void;
-	
+
 	/** A function node's port get renamed */
 	on(eventName: 'function.port.renamed', callback: (data: {
 		which: PortWhich,
@@ -1134,7 +1134,7 @@ class InstanceEvent {
 	};
 	/** Event namespace */
 	namespace: string;
-	
+
 	/** Any event nodes in the instance/function will be stored here */
 	used: Interface[];
 }
@@ -1170,7 +1170,7 @@ class InstanceEvents extends CustomEvent {
 }
 
 class OrderedExecution {
-	/** Maximum pending node in single data flow execution order */	
+	/** Maximum pending node in single data flow execution order */
 	initialSize: Number;
 	/** Any pending node will be stored here */
 	readonly list: Node<NodeStaticProps>[];
@@ -1223,7 +1223,7 @@ export class OutputPort extends PortGhost {
 
 	/** Sync value to all connected port */
 	sync(): void;
-	
+
 	/** There are value update on the port */
 	on(eventName: 'value', callback: (data: OutputPort_EventValue<any>) => void): void;
 	/** The Port.Trigger or port with Function type was called */
@@ -1244,7 +1244,7 @@ export class InputPort extends PortGhost {
 	 * @param type port's data type
 	 */
 	constructor(type: any);
-	
+
 	/** There are value update on the port */
 	on(eventName: 'value', callback: (data: IOPort_EventValue<any>) => void): void;
 	/** The Port.Trigger or port with Function type was called */
@@ -1286,7 +1286,7 @@ class RoutePort {
 export type { RoutePort };
 
 /**
- * ```txt 
+ * ```txt
  * [Experimental] [ToDo]
  * module "@blackprint/remote-control" is required
  * ```
@@ -1333,7 +1333,7 @@ class RemoteBase {
 }
 
 /**
- * ```txt 
+ * ```txt
  * [Experimental] [ToDo]
  * module "@blackprint/remote-control" is required
  * ```
@@ -1371,7 +1371,7 @@ export class RemoteControl extends RemoteBase {
 }
 
 /**
- * ```txt 
+ * ```txt
  * [Experimental] [ToDo]
  * module "@blackprint/remote-control" is required
  * ```

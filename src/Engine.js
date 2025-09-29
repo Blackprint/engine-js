@@ -162,7 +162,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		else if(!options.appendMode) this.clearNodes();
 
 		this._importing = true;
-		this.emit("json.importing", {appendMode: options.appendMode, raw: json});
+		this.emit("json.importing", {appendMode: options.appendMode, data: json});
 
 		if(json.environments !== void 0 && !options.noEnv){
 			let Env = Blackprint.Environment;
@@ -383,7 +383,7 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		}
 
 		this._importing = false;
-		this.emit("json.imported", {appendMode: options.appendMode, startIndex: appendLength, nodes: inserted, raw: json});
+		this.emit("json.imported", {appendMode: options.appendMode, startIndex: appendLength, nodes: inserted, data: json});
 		await this.executionOrder.next();
 
 		return inserted;
