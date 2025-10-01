@@ -78,6 +78,8 @@ class BPVariable extends CustomEvent {
 			let iface = map[i];
 			iface.node.instance.deleteNode(iface);
 		}
+
+		this.emit('destroy');
 	}
 }
 
@@ -202,12 +204,6 @@ function BPVarInit(){
 
 			let i_node = temp.used.indexOf(this);
 			if(i_node !== -1) temp.used.splice(i_node, 1);
-
-			let listener = this._bpVarRef.listener;
-			if(listener == null) return;
-
-			let i = listener.indexOf(this);
-			if(i !== -1) listener.splice(i, 1)
 		}
 		_recheckRoute(){
 			if(this.input?.Val?.type === Types.Trigger
