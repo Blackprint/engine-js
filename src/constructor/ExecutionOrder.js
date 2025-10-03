@@ -1,13 +1,15 @@
-class OrderedExecution {
+class ExecutionOrder {
 	constructor(instance, size=30){
 		this.instance = instance;
 		this.initialSize = size;
 		this.list = new Array(size);
 		this.index = 0;
-		this.length = 0;
+		this.lastIndex = 0;
 		this.stop = false;
 		this.pause = false;
 		this.stepMode = false;
+		this._lockNext = false;
+		this._nextLocked = false;
 		this._execCounter = null;
 		this._rootExecOrder = {stop: false};
 
@@ -21,23 +23,24 @@ class OrderedExecution {
 		// Cable who trigger the execution order's update (with stepMode)
 		this._tCable = new Map(); // { Node => Set<Cable> }
 	}
-	isPending(node){
-		if(this.index === this.length) return false;
+	isPending(node=null){
+		if(this.index === this.lastIndex) return false;
+		if(node === null) return true;
 		return this.list.includes(node, this.index);
 	}
 	clear(){
 		let list = this.list;
-		for (let i=this.index; i < this.length; i++) {
+		for (let i=this.index; i < this.lastIndex; i++) {
 			list[i] = null;
 		}
 
-		this.length = this.index = 0;
+		this.lastIndex = this.index = 0;
 	}
 	add(node, _cable){
 		if(this.stop || this._rootExecOrder.stop || this.isPending(node)) return;
 		this._isReachLimit();
 
-		this.list[this.length++] = node;
+		this.list[this.lastIndex++] = node;
 		if(this.stepMode) {
 			if(_cable != null) this._tCableAdd(node, _cable);
 			this._emitNextExecution();
@@ -58,20 +61,20 @@ class OrderedExecution {
 
 	_isReachLimit(){
         let i = this.index + 1;
-        if(i >= this.initialSize || this.length >= this.initialSize)
+        if(i >= this.initialSize || this.lastIndex >= this.initialSize)
             throw new Error("Execution order limit was exceeded");
 	}
 
 	_next(){
 		if(this.stop || this._rootExecOrder.stop) return;
-		if(this.index >= this.length) return;
+		if(this.index >= this.lastIndex) return;
 
         let i = this.index;
 		let temp = this.list[this.index++];
         this.list[i] = null;
 
-		if(this.index >= this.length)
-            this.index = this.length = 0;
+		if(this.index >= this.lastIndex)
+            this.index = this.lastIndex = 0;
 
 		if(this.stepMode) this._tCable.delete(temp);
         return temp;
@@ -141,7 +144,7 @@ class OrderedExecution {
 	_checkExecutionLimit(){
 		let limit = Blackprint.settings.singleNodeExecutionLoopLimit;
 		if(limit == null || limit == 0) { this._execCounter = null; return; }
-		if(this.length - this.index === 0) {
+		if(this.lastIndex - this.index === 0) {
 			this._execCounter?.clear();
 			return;
 		}
@@ -293,12 +296,12 @@ class OrderedExecution {
 
 		if(_pRequest.length === 0 && _pRequestLast.length === 0 && _pTrigger.length === 0 && _pRoute.length === 0)
 			this._hasStepPending = false;
-		
+
 		return true;
 	}
 
 	async next(force){
-		if(this.stop || this._rootExecOrder.stop) return;
+		if(this.stop || this._rootExecOrder.stop || this._nextLocked) return;
 		if(this.stepMode) this.pause = true;
 		if(this.pause && !force) return;
 		if(this.instance.ifaceList.length === 0) return;
@@ -319,6 +322,8 @@ class OrderedExecution {
 			_proxyInput = nextIface._proxyInput;
 			_proxyInput._bpUpdating = true;
 		}
+
+		if(this._lockNext) this._nextLocked = true;
 
 		try{
 			if(next.partialUpdate){
@@ -359,14 +364,28 @@ class OrderedExecution {
 			next._bpUpdating = false;
 			if(_proxyInput != null) _proxyInput._bpUpdating = false;
 
-			if(!next.partialUpdate && !skipUpdate) await next._bpUpdate();
+			if(!skipUpdate) {
+				if(!next.partialUpdate) await next._bpUpdate();
+				else if(next.bpFunction != null) next.iface.bpInstance.executionOrder.start(); // start execution runner
+			}
 		} catch(e){
 			if(_proxyInput != null) _proxyInput._bpUpdating = false;
 
 			this.clear();
 			throw e;
 		} finally {
+			this._nextLocked = false;
 			if(this.stepMode) this._emitNextExecution(next);
 		}
+	}
+
+	async start(){
+		if(this.stop || this._rootExecOrder.stop || this._nextLocked || this.pause) return;
+
+		this._lockNext = true;
+		for (let i=this.index; i < this.lastIndex; i++) {
+			await this.next();
+		}
+		this._lockNext = false;
 	}
 }

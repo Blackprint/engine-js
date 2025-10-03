@@ -310,7 +310,7 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 		if(thisNode.routes.out !== null
 		   && thisNode.iface._enum === _InternalNodeEnum.BPFnMain
-		   && thisNode.iface.bpInstance.executionOrder.length !== 0){
+		   && thisNode.iface.bpInstance.executionOrder.isPending()){
 			skipSync = true;
 		}
 

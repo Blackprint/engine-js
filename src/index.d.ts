@@ -388,7 +388,7 @@ export class Engine extends CustomEvent {
 	/** Event handler/emitted for the instance */
 	events: InstanceEvents;
 	/** Instance data flow's execution manager */
-	executionOrder: OrderedExecution;
+	executionOrder: ExecutionOrder;
 	/** Shortcut for accessing node ports by using the interface id */
 	ref: {[nodeId: string]: {
 		/** Get/set node output port's value */
@@ -1169,7 +1169,7 @@ class InstanceEvents extends CustomEvent {
 	deleteEvent(namespace: string): void;
 }
 
-class OrderedExecution {
+class ExecutionOrder {
 	/** Maximum pending node in single data flow execution order */
 	initialSize: Number;
 	/** Any pending node will be stored here */

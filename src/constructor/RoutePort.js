@@ -81,7 +81,7 @@ Blackprint.RoutePort = class RoutePort extends CustomEvent {
 		let executionOrder = node.instance.executionOrder;
 		if(executionOrder.stop || executionOrder._rootExecOrder.stop) return;
 
-		// Add to execution list if the OrderedExecution is in Step Mode
+		// Add to execution list if the ExecutionOrder is in Step Mode
 		if(executionOrder.stepMode && _cable && !_force){
 			executionOrder._addStepPending(_cable, 1);
 			return;

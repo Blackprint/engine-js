@@ -26,8 +26,10 @@ Blackprint.nodes.BP.Fn = {
 	},
 	Output: class extends Blackprint.Node {
 		static input = {};
+
 		constructor(instance){
 			super(instance);
+			this.partialUpdate = true; // Trigger this.update(cable) function everytime this node connected to any port that have update
 
 			let iface = this.setInterface('BPIC/BP/Fn/Output');
 			iface._enum = _InternalNodeEnum.BPFnOutput;
@@ -609,6 +611,11 @@ Blackprint._utils.BPFunction = BPFunction;
 
 // Main function node
 class BPFunctionNode extends Blackprint.Node {
+	constructor(instance){
+		super(instance);
+		this.partialUpdate = true;
+	}
+
 	imported(data){
 		let bpFunction = this.bpFunction;
 		bpFunction.used.push(this.iface);
@@ -849,11 +856,8 @@ function BPFnInit(){
 			inputPort._name = {name}; // When renaming port, this also need to be changed
 			this.emit(`_add.${name}`, {port: inputPort});
 
-			let onValueChanged = ({ cable }) => {
-				outputPort.iface.node.output[outputPort.name] = cable.output.value;
-			}
-			inputPort.on('value', onValueChanged);
-
+			// Code below is used when we dynamically modify function output node inside the function node
+			// where in a single function we can have multiple output node "BP/Fn/Output"
 			let list = this.parentInterface._proxyOutput;
 			for (let i=0; i < list.length; i++) {
 				let node = list[i];
@@ -861,7 +865,6 @@ function BPFnInit(){
 
 				port._name = inputPort._name;
 				this.emit(`_add.${name}`, {port});
-				port.on('value', onValueChanged);
 			}
 
 			return inputPort;
