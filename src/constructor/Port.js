@@ -392,6 +392,9 @@ Blackprint.Engine.Port = class Port extends Blackprint.Engine.CustomEvent{
 
 		// Skip if the assigned type is also Slot type
 		if(type === Blackprint.Types.Slot) return;
+		if(type === Blackprint.Types.Trigger && this.source === 'input') {
+			throw new Error("Assigning Trigger type must use PortFeatures, and not only Types.Trigger");
+		}
 
 		// Check current output value type
 		if(this.value != null && !(this.value instanceof type))

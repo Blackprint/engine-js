@@ -46,6 +46,10 @@ class PortLink {
 				val = val.portType;
 		}
 
+		if(val === Blackprint.Types.Trigger && this._which === 'input') {
+			throw new Error("Port with Trigger type must use PortFeatures, and not only Types.Trigger");
+		}
+
 		var iPort = this._iface[this._which];
 		let exist = iPort[portName];
 

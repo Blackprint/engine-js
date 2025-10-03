@@ -147,12 +147,12 @@ function BPFnVarInit(){
 					if(port.iface.node.routes.out != null){
 						let { Val } = this.ref.IOutput;
 						Val.value = port.value; // Change value without trigger node.update
-	
+
 						let list = Val.cables;
 						for (let i=0; i < list.length; i++) {
 							let temp = list[i];
 							if(temp.hasBranch) continue;
-	
+
 							// Clear connected cable's cache
 							temp.input._cache = void 0;
 						}

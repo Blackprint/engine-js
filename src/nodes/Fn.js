@@ -440,7 +440,7 @@ class BPFunction extends CustomEvent {
 				let oldObj = getDeepProperty(varsObject, path);
 				if(oldObj == null) continue;
 				if(scopeId === VarScope.Private) oldObj.destroy();
-	
+
 				deleteDeepProperty(varsObject, path, true);
 				let eventData = {scope: oldObj._scope, id: oldObj.id, bpFunction: this};
 				instance.emit('variable.deleted', eventData);
@@ -488,7 +488,7 @@ class BPFunction extends CustomEvent {
 					let proxyVar = ifaces[a];
 					if(proxyVar.namespace !== "BP/FnVar/Input")
 						continue;
-	
+
 					if(proxyVar.data.name !== fromName) continue;
 					proxyVar.data.name = toName;
 				}
@@ -780,8 +780,8 @@ function BPFnInit(){
 				throw new Error("Function Input can't be connected directly to Output");
 
 			let name = port._name?.name || customName || port.name;
-			let outputPort;
 			let portType, refName;
+			let inputPortType;
 
 			let nodeA, nodeB; // Main (input) -> Input (output), Output (input) -> Main (output)
 			if(this.type === 'bp-fn-input'){ // Main (input) -> Input (output)
@@ -799,7 +799,12 @@ function BPFnInit(){
 				refName = {name};
 
 				portType = getFnPortType(port, 'input', this, refName);
-				nodeA.bpFunction.input[name] = portType;
+
+				if(portType === Types.Trigger)
+					inputPortType = BP_Port.Trigger((_port)=> _port.iface._proxyInput.output[refName.name]());
+				else inputPortType = portType;
+
+				nodeA.bpFunction.input[name] = inputPortType;
 			}
 			else { // Output (input) -> Main (output)
 				let inc = 1;
@@ -816,18 +821,16 @@ function BPFnInit(){
 				refName = {name};
 
 				portType = getFnPortType(port, 'output', this, refName);
-				nodeB.bpFunction.output[name] = portType;
+
+				if(port.type === Types.Trigger)
+					inputPortType = BP_Port.Trigger((_port)=> _port.iface.parentInterface.node.output[refName.name]());
+				else inputPortType = portType;
+
+				nodeB.bpFunction.output[name] = inputPortType;
 			}
 
-			outputPort = nodeB.createPort('output', name, portType);
-
-			let inputPort;
-			let inputPortType;
-			if(portType === Types.Trigger)
-				inputPortType = BP_Port.Trigger(()=> outputPort._callAll());
-			else inputPortType = portType;
-
-			inputPort = nodeA.createPort('input', name, inputPortType);
+			let outputPort = nodeB.createPort('output', name, portType);
+			let inputPort = nodeA.createPort('input', name, inputPortType);
 
 			// When using Blackprint.Sketch we need to reconnect the cable
 			if(cable != null){

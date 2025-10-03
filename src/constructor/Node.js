@@ -11,6 +11,9 @@ Blackprint.Node = class Node {
 		this.syncThrottle = 0; // One syncOut per 0ms, last state will be synced
 		this.disablePorts = false; // Disable output port from synchronizing data to other nodes
 
+		// If enabled, syncIn will have 3 parameter, and syncOut will be send to related node in other function instances
+		this.allowSyncToAllFunction = false;
+
 		this.partialUpdate = false;
 	}
 
@@ -181,13 +184,16 @@ Blackprint.Node = class Node {
 			if(iface === parentInterface) continue; // Skip self
 			let target = iface.bpInstance.ifaceList[nodeIndex];
 
-			if(target === void 0) throw new Error("Target node was not found on other function instance, maybe the node was not correctly synced? (" + namespace.replace('BPI/F/', '') + ");");
+			if(target === void 0) {
+				// console.log(12, iface.bpInstance.ifaceList, target, nodeIndex, this.iface)
+				throw new Error("Target node was not found on other function instance, maybe the node was not correctly synced/saved? (" + namespace.replace('BPI/F/', '') + ");");
+			}
 			target.node.syncIn(id, data, false);
 		}
 	}
 
 	syncOut(id, data, force=false){
-		this._syncToAllFunction(id, data);
+		if(this.allowSyncToAllFunction) this._syncToAllFunction(id, data);
 
 		let instance = this.instance;
 		if(instance.rootInstance !== void 0) instance.rootInstance = instance.rootInstance; // Ensure rootInstance is set
