@@ -53,17 +53,16 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		let list = this.ifaceList;
 		var i = list.indexOf(iface);
 
-		if(i !== -1)
+		if(i !== -1){
+			iface._bpDestroy = true;
+			let eventData = { iface };
+			this._emit('node.delete', eventData);
 			list.splice(i, 1);
+		}
 		else return this._emit('error', {
 			type: 'node_delete_not_found',
 			data: {iface}
 		});
-
-		iface._bpDestroy = true;
-
-		let eventData = { iface };
-		this._emit('node.delete', eventData);
 
 		iface.node.destroy && iface.node.destroy();
 		iface.destroy && iface.destroy();
@@ -391,13 +390,15 @@ Blackprint.Engine = class Engine extends CustomEvent {
 	}
 
 	linkVariables(vars){
+		let bpFunction = this.parentInterface?.node.bpFunction;
 		for (let i=0; i < vars.length; i++) {
 			let temp = vars[i];
 			setDeepProperty(this.variables, temp.id.split('/'), temp);
 			this._emit('variable.new', {
-				reference: temp,
 				scope: temp._scope,
 				id: temp.id,
+				bpFunction,
+				reference: temp,
 			});
 		}
 	}
@@ -624,11 +625,13 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		let temp = new BPVariable(id, options);
 		setDeepProperty(this.variables, ids, temp);
 
+		let bpFunction = this.parentInterface?.node.bpFunction;
 		temp._scope = VarScope.Public;
 		this._emit('variable.new', {
-			reference: temp,
 			scope: temp._scope,
 			id: temp.id,
+			bpFunction,
+			reference: temp,
 		});
 
 		return temp;
@@ -672,12 +675,13 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		deleteDeepProperty(varsObject, ids, true);
 		setDeepProperty(varsObject, ids2, oldObj);
 
+		let bpFunction = this.parentInterface?.node.bpFunction;
 		if(scopeId === VarScope.Private) {
 			instance._emit('variable.renamed', {
-				old: from, now: to, bpFunction: this.parentInterface.node.bpFunction, scope: scopeId
+				scope: scopeId, old: from, now: to, bpFunction, reference: oldObj
 			});
 		}
-		else instance._emit('variable.renamed', {old: from, now: to, reference: oldObj, scope: scopeId });
+		else instance._emit('variable.renamed', {scope: scopeId, old: from, now: to, bpFunction, reference: oldObj });
 	}
 
 	deleteVariable(namespace, scopeId){

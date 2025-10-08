@@ -537,7 +537,6 @@ export class Engine extends CustomEvent {
 
 		/** Only available for Public and Shared variable */
 		reference?: BPVariable,
-		/** Only available for Private variable */
 		bpFunction?: BPFunction,
 	}) => void): void;
 	/** A variable was renamed */
@@ -547,17 +546,12 @@ export class Engine extends CustomEvent {
 
 		/** Only available for Public and Shared variable */
 		reference?: BPVariable,
-		/** Only available for Private variable */
 		bpFunction?: BPFunction,
 	}) => void): void;
 	/** A variable was deleted */
 	on(eventName: 'variable.deleted', callback: (data: {
 		id: String,
 		scope: VarScope,
-
-		/** Only available for Public and Shared variable */
-		reference?: BPVariable,
-		/** Only available for Private variable */
 		bpFunction?: BPFunction,
 	}) => void): void;
 	/** A function template was created */

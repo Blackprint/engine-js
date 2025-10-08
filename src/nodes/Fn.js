@@ -318,7 +318,7 @@ class BPFunction extends CustomEvent {
 			if(!this.privateVars.includes(id)){
 				this.privateVars.push(id);
 
-				let eventData = {bpFunction: this, scope: VarScope.Private, id};
+				let eventData = {scope: VarScope.Private, id, bpFunction: this, reference: null};
 				this.emit('variable.new', eventData);
 				this.rootInstance.emit('variable.new', eventData);
 			}
@@ -351,9 +351,10 @@ class BPFunction extends CustomEvent {
 		else this.variables[id] = temp;
 
 		let eventData = {
-			reference: temp,
 			scope: temp._scope,
-			id: temp.id
+			id: temp.id,
+			bpFunction: this,
+			reference: temp,
 		};
 		this.emit('variable.new', eventData);
 		this.rootInstance.emit('variable.new', eventData);
@@ -399,7 +400,7 @@ class BPFunction extends CustomEvent {
 			else delete this.variables[from];
 
 			this.rootInstance.emit('variable.renamed', {
-				old: from, now: to, reference: varObj, scope: scopeId,
+				scope: scopeId, old: from, now: to, bpFunction: this, reference: varObj,
 			});
 		}
 		else throw new Error("Can't rename variable from scopeId: " + scopeId);
@@ -453,7 +454,7 @@ class BPFunction extends CustomEvent {
 			used[0].bpInstance.deleteVariable(namespace, scopeId);
 
 			// Delete from all function node instance
-			let eventData = {scope: oldObj._scope, id: oldObj.id, reference: oldObj};
+			let eventData = {scope: oldObj._scope, id: oldObj.id, bpFunction: this};
 			for (let i=1; i < used.length; i++) {
 				used[i].bpInstance.emit('variable.deleted', eventData);
 			}
@@ -730,6 +731,7 @@ function BPFnInit(){
 				}, 1000);
 
 				if(force || bpFunction._syncing) return;
+				if(iface._bpDestroy) return;
 
 				ev.bpFunction = bpFunction;
 
