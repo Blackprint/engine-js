@@ -96,6 +96,7 @@ class BPFunction extends CustomEvent {
 
 		// This will be updated if the function sketch was modified
 		this.structure = options.structure || {
+			_bpStale: false,
 			instance: {
 				'BP/Fn/Input':[{i: 0, x: 400, y: 100}],
 				'BP/Fn/Output':[{i: 1, x: 600, y: 100}],
@@ -711,7 +712,10 @@ function BPFnInit(){
 			this.initInputPort?.(true);
 
 			let debounce;
+			let iface = this;
 			this._save = (ev, eventName, force) => {
+				eventName = newInstance._currentEventName;
+
 				if(newInstance.rootInstance._destroying || this.bpInstance._destroying)
 					return; // Avoid saving when the instance is being destroyed
 

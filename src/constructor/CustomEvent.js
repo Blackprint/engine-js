@@ -155,6 +155,7 @@ class CustomEvent {
 			return hasFallback !== void 0;
 		}
 
+		this._currentEventName = eventName;
 		for (var i = 0; i < events.length; i++){
 			var ev = events[i];
 			if(ev.once){
@@ -162,8 +163,9 @@ class CustomEvent {
 				events.splice(i--, 1);
 			}
 
-			ev(obj, eventName);
+			ev(obj);
 		}
+		this._currentEventName = null;
 
 		if(this._event.$_all !== void 0 && eventName !== '$_all'){
 			obj ??= {};
