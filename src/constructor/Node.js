@@ -205,4 +205,13 @@ Blackprint.Node = class Node {
 
 	// To be replaced by the developer or user
 	syncIn(id, data, isRemote=false){}
+
+	notifyEditorDataChanged(){
+		if(Blackprint.Sketch == null) return; // Do nothing
+
+		clearTimeout(this.notifyEditorDataChanged_);
+		this.notifyEditorDataChanged_ = setTimeout(() => {
+			this.instance._emit('editor.data.changed', { iface: this.iface });
+		}, 500);
+	}
 };

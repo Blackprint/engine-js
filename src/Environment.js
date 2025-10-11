@@ -122,3 +122,6 @@ else{
 	Blackprint.Environment.isDeno = true;
 	Blackprint.Environment.loadFromURL = true;
 }
+
+// User need to override this to true if prefer not to load from URL
+Blackprint.Environment.loadFromNodeModules = false;

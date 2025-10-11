@@ -130,8 +130,10 @@ class Cable{
 
 			let node = inp.iface.node;
 			if(node.update != null) {
-				if(node.instance._importing)
+				if(node.instance._importing){
+					if(node.partialUpdate) inp._hasUpdateCable = this;
 					node.instance.executionOrder.add(node, this);
+				}
 				else if(node.routes.in.length === 0) {
 					node._bpUpdate(this);
 				}
