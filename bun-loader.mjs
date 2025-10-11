@@ -50,8 +50,8 @@ plugin({
 			return { path, namespace: "url" };
 		});
 
-		builder.onLoad({ namespace: "url", filter: /.*\.(js|mjs)($|\?|#)/m }, async ({ path: url, namespace }) => {			
-			let dir = url.replace(/(https|http):\/\//, '').replace(/\/\//, '').replace(/\\/g, '/').replace(/[*"|:?<>]/g, '-');
+		builder.onLoad({ namespace: "url", filter: /.*\.(js|mjs)($|\?|#)/m }, async ({ path: url, namespace }) => {
+			let dir = url.replace(/(https|http):\/\//, '').replace(/\/\//, '').replace(/\\/g, '/').replace(/[*"|:<>]/g, '-').replace(/[?#].*?$/m, '');
 			if(dir.includes('/../')){
 				console.log(dir);
 				console.error("/../ currently not allowed");

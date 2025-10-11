@@ -26,7 +26,7 @@ export function resolve(specifier, context, nextResolve) {
 export function load(url, context, nextLoad) {
 	// For JavaScript to be loaded over the network, we need to fetch and return it.
 	if (!url.startsWith('file:') && isMatch(url)) {
-		let dir = url.replace(/(https|http):\/\//, '').replace(/\/\//, '').replace(/\\/g, '/').replace(/[*"|:?<>]/g, '-')
+		let dir = url.replace(/(https|http):\/\//, '').replace(/\/\//, '').replace(/\\/g, '/').replace(/[*"|:<>]/g, '-').replace(/[?#].*?$/m, '');
 
 		if(dir.includes('/../')){
 			console.log(dir);
