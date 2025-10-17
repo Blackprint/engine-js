@@ -15,8 +15,13 @@ if(!!allowedDomain){
 }
 else Blackprint.allowModuleOrigin('*'); // Allow all origin
 
+process.loadEnvFile();
+let copyEnv = {};
+for(let key in process.env) copyEnv[key.match(/[\\w_]+/)[0].toUpperCase()] = process.env[key];
+Blackprint.Environment.import(copyEnv);
+
 let instance = new Blackprint.Engine();
-await instance.importJSON(%json_here%);
+instance.importJSON(%json_here%);
 export default instance;
 
 let {
@@ -35,6 +40,29 @@ export {
 };
 
 await instance.ready();
+
+let hasRemote = false;
+let cors = undefined;
+process.argv.forEach(v => {
+	if(v.startsWith('--remote=')){
+		let port = Number(v.replace('--remote=', ''));
+		if(!port) throw new Error('--remote=port must be number, but get: ' + port);
+		hasRemote = port;
+	}
+	else if(v.startsWith('--remote')){
+		hasRemote = true;
+	}
+	else if(v.startsWith('--cors=')){
+		cors = v.replace('--cors=', '').replace(/['"]/g, '').split(',');
+	}
+});
+
+if(hasRemote) {
+	if(hasRemote === true) hasRemote = undefined;
+
+	;(await import('@blackprint/remote-control/wrapper/remote-engine')).setup(instance, hasRemote, cors);
+	setInterval(()=>1, 10e3);
+}
 `;
 
 // https://github.com/oven-sh/bun/blob/bfaf095c2ed2ba1f0cd35f1658e2babee8b51985/test/js/bun/plugin/plugins.test.ts#L16-L34
