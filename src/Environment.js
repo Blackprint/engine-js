@@ -107,21 +107,21 @@ Blackprint.Environment = {
 	},
 };
 
-if(window.Bun != null){
+if(globalThis.Bun != null){
 	Blackprint.Environment.isBun = true;
 	Blackprint.Environment.isNode = true;
 	Blackprint.Environment.loadFromURL = true;
 }
-else if(window.HTMLVideoElement !== void 0){
+else if(globalThis.HTMLVideoElement !== void 0){
 	Blackprint.Environment.isBrowser = true;
 	Blackprint.Environment.loadFromURL = true;
 }
-else if(typeof process !== "undefined" && process.execPath !== void 0)
+else if(globalThis.process?.versions?.node)
 	Blackprint.Environment.isNode = true;
-else{
+else {
 	Blackprint.Environment.isDeno = true;
 	Blackprint.Environment.loadFromURL = true;
 }
 
 // User need to override this to true if prefer not to load from URL
-Blackprint.Environment.loadFromNodeModules = false;
+Blackprint.Environment.loadFromNodeModules = Blackprint.Environment.isNode || Blackprint.Environment.isBun;
