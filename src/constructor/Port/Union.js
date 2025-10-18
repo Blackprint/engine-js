@@ -11,7 +11,7 @@ BP_Port.Union = function(types){
 
 	var names = [];
 	for (var i = 0; i < types.length; i++){
-		let temp = types[i].name;
+		let temp = types[i].name ?? types[i].portType?.name;
 		names.push(temp.length > 2 ? temp : '?');
 	}
 

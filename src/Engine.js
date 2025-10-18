@@ -53,9 +53,10 @@ Blackprint.Engine = class Engine extends CustomEvent {
 		let list = this.ifaceList;
 		var i = list.indexOf(iface);
 
+		iface._bpDestroy = true;
+		let eventData = { iface };
+
 		if(i !== -1){
-			iface._bpDestroy = true;
-			let eventData = { iface };
 			this._emit('node.delete', eventData);
 			list.splice(i, 1);
 		}
@@ -246,6 +247,10 @@ Blackprint.Engine = class Engine extends CustomEvent {
 						iface: iface,
 						config: temp,
 					});
+				}
+
+				if(iface == null && !Blackprint.Environment.isBrowser){
+					throw new Error("Can't continue because of missing nodes");
 				}
 
 				// For custom function node
@@ -1010,7 +1015,7 @@ Blackprint.registerNode = function(namespace, func){
 	namespace = namespace.split('/');
 
 	let isExist = getDeepProperty(Blackprint.nodes, namespace);
-	if(isExist){
+	if(isExist && !isExist._isSkeleton){
 		if(this._scopeURL && isExist._scopeURL !== this._scopeURL){
 			let _call = ()=> this.registerNode.apply(this, arguments);
 			onModuleConflict(namespace.join('/'), isExist._scopeURL, this._scopeURL, _call);
