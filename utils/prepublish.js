@@ -1,5 +1,5 @@
 let fs = require('fs');
-fs.mkdirSync('./dist');
+if (!fs.existsSync('./dist')) fs.mkdirSync('./dist');
 
 function fixDenoExports(distFile, prepend, append){
 	let compiled = fs.readFileSync(`../dist/${distFile}.min.js`, 'utf8');
