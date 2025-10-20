@@ -25,7 +25,7 @@ Please specify the version when importing, breaking changes may happen on v0.\*.
 
 Browser
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@blackprint/engine@0.8"></script>
+<script src="https://cdn.jsdelivr.net/npm/@blackprint/engine@0.10"></script>
 <script>
     let instance = new Blackprint.Engine();
     instance.importJSON("{...}");
@@ -35,7 +35,7 @@ Browser
 Node.js
 ```sh
 # Add the dependency first
-npm i @blackprint/engine@0.8
+npm i @blackprint/engine@0.10
 ```
 
 ```js
@@ -47,7 +47,7 @@ instance.importJSON("{...}");
 
 Deno
 ```js
-import Blackprint from 'https://cdn.skypack.dev/@blackprint/engine@0.8';
+import Blackprint from 'https://cdn.skypack.dev/@blackprint/engine@0.10';
 
 let instance = new Blackprint.Engine();
 instance.importJSON("{...}");
@@ -108,18 +108,18 @@ class MyTemplate extends Blackprint.Node {
         /**
          * Using this .update() function is MORE recommended rather than listening
          * for value changes with event listener.
-         * 
+         *
          * Multiple input update will be delayed by the internal execution order
          * and this function will be triggered once this node has turn to be updated
-         * 
+         *
          * In case you need to partially update for specific ports
          * you can enable the mode by adding code below on your constructor function
          * > this.partialUpdate = true;
-         * 
+         *
          * By using `.partialUpdate` when this node is going to be updated
          * this `.update` function will be called multiple times for every updated cable
          * and the `cable` parameter will no longer null, but it will referencing to the updated cable
-         */ 
+         */
     }
 
     request(){

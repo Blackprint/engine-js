@@ -1,3 +1,71 @@
+# 0.10.0
+
+### Features
+- Add tools for export skeleton (node structures as JSON)
+- Add startIndex on import event
+- Add `DepsLoader` for loading external dependencies for browser and non-browser environment
+- Add direct invoke for a function node that can be called with plain code
+- Add `.bpi` loader support for Node.js and Bun
+
+### Improvement
+- Small performance optimization
+- Improve environment checker
+- Improve loader for bun and Node.js
+
+### Bug Fix
+- Fix event data on node deletion and error on union port
+- Fix events order and fields
+- Fix execution order when function node get updated
+- Fix port trigger for function node
+- Fix execution stop and improve cable flow visualization event
+- Fix bit operator for port switches
+- Fix remote node sync
+- Fix function node route execution
+- Fix route cable connection inside of function
+- Fix function node state sync
+- Fix cable position after deleting port
+- Fix output port connection to route port
+- Fix function node save when connecting route cable
+- Fix function port rename and deletion if the instance have function output more than one node
+- Fix execution flow cable and add do some optimization
+- Fix route port disconnection event
+- Prevent creating function input node more than once
+- Disable route out after returning data from function node
+- Throw error if the route cable is not created from route port
+- Remove unused code and emit destroy event when variable get destroyed
+- Remove port name check
+- Make sure event callback only have one parameter
+
+### Breaking Changes
+- Change `json.imported` event parameter field name
+
+```js
+let instance = new Blackprint.Engine();
+
+// Before
+instance.on("json.imported", function({
+    appendMode, startIndex, nodes, raw
+}){ ... });
+
+// After
+instance.on("json.imported", function({
+    appendMode, startIndex, nodes, data
+}){ ... });
+```
+
+- `Blackprint.OrderedExecution` renamed to `Blackprint.ExecutionOrder`
+
+- Remove "Function Output Variable" node `BP/FnVar/Output`
+  - If you use this node before, it will be replaced with placeholder node and will be removed anytime in the future. Please use `BP/Fn/Output` instead.
+
+<img width="289" height="123" alt="Image" src="https://github.com/user-attachments/assets/c05346ad-8b9c-424c-b389-8b67e31379b3" />
+replace it with
+<img width="312" height="108" alt="Image" src="https://github.com/user-attachments/assets/17020867-7fc1-4257-b9d0-29f5a7c0bd10" />
+
+If you used "Function Output Variable" node before, it will be replaced with placeholder node like below:
+<img width="417" height="117" alt="Image" src="https://github.com/user-attachments/assets/ced2354d-42fc-45c4-96ac-cae4896a3246" />
+
+
 # 0.9.2
 
 ### Bug Fix
