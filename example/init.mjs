@@ -1,5 +1,5 @@
 // For Deno
-// import Blackprint from 'https://cdn.skypack.dev/@blackprint/engine@0.9';
+// import Blackprint from 'https://cdn.skypack.dev/@blackprint/engine@0.10';
 import Blackprint from '../dist/engine.mjs';
 
 // For Node.js and Bun
